@@ -50,3 +50,25 @@ function furnishCampusInteriors(map){
   }
   return map;
 }
+
+function installTd2(map){
+  const corridor=map.zones.terra;
+  if(!corridor||corridor.width<=10||corridor.height<=4||corridor.objects.some(o=>o.uid==="terra-td2"))return map;
+  if(!map.zones.td2&&Object.keys(map.zones).length>=maxCampusZones)return map;
+  const fixture=(uid,kind,name,x,y,extra={})=>({
+    uid,kind,name,x,y,w:1,h:1,rotation:0,variant:0,color:"#758685",solid:false,
+    action:"",native:"",text:"",target:"",gate:"",missionTarget:"",auto:false,behavior:"idle",speed:1.7,route:[],...extra
+  });
+  corridor.objects.push(fixture("terra-td2","door","TD2 · Entra in aula",10,4,{action:"portal",target:"td2#terra"}));
+  map.zones.td2??={name:"TD2 · Aula studio",width:16,height:11,ground:"floor",
+    plan:{show:false,opacity:45,scale:57},objects:[
+      fixture("td2-entry","entrance","Arrivo dal piano terra",7,8,{target:"terra"}),
+      fixture("td2-exit","door","Torna al piano terra",7,10,{action:"portal",target:"terra#td2"}),
+      fixture("td2-board","board","Lavagna del TD2",5,1,{w:6,solid:true}),
+      fixture("td2-desk-left","desk","Banchi",2,4,{w:4,solid:true}),
+      fixture("td2-desk-right","desk","Banchi",10,4,{w:4,solid:true}),
+      fixture("td2-student","student","Matteo · Calcetto",8,5,{color:"#3f84a8",solid:true,action:"native",native:"calcetto"})
+    ]};
+  corridor.objects.push(fixture("terra-td2-arrival","entrance","Uscita TD2",10,5,{target:"td2"}));
+  return map;
+}

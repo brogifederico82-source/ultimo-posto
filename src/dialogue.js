@@ -489,6 +489,7 @@ function frame(now){
     }
     if(dirty&&(!move||activeScene||now-lastWalk>=300)){save();dirty=false;}
     if(minigame?.kind==="arcade")tickArcade(now);
+    if(minigame?.kind==="calcetto")tickCalcetto(minigame,now);
     if(minigame?.kind==="loft")tickLoftGame(now);
     if(minigame?.kind==="arm")tickArm(now);
     if(minigame?.kind==="dance")tickDance(now);
@@ -581,6 +582,14 @@ window.addEventListener("keydown",event=>{
     if(minigame.kind==="cards"&&/^[123]$/.test(key)){
       event.preventDefault();
       if(!event.repeat)playCard(minigame,0,Number(key)-1);
+      return;
+    }
+    if(minigame.kind==="calcetto"&&["arrowup","w","arrowleft","a","arrowright","d"," "].includes(key)){
+      if(key===" "&&event.target instanceof HTMLButtonElement)return;
+      event.preventDefault();
+      if(key==="arrowup"||key==="w"){if(!event.repeat)jumpCalcetto(minigame.you);}
+      else if(key===" "){if(!event.repeat)kickCalcetto(minigame.you,minigame.ball,1);}
+      else keys.add(key);
       return;
     }
     if(minigame.kind==="arcade"||minigame.kind==="loft"){
