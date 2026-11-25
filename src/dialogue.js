@@ -220,7 +220,60 @@ const campusSmallStories={
   "portico-reader":["Controlla il segnaposto","Sul tavolo c’è un biglietto: «Torno tra cinque minuti». Sotto, a matita: «Anno accademico da definire»."],
   "courtyard-foos":["Guarda sotto il segnapunti","Un foglietto recita: «La stecca che cigola ha diritto a un appello straordinario». Qualcuno ha aggiunto «con riserva»."]
 };
+const radioTapeStops=[
+  {uid:"giardiniera-nora",label:["Registra il rubinetto dell’orto","Record the garden tap"],
+    clue:["All’orto, qualcuno batte il tempo mentre innaffia.","Someone keeps time while watering the garden."],
+    line:["«Ci mette un po’, poi fa tre colpi. Aspetta il terzo: è quello che viene bene.»","“It takes a moment, then it knocks three times. Get the third one. That’s the good one.”"],
+    notes:[62,62,67]},
+  {uid:"courtyard-foos",label:["Registra la pallina sul legno","Record the ball against the wood"],
+    clue:["In terrazza, cerca il gioco che fa rumore anche a partita finita.","On the terrace, find the game that makes noise even after the match."],
+    line:["La pallina batte sul legno. Qualcuno dalla panchina grida «traversa!». Ti tieni anche quello.","The ball hits the wood. Someone on the bench shouts, “Crossbar!” You keep that in the recording."],
+    notes:[69,76,71]},
+  {uid:"loft-podcast",label:["Registra il conto alla rovescia","Record the countdown"],
+    clue:["All’ultimo piano, trova il microfono che si accende prima di un «tre, due…».","On the top floor, find the microphone that lights up before someone says, “Three, two…”"],
+    line:["Tre, due, uno. Nell’ultimo secondo si sente qualcuno spostare una sedia con tutta la delicatezza di un trasloco.","Three, two, one. In the last second, someone moves a chair with all the delicacy of a moving crew."],
+    notes:[71,67,64]}
+];
+function radioTapeHint(){
+  const step=state.radioTape;
+  if(!step||step>radioTapeStops.length+1)return "";
+  const prefix=local("Frequenza fantasma","Ghost Frequency");
+  if(step>radioTapeStops.length)return prefix+" · "+local("Riporta il nastro a Tommaso.","Take the tape back to Tommaso.");
+  return prefix+" · "+(step-1)+"/"+radioTapeStops.length+" · "+local(...radioTapeStops[step-1].clue);
+}
+function radioTapeChoice(o){
+  if(testMode)return null;
+  const step=state.radioTape??0;
+  if(o.uid==="radio-tommaso"){
+    if(!step)return [local("Cerca il nastro della radio","Find the station’s tape"),()=>{
+      state.radioTape=1;
+      record(local("Frequenza fantasma · Tommaso ti ha chiesto tre registrazioni per una sigla.","Ghost Frequency · Tommaso asked you to record three sounds for a new intro."));
+      state.chatTopic={uid:o.uid,prompt:local("Che cosa devo registrare?","What should I record?"),reply:radioTapeHint()};
+    }];
+    if(step>radioTapeStops.length+1)return null;
+    if(step===radioTapeStops.length+1)return [local("Fai ascoltare il nastro","Play back the tape"),()=>{
+      state.radioTape++;
+      carry("Nastro di Radio Luiss");awardCoins(4);
+      record(local("Frequenza fantasma · Hai montato la sigla e guadagnato 4 monete.","Ghost Frequency · You made a new intro and earned four coins."));
+      state.chatTopic={uid:o.uid,prompt:local("Allora, regge?","Well, does it work?"),reply:local(
+        "«Il rubinetto tiene il tempo, il biliardino fa da rullante. E la sedia? Quella va nei titoli di coda.»",
+        "“The tap keeps time, the foosball table is our snare. The chair? That goes in the credits.”")};
+      chime(radioTapeStops.flatMap(stop=>stop.notes),.085);
+    }];
+    return speechChoice(o,local("Chiedi l’indizio della radio","Ask for the radio clue"),radioTapeHint());
+  }
+  const stop=radioTapeStops[step-1];
+  if(stop?.uid!==o.uid)return null;
+  return [local(...stop.label),()=>{
+    state.radioTape++;
+    record(local("Frequenza fantasma","Ghost Frequency")+" · "+local(...stop.label));
+    state.chatTopic={uid:o.uid,prompt:local(...stop.label),reply:local(...stop.line)};
+    chime(stop.notes,.12);
+  }];
+}
 function campusOptionalScene(sceneData,o){
+  const tapeChoice=radioTapeChoice(o);
+  if(tapeChoice)sceneData.choices.push(tapeChoice);
   const optional=campusSmallStories[o.uid];
   if(optional)sceneData.choices.push(speechChoice(o,optional[0],optional[1]));
   const memory=has("Festa a Pola")?campusEpilogue[o.uid]:null;
@@ -276,7 +329,8 @@ function getScene(){
   }]);
   if(o.action==="event")return scene(o.name,note,...(!state.completedEvents.includes(o.uid)?
     [["Registra nel diario",()=>{state.completedEvents.push(o.uid);record("Evento · "+o.name);}]]:[]));
-  return scene(o.name,note);
+  const turn=state.chatTopic?.uid===o.uid?state.chatTopic:null;
+  return campusOptionalScene({...scene(o.name,turn?.reply??note),playerLine:turn?.prompt},o);
 }
 function completeObjective(o){
   if(state.missionTarget!==o.uid||gateLocked(o.gate))return;

@@ -734,6 +734,9 @@ function renderScene(){
   const chapter=nextStep<0?"":nextStep<4?"Romania":nextStep===4?"Parenzo":"Pola";
   $("taskChapter").hidden=!chapter||Boolean(state.ending);
   $("taskChapter").textContent=chapter?chapter+" · "+(nextStep+1)+"/"+storySteps.length:"";
+  const radioHint=state.ending?"":radioTapeHint();
+  $("radioTapeHint").hidden=!radioHint;
+  $("radioTapeHint").textContent=radioHint;
   $("zone").textContent=tr(room(state.zone).name);
   updateCampusOverview();
   $("campusMap").replaceChildren();
