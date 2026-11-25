@@ -6,11 +6,12 @@ const output = new URL('../dist/', import.meta.url);
 const loadText = name => readFile(new URL(name, source), 'utf8');
 const scripts = ['game.js', 'classrooms.js', 'world.js', 'navigation.js', 'dialogue.js', 'minigames.js', 'loft-arcade.js', 'editor.js'];
 
-const [template, css, map, plan, ...parts] = await Promise.all([
+const [template, css, map, plan, music, ...parts] = await Promise.all([
   loadText('index.html'),
   loadText('styles.css'),
   loadText('campus.json'),
   readFile(new URL('plan.webp', source)),
+  readFile(new URL('sunny-underground.mp3', source)),
   ...scripts.map(loadText),
 ]);
 
@@ -21,6 +22,7 @@ const sections = {
   STYLES: css.trim(),
   CAMPUS: JSON.stringify(JSON.parse(map)).replaceAll('<', '\\u003c'),
   PLAN: plan.toString('base64'),
+  MUSIC: music.toString('base64'),
   GAME: game.trim(),
 };
 let html = template;

@@ -488,20 +488,9 @@ function frame(now){
   }
   requestAnimationFrame(frame);
 }
-let audioContext=null,audioOn=false,campusMusicTimer=0;
-const campusMelody=[64,null,67,71,69,67,null,62,64,67,69,null,72,71,67,null];
-function playCampusMusic(){
-  clearInterval(campusMusicTimer);
-  let step=0;
-  function beat(){
-    if(!audioOn||document.hidden||minigame)return;
-    const note=campusMelody[step];
-    if(note!==null)chime([note],.12,.021);
-    if(step%4===0)chime([[48,45,50,43][step/4]],.12,.028);
-    step=(step+1)%campusMelody.length;
-  }
-  beat();campusMusicTimer=setInterval(beat,250);
-}
+let audioContext=null,audioOn=false;
+const campusMusic=$("campusMusic");
+campusMusic.volume=.35;
 function enableAudio(){
   const Audio=window.AudioContext||window.webkitAudioContext;
   if(!Audio)return;
@@ -519,8 +508,18 @@ function chime(notes,spacing=.12,volume=.065){
   }
 }
 $("audio").onclick=()=>{
-  if(audioOn){audioOn=false;clearInterval(campusMusicTimer);$("audio").textContent=tr("Audio spento");$("audio").setAttribute("aria-pressed","false");audioContext.suspend().catch(()=>{});}
-  else{enableAudio();playCampusMusic();}
+  if(audioOn){
+    audioOn=false;
+    $("audio").textContent=tr("Audio spento");
+    $("audio").setAttribute("aria-pressed","false");
+    campusMusic.pause();
+    audioContext?.suspend().catch(()=>{});
+  }else{
+    enableAudio();
+    campusMusic.play().catch(error=>{
+      if(error.name!=="AbortError")console.warn("Campus music could not play",error);
+    });
+  }
 };
 window.addEventListener("keydown",event=>{
   if(screen!=="game"||$("campusSurprise").open||event.ctrlKey||event.altKey||event.metaKey)return;
