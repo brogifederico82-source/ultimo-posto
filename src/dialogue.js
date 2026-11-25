@@ -429,8 +429,8 @@ function paintCampusOverview(){
   if(state.zone!=="giardino")return;
   const waypoint=nextCampusWaypoint();
   if(waypoint)paintCampusWaypoint(ctx,overviewX+(waypoint.x+.5)*overviewScale,overviewY+(waypoint.y+.5)*overviewScale);
-  if($("surpriseHint").open){
-    ctx.beginPath();ctx.arc(overviewX+(surpriseTile.x+.5)*overviewScale,overviewY+(surpriseTile.y+.5)*overviewScale,5,0,Math.PI*2);
+  if($("surpriseHint").open)for(const spot of campusSurprises.filter(item=>item.zone==="giardino")){
+    ctx.beginPath();ctx.arc(overviewX+(spot.x+.5)*overviewScale,overviewY+(spot.y+.5)*overviewScale,5,0,Math.PI*2);
     ctx.fillStyle="#bc85ed";ctx.fill();ctx.lineWidth=1;ctx.strokeStyle="#241635";ctx.stroke();
   }
   ctx.beginPath();
@@ -481,6 +481,7 @@ function frame(now){
     }
     if(dirty&&(!move||activeScene||now-lastWalk>=300)){save();dirty=false;}
     if(minigame?.kind==="arcade")tickArcade(now);
+    if(minigame?.kind==="loft")tickLoftGame(now);
     if(minigame?.kind==="arm")tickArm(now);
     if(minigame?.kind==="dance")tickDance(now);
     if(!minigame)draw(now);
@@ -535,7 +536,7 @@ window.addEventListener("keydown",event=>{
       if(!event.repeat)playCard(minigame,0,Number(key)-1);
       return;
     }
-    if(minigame.kind==="arcade"){
+    if(minigame.kind==="arcade"||minigame.kind==="loft"){
       if(["arrowleft","arrowright","a","d"].includes(key)){event.preventDefault();keys.add(key);}
       if(key===" "&&event.target!==$("challengeExit")&&event.target!==$("challengeReplay")){
         event.preventDefault();
@@ -584,9 +585,15 @@ for(const button of document.querySelectorAll("[data-move]")){
 }
 $("interact").onclick=interact;
 const surprisePreference="ultimo-posto-sorprese";
-const surpriseTile={x:13,y:39};
+const campusSurprises=[
+  {zone:"giardino",x:13,y:39,id:"Fantasma del fuoricorso",voice:"Guagliò!",line:"Da Napoli, il fantasma del fuoricorso. Gli rimane un esame dal 1998.",theme:"ghost"},
+  {zone:"giardino",x:47,y:14,id:"Custode delle zucchine",voice:"Guagliò, lascia stare le zucchine!",line:"Il custode dell’orto difende l’ultima zucchina con una torcia e un verbale.",theme:"garden"},
+  {zone:"dome2",x:19,y:3,id:"Tecnico del Dome",voice:"Guagliò, il microfono è acceso!",line:"Il tecnico del Dome era nascosto dietro l’ultima fila. L’aula lo ha sentito benissimo.",theme:"dome"},
+  {zone:"loft",x:16,y:8,id:"Conduttore fantasma",voice:"Guagliò, siamo in onda!",line:"Il conduttore fantasma presenta una trasmissione che nessuno ha acceso.",theme:"radio"},
+  {zone:"pola-cortile",x:25,y:12,id:"Ospite del brindisi",voice:"Guagliò, aspetta il brindisi!",line:"Un compagno esce da dietro il tavolo con una corona d’alloro grande quanto lui.",theme:"party"}
+];
 const surpriseEnabled=$("surpriseEnabled");
-try{surpriseEnabled.checked=localStorage.getItem(surprisePreference)==="on";}catch{}
+try{surpriseEnabled.checked=localStorage.getItem(surprisePreference)!=="off";}catch{}
 surpriseEnabled.onchange=()=>{
   try{localStorage.setItem(surprisePreference,surpriseEnabled.checked?"on":"off");}catch{}
 };
@@ -597,14 +604,18 @@ $("campusSurprise").addEventListener("close",()=>{
   $("interact").focus();
 });
 function checkCampusSurprise(){
-  if(!surpriseEnabled.checked||testMode||has("Fantasma del fuoricorso")||state.ending)return;
-  if(state.zone!=="giardino"||state.x!==surpriseTile.x||state.y!==surpriseTile.y)return;
-  carry("Fantasma del fuoricorso");
-  record("Scoperta · Il fantasma del fuoricorso");
+  if(!surpriseEnabled.checked||testMode||state.ending)return;
+  const encounter=campusSurprises.find(item=>item.zone===state.zone&&item.x===state.x&&item.y===state.y&&!has(item.id));
+  if(!encounter)return;
+  carry(encounter.id);
+  record("Scoperta · "+encounter.id);
   keys.clear();controls.clear();
+  $("campusSurprise").dataset.theme=encounter.theme;
+  $("surpriseTitle").textContent=encounter.voice;
+  $("surpriseLine").textContent=encounter.line;
   $("campusSurprise").showModal();
   if(audioOn&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
-    surpriseVoice=new SpeechSynthesisUtterance("Guagliò!");
+    surpriseVoice=new SpeechSynthesisUtterance(encounter.voice);
     surpriseVoice.lang="it-IT";
     surpriseVoice.rate=1.12;
     surpriseVoice.volume=.55;

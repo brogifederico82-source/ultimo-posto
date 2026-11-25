@@ -20,7 +20,7 @@
 <p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
 <button id="play" class="primary">Entra a Viale Romania</button></section>
 </div></div></section>
-<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
+<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
 <div class="direction-pad" role="group" aria-label="Movimento">
 <button data-move="up" aria-label="Cammina in alto">↑</button>
 <button data-move="left" aria-label="Cammina a sinistra">←</button>
@@ -37,7 +37,14 @@
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
 <details id="surpriseHint">
 <summary>Dov’è il «Guagliò!»?</summary>
-<p>Attiva le sorprese nelle Opzioni. Dal Giardino delle panchine vai verso ovest e scendi un poco. Il punto è la casella 13, 39. Sul campus è segnato da un punto viola finché tieni aperto questo indizio.</p>
+<ol class="surprise-locations">
+<li><strong>Giardino delle panchine</strong> · dalla targa, 5 passi a sinistra e 2 in basso (13, 39).</li>
+<li><strong>Orto Luiss</strong> · oltre il cartello degli impollinatori, sul lato sud-est (47, 14).</li>
+<li><strong>The Dome 2</strong> · entra nel padiglione ovest e risali fino all’angolo in alto a destra (19, 3).</li>
+<li><strong>LOFT</strong> · all’ultimo piano, oltre il cabinato, verso destra (16, 8).</li>
+<li><strong>Pola</strong> · entra nel cortile della festa e vai verso l’estremità in basso a destra (25, 12).</li>
+</ol>
+<p class="hint">Nel giardino, i punti viola indicano i due incontri. La voce si sente con l’audio del gioco acceso.</p>
 </details>
 <details class="campus-reference"><summary>Confronta con la planimetria di Viale Romania</summary>
 <p>Riferimento reale per ingresso, Aula Chiesa, bar, edificio principale e Via Panama.</p>
@@ -48,7 +55,7 @@
 <dialog id="campusSurprise" class="campus-surprise" aria-labelledby="surpriseTitle">
 <div class="surprise-face" aria-hidden="true"></div>
 <h2 id="surpriseTitle">GUAGLIÒ!</h2>
-<p>Da Napoli, il fantasma del fuoricorso. Gli rimane un esame dal 1998.</p>
+<p id="surpriseLine"></p>
 <button id="surpriseClose" class="primary">Torna al campus</button>
 </dialog>
 <dialog id="challenge" class="challenge" aria-labelledby="challengeTitle">
@@ -58,7 +65,7 @@
 <ol><li>Scegli una delle tre carte. Puoi giocare qualsiasi seme. Il seme della carta scoperta è la briscola.</li>
 <li>Una briscola batte qualsiasi altro seme. Tra due briscole vince la più alta. Se nessuno gioca briscola, conta il seme della prima carta.</li>
 <li>Chi fa la presa prende entrambe le carte, pesca per primo e apre la mano successiva. Quando il mazzo finisce si giocano le carte rimaste.</li>
-<li>Si giocano 20 prese. Con almeno 61 punti vinci. A 60 pari è pareggio.</li></ol>
+<li>Si giocano 20 prese per 120 punti complessivi. Vince chi fa almeno 61 punti. A 60–60 si pareggia.</li></ol>
 <table><thead><tr><th>Carta, dalla più forte</th><th>Punti</th></tr></thead><tbody>
 <tr><td>Asso</td><td>11</td></tr><tr><td>Tre</td><td>10</td></tr><tr><td>Re</td><td>4</td></tr>
 <tr><td>Cavallo</td><td>3</td></tr><tr><td>Fante</td><td>2</td></tr><tr><td>7, 6, 5, 4, 2</td><td>0</td></tr>
@@ -138,231 +145,8 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <footer>Satira studentesca · Pianta di gioco stilizzata · WASD o frecce, E per interagire.</footer>
 <details class="journal campus-options">
 <summary>Opzioni</summary>
-<label><input type="checkbox" id="surpriseEnabled"> Sorprese horror-comiche</label>
-<p class="hint">Una scena improvvisa e un richiamo vocale facoltativo. La voce segue l’impostazione audio del gioco.</p>
-</details>
-<details class="journal study-board" id="studyBoard">
-<summary>Lezioni e quiz · Luiss</summary>
-<p>Scegli un corso di laurea e apri una domanda per ripassare. I quiz sono esercizi originali del gioco.</p>
-<details class="degree-course">
-<summary>Economia e Management</summary>
-<p><a href="https://undergraduate.luiss.it/it/course/economia-management" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Economia aziendale</h4>
-<p>Un’impresa ha attività per 180 e debiti per 110. Quanto vale il patrimonio netto?</p>
-<details><summary>Mostra la risposta</summary><p>70. Il patrimonio netto è la differenza fra attività e passività.</p></details>
-</article>
-<article>
-<h4>Ragioneria</h4>
-<p>Quando vendi a credito, perché il ricavo e l’incasso possono cadere in mesi diversi?</p>
-<details><summary>Mostra la risposta</summary><p>Il ricavo si rileva quando matura. L’incasso avviene quando il cliente paga il credito.</p></details>
-</article>
-<article>
-<h4>Economia e gestione delle imprese</h4>
-<p>Come distingui costo fisso e costo variabile?</p>
-<details><summary>Mostra la risposta</summary><p>Entro l’intervallo considerato, il costo fisso non dipende dal volume prodotto. Il costo variabile cambia con il volume.</p></details>
-</article>
-<article>
-<h4>Storia dell’economia e dell’impresa</h4>
-<p>Che cosa può cambiare quando un’impresa passa dalla produzione artigianale alla produzione di serie?</p>
-<details><summary>Mostra la risposta</summary><p>Può crescere la produttività attraverso standardizzazione, specializzazione e investimenti in capitale.</p></details>
-</article>
-</div>
-</details>
-<details class="degree-course">
-<summary>Business Administration</summary>
-<p><a href="https://www.luiss.it/it/ateneo/chi-siamo/quality-assurance/didattica/offerta-formativa/anno-accademico-2026-2027" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Accounting</h4>
-<p>A company collects an invoice previously recorded as revenue. Does revenue increase again?</p>
-<details><summary>Mostra la risposta</summary><p>No. Cash increases and accounts receivable decreases.</p></details>
-</article>
-<article>
-<h4>Marketing</h4>
-<p>What distinguishes segmentation from positioning?</p>
-<details><summary>Mostra la risposta</summary><p>Segmentation divides the market into groups. Positioning defines how the offering should be perceived by the target group.</p></details>
-</article>
-<article>
-<h4>Corporate finance</h4>
-<p>If a project costs 100 today and returns 110 in one year, what is its net present value at 10%?</p>
-<details><summary>Mostra la risposta</summary><p>Zero. The future 110 is worth 100 today at a 10% discount rate.</p></details>
-</article>
-<article>
-<h4>Operations</h4>
-<p>One station processes 12 units per hour and the next handles 8. What is the line’s maximum sustained throughput?</p>
-<details><summary>Mostra la risposta</summary><p>8 units per hour, assuming no bypass and no other bottleneck.</p></details>
-</article>
-</div>
-</details>
-<details class="degree-course">
-<summary>Economics and Business</summary>
-<p><a href="https://www.luiss.it/it/ateneo/chi-siamo/quality-assurance/didattica/offerta-formativa/anno-accademico-2026-2027" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Microeconomics</h4>
-<p>What does a price elasticity of demand of −2 mean for a small price increase of 1%?</p>
-<details><summary>Mostra la risposta</summary><p>Quantity demanded falls by approximately 2%, other things equal.</p></details>
-</article>
-<article>
-<h4>Macroeconomics</h4>
-<p>What is the difference between nominal and real GDP?</p>
-<details><summary>Mostra la risposta</summary><p>Nominal GDP uses current prices. Real GDP adjusts for price changes to compare output.</p></details>
-</article>
-<article>
-<h4>Statistics</h4>
-<p>Can a high correlation establish that one variable causes another?</p>
-<details><summary>Mostra la risposta</summary><p>No. Confounding, reverse causality or chance can also produce an association.</p></details>
-</article>
-<article>
-<h4>Finance</h4>
-<p>What happens to the price of an existing fixed-rate bond when market yields rise?</p>
-<details><summary>Mostra la risposta</summary><p>Its price generally falls because its fixed future payments are discounted at a higher rate.</p></details>
-</article>
-</div>
-</details>
-<details class="degree-course">
-<summary>Management and Artificial Intelligence</summary>
-<p><a href="https://www.luiss.it/it/ateneo/chi-siamo/quality-assurance/didattica/offerta-formativa/anno-accademico-2026-2027" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Programming</h4>
-<p>What data structure can detect a duplicate while scanning a list once?</p>
-<details><summary>Mostra la risposta</summary><p>A set of values already seen. Check membership before adding each value.</p></details>
-</article>
-<article>
-<h4>Machine learning</h4>
-<p>What does high training accuracy with low validation accuracy suggest?</p>
-<details><summary>Mostra la risposta</summary><p>It can indicate overfitting. The model may have learned patterns specific to the training data.</p></details>
-</article>
-<article>
-<h4>Data analysis</h4>
-<p>Why should preprocessing be fitted on training data before evaluating a model?</p>
-<details><summary>Mostra la risposta</summary><p>Fitting preprocessing on all data can leak information from the test set into training.</p></details>
-</article>
-<article>
-<h4>AI and management</h4>
-<p>An AI prototype improves accuracy but doubles processing time. What should a manager measure before rollout?</p>
-<details><summary>Mostra la risposta</summary><p>Measure benefit, latency, operating cost and error impact against a baseline. Pick thresholds that reflect who uses the system.</p></details>
-</article>
-<article>
-<h4>AI governance</h4>
-<p>What would you document before using a model to screen applications?</p>
-<details><summary>Mostra la risposta</summary><p>Document purpose, data provenance, performance across groups, human oversight and how cases can be challenged.</p></details>
-</article>
-</div>
-</details>
-<details class="degree-course">
-<summary>Scienze Politiche</summary>
-<p><a href="https://undergraduate.luiss.it/it/course/scienze-politiche/" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid"><article><h4>Elementi di analisi matematica</h4><p>Come riconosci un massimo locale in un punto regolare?</p><details><summary>Mostra la risposta</summary><p>Controlla il passaggio della derivata da positiva a negativa. Una derivata nulla, da sola, non basta.</p></details></article><article><h4>Coding Lab</h4><p>Come conti quante volte compare ciascun valore in una lista?</p><details><summary>Mostra la risposta</summary><p>Scorri la lista e incrementa il contatore della voce corrispondente in una mappa chiave-valore.</p></details></article><article><h4>Filosofia politica</h4><p>Che cosa distingue legittimità e legalità?</p><details><summary>Mostra la risposta</summary><p>La legalità riguarda la conformità alle regole in vigore. La legittimità riguarda le ragioni per cui un potere può rivendicare obbedienza.</p></details></article><article><h4>Sociologia generale e politica</h4><p>Come distingueresti ribalta e retroscena alla radio del campus?</p><details><summary>Mostra la risposta</summary><p>La trasmissione è una situazione di ribalta. La preparazione a microfoni spenti è un possibile retroscena rispetto all’ascoltatore.</p></details></article><article><h4>Statistica</h4><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/358/a/l25psbase/2025/statistica" target="_blank" rel="noopener">Livia De Giovanni · A · 2025/26</a></li></ul><p>Nel campione 2, 3, 4, 5, 46 quale misura descrive meglio il centro se vuoi attenuare l’effetto dell’ultimo dato?</p><details><summary>Mostra la risposta</summary><p>La mediana è 4. La media è 12 e risente molto del valore 46.</p></details></article><article><h4>Istituzioni di diritto pubblico</h4><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/37/0/l25psbase/2026/istituzioni-di-diritto-pubblico" target="_blank" rel="noopener">Guido Meloni · Unico · 2026/27</a></li></ul><p>Qual è la differenza tra una Camera e il Parlamento in seduta comune?</p><details><summary>Mostra la risposta</summary><p>La Camera dei deputati e il Senato operano ordinariamente separati. La seduta comune riunisce i loro membri per le funzioni previste dalla Costituzione.</p></details></article><article><h4>Microeconomia</h4><p>Cosa isola la variazione compensata associata a un prezzo?</p><details><summary>Mostra la risposta</summary><p>L’effetto di sostituzione. Nella compensazione di Slutsky il reddito viene aggiustato per rendere ancora acquistabile il paniere iniziale.</p></details></article><article><h4>Storia contemporanea</h4><p>In che anno furono aperti i valichi del Muro di Berlino?</p><details><summary>Mostra la risposta</summary><p>Il 9 novembre 1989. La riunificazione tedesca avvenne l’anno successivo.</p></details></article><article><h4>Storia delle dottrine politiche</h4><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/264/a/l25psbase/2025/storia-delle-dottrine-politiche" target="_blank" rel="noopener">Sebastiano Maffettone · A · 2025/26</a></li><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/264/0/l25psbase/2026/storia-delle-dottrine-politiche" target="_blank" rel="noopener">Gaetano Pecora · Unico · 2026/27</a></li></ul><p>Che problema affronta il patto in Hobbes?</p><details><summary>Mostra la risposta</summary><p>Come uscire dall’insicurezza dello stato di natura mediante l’istituzione di un potere comune.</p></details></article><article><h4>Macroeconomia</h4><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/672/a/l25psbase/2026/macroeconomia" target="_blank" rel="noopener">Gaetano Bloise · A · 2026/27</a></li><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/672/b/l25psbase/2026/macroeconomia" target="_blank" rel="noopener">Paolo Canofari · B · 2026/27</a></li></ul><p>Se i prezzi crescono meno rapidamente dell’anno scorso, si tratta necessariamente di deflazione?</p><details><summary>Mostra la risposta</summary><p>No. È disinflazione se l’inflazione rallenta pur restando positiva. La deflazione richiede una diminuzione del livello generale dei prezzi.</p></details></article></div>
-
-</details>
-<details class="degree-course">
-<summary>Politics: Philosophy and Economics (PPE)</summary>
-<p><a href="https://www.luiss.it/it/ateneo/chi-siamo/quality-assurance/didattica/offerta-formativa/anno-accademico-2026-2027" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Political philosophy</h4>
-<p>How can equal resources and equal opportunities lead to different policies?</p>
-<details><summary>Mostra la risposta</summary><p>Equal resources treats inputs alike. Equal opportunity can justify additional support where barriers prevent comparable access.</p></details>
-</article>
-<article>
-<h4>Political science</h4>
-<p>Why might electoral systems affect the number of parties?</p>
-<details><summary>Mostra la risposta</summary><p>Seat allocation and strategic voting alter the incentives for parties to compete separately or form coalitions.</p></details>
-</article>
-<article>
-<h4>Economics</h4>
-<p>Why might a market provide less than the socially efficient amount of a public good?</p>
-<details><summary>Mostra la risposta</summary><p>When people cannot be easily excluded, they may benefit without paying, weakening private incentives to provide it.</p></details>
-</article>
-<article>
-<h4>Research methods</h4>
-<p>What is the purpose of a control group in a randomized study?</p>
-<details><summary>Mostra la risposta</summary><p>It supplies a comparison for estimating what would have happened without the intervention.</p></details>
-</article>
-<article>
-<h4>Comparative politics</h4>
-<p>What is a coalition government?</p>
-<details><summary>Mostra la risposta</summary><p>A government formed by more than one party, usually through an agreement on support, policy and ministerial responsibilities.</p></details>
-</article>
-</div>
-</details>
-<details class="degree-course">
-<summary>Global Law</summary>
-<p><a href="https://undergraduate.luiss.it/en/course/global-law" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Comparative law</h4>
-<p>Why can identical legal words have different effects in two jurisdictions?</p>
-<details><summary>Mostra la risposta</summary><p>Their effects depend on institutions, sources of law, procedure and local interpretation.</p></details>
-</article>
-<article>
-<h4>International law</h4>
-<p>What is the difference between a treaty and customary international law?</p>
-<details><summary>Mostra la risposta</summary><p>A treaty rests on agreement. Custom arises from sufficiently general practice accepted as law.</p></details>
-</article>
-<article>
-<h4>EU law</h4>
-<p>How does an EU regulation differ from an EU directive in form?</p>
-<details><summary>Mostra la risposta</summary><p>A regulation is directly applicable. A directive binds Member States as to the result and generally requires national transposition.</p></details>
-</article>
-<article>
-<h4>Law and technology</h4>
-<p>What legal questions arise when an automated system makes a decision across borders?</p>
-<details><summary>Mostra la risposta</summary><p>Identify relevant jurisdictions, applicable rules, accountability, data transfers and how the person can contest the decision.</p></details>
-</article>
-<article>
-<h4>International organizations</h4>
-<p>Why distinguish an organization’s founding treaty from its later decisions?</p>
-<details><summary>Mostra la risposta</summary><p>The treaty establishes powers and procedures. Later decisions must be assessed against that authority.</p></details>
-</article>
-</div>
-</details>
-<details class="degree-course">
-<summary>Giurisprudenza</summary>
-<p><a href="https://www.luiss.it/it/ateneo/chi-siamo/quality-assurance/didattica/offerta-formativa/anno-accademico-2026-2027" target="_blank" rel="noopener">Offerta e piano ufficiale Luiss</a></p>
-<div class="study-grid">
-<article>
-<h4>Diritto costituzionale</h4>
-<p>Qual è la differenza tra decreto-legge e decreto legislativo?</p>
-<details><summary>Mostra la risposta</summary><p>Il decreto-legge nasce da necessità e urgenza e deve essere convertito. Il decreto legislativo si basa su una legge di delega.</p></details>
-</article>
-<article>
-<h4>Diritto privato</h4>
-<p>Quali elementi del confronto in chat possono aiutare a capire se c’è un accordo?</p>
-<details><summary>Mostra la risposta</summary><p>Cerca proposta, accettazione, accordo sugli elementi essenziali e eventuali requisiti di forma.</p></details>
-</article>
-<article>
-<h4>Diritto penale</h4>
-<p>Che cosa esprime il principio di legalità penale?</p>
-<details><summary>Mostra la risposta</summary><p>Nessuno può essere punito per un fatto che non era previsto dalla legge come reato quando è stato commesso.</p></details>
-</article>
-<article>
-<h4>Diritto amministrativo</h4>
-<p>Che differenza c’è tra una decisione vincolata e una discrezionale?</p>
-<details><summary>Mostra la risposta</summary><p>Nella prima la legge determina l’esito al ricorrere dei presupposti. Nella seconda l’amministrazione deve valutare interessi e alternative entro i limiti di legge.</p></details>
-</article>
-<article>
-<h4>Diritto commerciale</h4>
-<p>In una società di capitali, perché capitale sociale e patrimonio netto non coincidono necessariamente?</p>
-<details><summary>Mostra la risposta</summary><p>Il capitale è un valore statutario. Il patrimonio netto cambia anche con utili, perdite e riserve.</p></details>
-</article>
-<article>
-<h4>Procedura civile</h4>
-<p>Quale funzione svolge il contraddittorio?</p>
-<details><summary>Mostra la risposta</summary><p>Consente alle parti di conoscere le domande e gli elementi rilevanti e di esporre le proprie ragioni.</p></details>
-</article>
-<article>
-<h4>Diritto romano</h4>
-<p>Perché studiare categorie romane come possesso e proprietà?</p>
-<details><summary>Mostra la risposta</summary><p>Aiuta a riconoscere l’origine di istituti moderni e a distinguere il controllo di fatto dal titolo giuridico.</p></details>
-</article>
-</div>
-</details>
-<p><a href="https://www.luiss.it/it/ateneo/chi-siamo/quality-assurance/didattica/offerta-formativa/anno-accademico-2026-2027" target="_blank" rel="noopener">Catalogo Luiss 2026/27</a> · <a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online" target="_blank" rel="noopener">Cattedre Online</a></p>
+<label><input type="checkbox" id="surpriseEnabled" checked> Sorprese horror-comiche</label>
+<p class="hint">Attive di default. Puoi disattivarle qui. La voce segue l’impostazione audio del gioco.</p>
 </details>
 </main>
 <script id="edOriginal" type="application/json"><!-- BUILD_CAMPUS --></script>

@@ -91,6 +91,25 @@ function installTeachingRooms(map){
   romania.height=Math.max(romania.height,15);
   romania.name="Edificio centrale · Corridoio del secondo piano";
   const object=(uid,kind,name,x,y,extra={})=>({uid,kind,name,x,y,...extra});
+  const loft=map.zones.loft;
+  if(loft&&!loft.objects.some(o=>o.uid==="loft-cabinato")){
+    loft.objects.push(object("loft-cabinato","vending","Cabinato arcade",13,5,{action:"native",native:"loft-cabinato",color:"#765d9e",solid:true}));
+  }
+  const garden=map.zones.giardino;
+  if(garden?.width===144&&!garden.objects.some(o=>o.uid==="romania-corte-chiesa")){
+    garden.objects.push(
+      object("romania-corte-chiesa","paving","Sagrato Aula Chiesa",36,63,{w:5,h:5,color:"#c1ad91"}),
+      object("romania-corte-atrio","paving","Piazzale dell’edificio centrale",44,77,{w:10,h:5,color:"#ad9a84"}),
+      object("romania-corte-dome","paving","Piazzale The Dome 1",55,53,{w:8,h:4,color:"#b2a38b"}),
+      object("romania-corte-panama","paving","Accesso sul lato Via Panama",70,46,{w:5,h:4,color:"#ad9a84"})
+    );
+    garden.objects.push(
+      object("romania-cartello-chiesa","sign","Aula Chiesa · A200",37,66,{action:"dialog",text:"L’ingresso è accanto al corpo in cotto. Dall’interno si arriva anche al secondo piano."}),
+      object("romania-cartello-panama","sign","Via Panama",73,47,{action:"dialog",text:"Il margine del campus segue Via Panama. Il vialetto interno conduce verso The Dome e il bar."}),
+      object("romania-seduta-atrio","bench","Seduta del piazzale",46,81,{w:2,solid:true}),
+      object("romania-seduta-dome","bench","Seduta del Dome",56,55,{w:2,solid:true})
+    );
+  }
   const parenzoDoor=parenzo.objects.find(o=>o.uid==="parenzo-inside");
   const seminarExit=seminar.objects.find(o=>o.uid==="parenzo-interno-exit");
   if(parenzoDoor&&seminarExit&&!map.zones["parenzo-corridoio"]){
@@ -173,15 +192,270 @@ function paintTeachingSigns(context,zone,cameraX,cameraY,zoom,width,height){
   context.restore();
 }
 
+const oralQuestions={
+  "lezione-azienda": [
+    [
+      "Economia aziendale",
+      "Un’impresa ha attività per 180 e debiti per 110. Quanto vale il patrimonio netto?",
+      "70. Il patrimonio netto è la differenza fra attività e passività."
+    ],
+    [
+      "Ragioneria",
+      "Quando vendi a credito, perché il ricavo e l’incasso possono cadere in mesi diversi?",
+      "Il ricavo si rileva quando matura. L’incasso avviene quando il cliente paga il credito."
+    ],
+    [
+      "Economia e gestione delle imprese",
+      "Come distingui costo fisso e costo variabile?",
+      "Entro l’intervallo considerato, il costo fisso non dipende dal volume prodotto. Il costo variabile cambia con il volume."
+    ],
+    [
+      "Storia dell’economia e dell’impresa",
+      "Che cosa può cambiare quando un’impresa passa dalla produzione artigianale alla produzione di serie?",
+      "Può crescere la produttività attraverso standardizzazione, specializzazione e investimenti in capitale."
+    ],
+    [
+      "Accounting",
+      "A company collects an invoice previously recorded as revenue. Does revenue increase again?",
+      "No. Cash increases and accounts receivable decreases."
+    ],
+    [
+      "Marketing",
+      "What distinguishes segmentation from positioning?",
+      "Segmentation divides the market into groups. Positioning defines how the offering should be perceived by the target group."
+    ],
+    [
+      "Corporate finance",
+      "If a project costs 100 today and returns 110 in one year, what is its net present value at 10%?",
+      "Zero. The future 110 is worth 100 today at a 10% discount rate."
+    ],
+    [
+      "Operations",
+      "One station processes 12 units per hour and the next handles 8. What is the line’s maximum sustained throughput?",
+      "8 units per hour, assuming no bypass and no other bottleneck."
+    ]
+  ],
+  "lezione-micro": [
+    [
+      "Microeconomics",
+      "What does a price elasticity of demand of −2 mean for a small price increase of 1%?",
+      "Quantity demanded falls by approximately 2%, other things equal."
+    ],
+    [
+      "Microeconomia",
+      "Cosa isola la variazione compensata associata a un prezzo?",
+      "L’effetto di sostituzione. Nella compensazione di Slutsky il reddito viene aggiustato per rendere ancora acquistabile il paniere iniziale."
+    ]
+  ],
+  "lezione-macro": [
+    [
+      "Macroeconomics",
+      "What is the difference between nominal and real GDP?",
+      "Nominal GDP uses current prices. Real GDP adjusts for price changes to compare output."
+    ]
+  ],
+  "lezione-statistica": [
+    [
+      "Statistics",
+      "Can a high correlation establish that one variable causes another?",
+      "No. Confounding, reverse causality or chance can also produce an association."
+    ],
+    [
+      "Statistica",
+      "Nel campione 2, 3, 4, 5, 46 quale misura descrive meglio il centro se vuoi attenuare l’effetto dell’ultimo dato?",
+      "La mediana è 4. La media è 12 e risente molto del valore 46."
+    ]
+  ],
+  "lezione-finanziaria": [
+    [
+      "Finance",
+      "What happens to the price of an existing fixed-rate bond when market yields rise?",
+      "Its price generally falls because its fixed future payments are discounted at a higher rate."
+    ]
+  ],
+  "lezione-ai": [
+    [
+      "Programming",
+      "What data structure can detect a duplicate while scanning a list once?",
+      "A set of values already seen. Check membership before adding each value."
+    ],
+    [
+      "Machine learning",
+      "What does high training accuracy with low validation accuracy suggest?",
+      "It can indicate overfitting. The model may have learned patterns specific to the training data."
+    ],
+    [
+      "Data analysis",
+      "Why should preprocessing be fitted on training data before evaluating a model?",
+      "Fitting preprocessing on all data can leak information from the test set into training."
+    ],
+    [
+      "AI and management",
+      "An AI prototype improves accuracy but doubles processing time. What should a manager measure before rollout?",
+      "Measure benefit, latency, operating cost and error impact against a baseline. Pick thresholds that reflect who uses the system."
+    ],
+    [
+      "AI governance",
+      "What would you document before using a model to screen applications?",
+      "Document purpose, data provenance, performance across groups, human oversight and how cases can be challenged."
+    ]
+  ],
+  "lezione-politica": [
+    [
+      "Elementi di analisi matematica",
+      "Come riconosci un massimo locale in un punto regolare?",
+      "Controlla il passaggio della derivata da positiva a negativa. Una derivata nulla, da sola, non basta."
+    ],
+    [
+      "Coding Lab",
+      "Come conti quante volte compare ciascun valore in una lista?",
+      "Scorri la lista e incrementa il contatore della voce corrispondente in una mappa chiave-valore."
+    ],
+    [
+      "Filosofia politica",
+      "Che cosa distingue legittimità e legalità?",
+      "La legalità riguarda la conformità alle regole in vigore. La legittimità riguarda le ragioni per cui un potere può rivendicare obbedienza."
+    ],
+    [
+      "Sociologia generale e politica",
+      "Come distingueresti ribalta e retroscena alla radio del campus?",
+      "La trasmissione è una situazione di ribalta. La preparazione a microfoni spenti è un possibile retroscena rispetto all’ascoltatore."
+    ],
+    [
+      "Istituzioni di diritto pubblico",
+      "Qual è la differenza tra una Camera e il Parlamento in seduta comune?",
+      "La Camera dei deputati e il Senato operano ordinariamente separati. La seduta comune riunisce i loro membri per le funzioni previste dalla Costituzione."
+    ],
+    [
+      "Storia contemporanea",
+      "In che anno furono aperti i valichi del Muro di Berlino?",
+      "Il 9 novembre 1989. La riunificazione tedesca avvenne l’anno successivo."
+    ],
+    [
+      "Storia delle dottrine politiche",
+      "Che problema affronta il patto in Hobbes?",
+      "Come uscire dall’insicurezza dello stato di natura mediante l’istituzione di un potere comune."
+    ],
+    [
+      "Macroeconomia",
+      "Se i prezzi crescono meno rapidamente dell’anno scorso, si tratta necessariamente di deflazione?",
+      "No. È disinflazione se l’inflazione rallenta pur restando positiva. La deflazione richiede una diminuzione del livello generale dei prezzi."
+    ],
+    [
+      "Political philosophy",
+      "How can equal resources and equal opportunities lead to different policies?",
+      "Equal resources treats inputs alike. Equal opportunity can justify additional support where barriers prevent comparable access."
+    ],
+    [
+      "Political science",
+      "Why might electoral systems affect the number of parties?",
+      "Seat allocation and strategic voting alter the incentives for parties to compete separately or form coalitions."
+    ],
+    [
+      "Economics",
+      "Why might a market provide less than the socially efficient amount of a public good?",
+      "When people cannot be easily excluded, they may benefit without paying, weakening private incentives to provide it."
+    ],
+    [
+      "Research methods",
+      "What is the purpose of a control group in a randomized study?",
+      "It supplies a comparison for estimating what would have happened without the intervention."
+    ],
+    [
+      "Comparative politics",
+      "What is a coalition government?",
+      "A government formed by more than one party, usually through an agreement on support, policy and ministerial responsibilities."
+    ]
+  ],
+  "lezione-global-law": [
+    [
+      "Comparative law",
+      "Why can identical legal words have different effects in two jurisdictions?",
+      "Their effects depend on institutions, sources of law, procedure and local interpretation."
+    ],
+    [
+      "International law",
+      "What is the difference between a treaty and customary international law?",
+      "A treaty rests on agreement. Custom arises from sufficiently general practice accepted as law."
+    ],
+    [
+      "EU law",
+      "How does an EU regulation differ from an EU directive in form?",
+      "A regulation is directly applicable. A directive binds Member States as to the result and generally requires national transposition."
+    ],
+    [
+      "Law and technology",
+      "What legal questions arise when an automated system makes a decision across borders?",
+      "Identify relevant jurisdictions, applicable rules, accountability, data transfers and how the person can contest the decision."
+    ],
+    [
+      "International organizations",
+      "Why distinguish an organization’s founding treaty from its later decisions?",
+      "The treaty establishes powers and procedures. Later decisions must be assessed against that authority."
+    ]
+  ],
+  "lezione-giurisprudenza": [
+    [
+      "Diritto costituzionale",
+      "Qual è la differenza tra decreto-legge e decreto legislativo?",
+      "Il decreto-legge nasce da necessità e urgenza e deve essere convertito. Il decreto legislativo si basa su una legge di delega."
+    ],
+    [
+      "Diritto privato",
+      "Quali elementi del confronto in chat possono aiutare a capire se c’è un accordo?",
+      "Cerca proposta, accettazione, accordo sugli elementi essenziali e eventuali requisiti di forma."
+    ],
+    [
+      "Diritto penale",
+      "Che cosa esprime il principio di legalità penale?",
+      "Nessuno può essere punito per un fatto che non era previsto dalla legge come reato quando è stato commesso."
+    ],
+    [
+      "Diritto amministrativo",
+      "Che differenza c’è tra una decisione vincolata e una discrezionale?",
+      "Nella prima la legge determina l’esito al ricorrere dei presupposti. Nella seconda l’amministrazione deve valutare interessi e alternative entro i limiti di legge."
+    ],
+    [
+      "Diritto commerciale",
+      "In una società di capitali, perché capitale sociale e patrimonio netto non coincidono necessariamente?",
+      "Il capitale è un valore statutario. Il patrimonio netto cambia anche con utili, perdite e riserve."
+    ],
+    [
+      "Procedura civile",
+      "Quale funzione svolge il contraddittorio?",
+      "Consente alle parti di conoscere le domande e gli elementi rilevanti e di esporre le proprie ragioni."
+    ],
+    [
+      "Diritto romano",
+      "Perché studiare categorie romane come possesso e proprietà?",
+      "Aiuta a riconoscere l’origine di istituti moderni e a distinguere il controllo di fatto dal titolo giuridico."
+    ]
+  ]
+};
+
 function teachingScene(id){
   const course=teachingRooms[id];
   const sessions=state.lessonSessions??={};
   const progress=sessions[id];
   const restart=()=>{sessions[id]={index:0,correct:0,answer:null};};
   const title=course.teacher+" · "+course.title;
-  if(!progress)return scene(title,course.overview,["Inizia gli esercizi",restart]);
+  const oral=oralQuestions[id]??[];
+  const review=["Ripasso orale",()=>{state.classReview={id,index:0,answer:false};}];
+  const current=state.classReview;
+  if(current?.id===id&&oral[current.index]){
+    const [subject,prompt,answer]=oral[current.index];
+    return scene(title,current.answer?answer:subject+" · "+prompt,
+      current.answer
+        ?[current.index+1<oral.length?"Altra domanda":"Torna al quiz",()=>{
+          if(current.index+1<oral.length){current.index++;current.answer=false;}
+          else state.classReview=null;
+        }]
+        :["Fammi vedere la risposta",()=>{current.answer=true;}],
+      ["Interrompi il ripasso",()=>{state.classReview=null;}]);
+  }
+  if(!progress){restart();return teachingScene(id);}
   if(progress.index>=course.topics.length){
-    return scene(title,"Risultato: "+progress.correct+"/"+course.topics.length+". Puoi ripetere l’esercitazione o uscire nel corridoio.",["Riprova",restart]);
+    return scene(title,"Risultato: "+progress.correct+"/"+course.topics.length+". Puoi ripetere l’esercitazione o uscire nel corridoio.",["Riprova",restart],...(oral.length?[review]:[]));
   }
   const [question,choices,correct,explanation]=course.topics[progress.index];
   if(progress.answer!==null){
@@ -196,5 +470,5 @@ function teachingScene(id){
     if(progress.answer!==null)return;
     progress.answer=index;
     if(index===correct)progress.correct++;
-  }]));
+  }]),...(oral.length?[review]:[]));
 }

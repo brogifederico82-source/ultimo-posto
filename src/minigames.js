@@ -10,6 +10,8 @@ const arcadeRules={
   bris:"Scegli una carta con il mouse o con i tasti 1, 2 e 3. La briscola batte gli altri semi. Nel seme di apertura e in quello di briscola l’ordine è Asso, Tre, Re, Cavallo, Fante, 7, 6, 5, 4, 2. Vince chi supera 60 punti."
 };
 const prizes={
+  mattoni:["Gettone Pixel Mattoni","Hai ripulito il tabellone del LOFT."],
+  nastri:["Gettone Salva i nastri","Le cassette sono tutte in salvo."],
   scopa:["Settebello del campus","Tessera del tavolo di Scopa aggiunta al diario."],
   arm:["Rivincita di Riccardo","Riccardo ti fa i complimenti e chiede la rivincita."],
   ping:["Gettone limonata","Hai ottenuto una limonata al bar."],
@@ -129,18 +131,25 @@ function tickDance(now){
   if(now>=g.deadline)danceInput(-1);
 }
 for(const [i,button] of [...$("dancePad").querySelectorAll("button")].entries())button.onclick=()=>danceInput(i);
-function openChallenge(id){
+function openChallenge(id,practice=false){
   keys.clear();controls.clear();
+  const isLoft=Object.hasOwn(loftGames,id);
   const isScopa=id==="scopa",isCards=id==="bris"||isScopa,isDance=id==="dance",isArm=id==="arm";
   $("dancePad").hidden=!isDance;
   if(isDance)minigame={id,kind:"dance",index:0,score:0,result:null,hits:[],steps:Array.from({length:5},()=>Math.floor(Math.random()*4)),deadline:0};
   else if(isArm)minigame=startArm();
+  else if(isLoft)minigame=startLoftGame(id);
   else minigame=isScopa?startScopa():isCards?startBriscola():startArcade(id);
-  $("challengeTitle").textContent=tr(challengeNames[id]);
+  minigame.practice=practice;
+  $("challengeTitle").textContent=tr(challengeNames[id])+(practice?" · Allenamento":"");
   $("challengeRules").textContent=isScopa?local(
     "Gioca con mouse, tocco o tasti 1, 2, 3. Se puoi fare più prese, scegli quella che preferisci.",
     "Play with mouse, touch, or keys 1, 2, 3. If there are several captures, choose the one you want."
-  ):tr(arcadeRules[id]);
+  ):isLoft?loftGames[id].rules:tr(arcadeRules[id]);
+  if(isLoft||id==="ping"||id==="foos")$("challengeRules").textContent+=" "+local(
+    "Puoi anche trascinare sul campo con il mouse o col dito.",
+    "You can also drag on the court with a mouse or your finger."
+  );
   $("challengeReplay").hidden=true;
   $("cardGame").hidden=!isCards;
   $("brisLegend").hidden=id!=="bris";
@@ -163,14 +172,14 @@ function openChallenge(id){
   refreshLanguage();
   court.hidden=isCards||isDance;
   $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm;
-  $("challengeShot").hidden=isCards||isDance;
-  $("challengeShot").textContent=tr(isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
+  $("challengeShot").hidden=isCards||isDance||id==="nastri";
+  $("challengeShot").textContent=tr(id==="mattoni"?"Lancia":isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
   $("challengeStatus").textContent="";
   if(!$("challenge").open)$("challenge").showModal();
   if(isDance){renderDance();$("dancePad").querySelector("button").focus();}
   else if(isScopa)renderScopa(true);
   else if(isCards)renderBriscola(true);
-  else{if(isArm)paintArm(minigame,performance.now());else paintCourt(minigame);court.focus();}
+  else{if(isArm)paintArm(minigame,performance.now());else if(isLoft)paintLoftGame(minigame);else paintCourt(minigame);court.focus();}
 }
 function closeChallenge(){
   if(!minigame)return;
@@ -181,7 +190,7 @@ function closeChallenge(){
 }
 $("challengeExit").onclick=closeChallenge;
 $("challenge").addEventListener("cancel",event=>{event.preventDefault();closeChallenge();});
-$("challengeReplay").onclick=()=>openChallenge(minigame.id);
+$("challengeReplay").onclick=()=>openChallenge(minigame.id,minigame.practice);
 $("challengeShot").onclick=()=>minigame?.kind==="arm"?armPush():arcadeAction();
 for(const [id,direction] of [["challengeLeft","left"],["challengeRight","right"]]){
   const button=$(id);
@@ -191,8 +200,23 @@ for(const [id,direction] of [["challengeLeft","left"],["challengeRight","right"]
   button.onpointercancel=()=>controls.delete(direction);
 }
 
+function aimCourt(event){
+  if(minigame?.kind!=="arcade"&&minigame?.kind!=="loft")return;
+  const bounds=court.getBoundingClientRect();
+  if(bounds.width)minigame.pointerAim=clamp((event.clientX-bounds.left)/bounds.width*320,0,320);
+}
+court.onpointerdown=event=>{court.setPointerCapture(event.pointerId);aimCourt(event);};
+court.onpointermove=event=>{if(court.hasPointerCapture(event.pointerId))aimCourt(event);};
+court.onlostpointercapture=()=>{if(minigame)minigame.pointerAim=null;};
+
 function endChallenge(g,result){
   g.result=result;
+  if(g.practice){
+    $("challengeStatus").textContent="Allenamento concluso. Premi Rivincita per riprovare.";
+    $("challengeReplay").hidden=false;
+    $("challengeReplay").focus();
+    return;
+  }
   const [item,unlock,secret,description]=prizes[g.id];
   if(result==="win"){
     if(!won(g.id)){
@@ -232,6 +256,7 @@ function serve(g,towardPlayer){
 }
 function arcadeAction(){
   const g=minigame;
+  if(g?.kind==="loft"){launchLoftBall(g);return;}
   if(g?.id==="ping"&&!g.result&&g.pingPlayerServe){
     const aim=clamp(160+(g.player-160)*1.15,48,272);
     Object.assign(g.ball,{x:g.player,y:bounds.player-5,vx:(aim-g.player)*130/109,vy:-130});
@@ -244,7 +269,7 @@ function arcadeAction(){
 }
 function arcadePoint(g,player){
   if(player)g.you++;else g.them++;
-  const matchOver=g.id==="ping"?Math.max(g.you,g.them)>=7&&Math.abs(g.you-g.them)>=2:g.you===3||g.them===3;
+  const matchOver=g.id==="ping"?Math.max(g.you,g.them)>=(g.practice?3:7)&&Math.abs(g.you-g.them)>=(g.practice?1:2):Math.max(g.you,g.them)>=(g.practice?2:3);
   if(matchOver){
     g.ball.vx=0;g.ball.vy=0;
     endChallenge(g,player?"win":"loss");
@@ -260,7 +285,7 @@ function tickArcade(now){
   if(!g.result){
     const left=keys.has("a")||keys.has("arrowleft")||controls.has("left");
     const right=keys.has("d")||keys.has("arrowright")||controls.has("right");
-    g.player=clamp(g.player+(Number(right)-Number(left))*227*dt,54,266);
+    g.player=g.pointerAim==null?clamp(g.player+(Number(right)-Number(left))*227*dt,54,266):clamp(g.pointerAim,54,266);
     if(g.id==="ping")tickPing(g,dt);
     else if(g.wait>0)g.wait=Math.max(0,g.wait-dt);
     else if(g.id==="foos"){
@@ -309,8 +334,8 @@ function stepFoos(g,dt){
   const tracking=g.impact<.09;
   const attackAim=attacking?(tracking?predicted(foosRows.rivalAttack)+slip:g.rival):160;
   const defenseAim=defending?(tracking?predicted(foosRows.rivalDefense)-slip:g.rivalGuard):160;
-  g.rival=approach(g.rival,clamp(attackAim,63,257),102*dt);
-  g.rivalGuard=approach(g.rivalGuard,clamp(defenseAim,105,215),64*dt);
+  g.rival=approach(g.rival,clamp(attackAim,63,257),(g.practice?70:102)*dt);
+  g.rivalGuard=approach(g.rivalGuard,clamp(defenseAim,105,215),(g.practice?43:64)*dt);
   if(g.kick>0){
     g.kick=Math.max(0,g.kick-dt);
     if(g.kick===0)g.kick=-.16;
@@ -376,7 +401,7 @@ function stepPingBall(g,dt){
   const rivalCanRead=b.vy<0&&b.y<108&&b.y>bounds.rival;
   const error=[-10,12,-17,8,16][(g.rally+g.you+g.them)%5];
   const target=rivalCanRead?pingIntercept(b,bounds.rival)+error:160;
-  g.rival=approach(g.rival,clamp(target,56,264),(rivalCanRead?140:72)*dt);
+  g.rival=approach(g.rival,clamp(target,56,264),(rivalCanRead?(g.practice?88:140):72)*dt);
   b.x+=b.vx*dt;b.y+=b.vy*dt;
   if(b.x<bounds.left||b.x>bounds.right){b.x=reflectCourt(b.x);b.vx*=-1;}
   const row=b.vy>0?bounds.player:bounds.rival;
@@ -499,7 +524,8 @@ function makeCardDeck(){
 }
 function startBriscola(){
   const deck=makeCardDeck();
-  const hands=[deck.splice(0,3),deck.splice(0,3)];
+  const hands=[[],[]];
+  for(let i=0;i<3;i++)for(const hand of hands)hand.push(deck.shift());
   return {id:"bris",kind:"cards",deck,hands,trump:deck.at(-1),table:[null,null],score:[0,0],
     leader:0,turn:0,tricks:0,phase:"playing",result:null,note:"Tocca a te."};
 }

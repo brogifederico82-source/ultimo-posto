@@ -190,12 +190,6 @@ button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .1
 .game-conversation .scene{max-width:780px;margin:0 auto;padding:clamp(14px,3vw,26px)}
 .game-conversation #speakerPortrait{border-color:var(--gold)}
 
-.study-board{padding:14px 0}
-.study-board summary{cursor:pointer;color:var(--gold)}
-.study-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
-.study-grid article{background:var(--panel);border:1px solid var(--line);padding:14px}
-.study-grid a,.study-board>p a{color:#a8d7f1}
-.study-grid li{margin-block:6px}
 
 .creator-heading{margin:30px 0 12px}
 .creator-heading h1{font-size:clamp(2rem,5vw,4rem);line-height:1.04;letter-spacing:-.04em}
@@ -216,10 +210,6 @@ button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .1
 .campus-reference a{color:#a8d7f1}
 .campus-reference summary{cursor:pointer;color:var(--gold)}
 
-.degree-course{border-top:1px solid var(--line);padding:9px 0}
-.degree-course>summary{font-weight:700;padding:8px 0}
-.degree-course a{color:#a8d7f1}
-.study-grid h4{font-size:1rem;margin:0}
 
 #game .frame{border-radius:18px}
 #stage{cursor:pointer}
@@ -260,3 +250,17 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 .game-conversation #speakerPortrait{width:min(100%,460px)}
 #surpriseHint{margin-block:12px}
 #surpriseHint summary{cursor:pointer;color:#dbb3fa}
+
+.task-card{display:grid;gap:4px;flex:1 1 275px;padding:9px 13px;border-left:3px solid var(--gold);
+  border-radius:7px;background:linear-gradient(100deg,#2c4052,#1d2d40)}
+#taskChapter{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#f5bf82}
+#objective{line-height:1.3}
+.game-conversation .scene{background:radial-gradient(ellipse at 50% 0%,#39506b,#172538 65%)}
+.campus-surprise[data-theme="garden"]{background:radial-gradient(ellipse at top,#405d42,#14251e 72%)}
+.campus-surprise[data-theme="dome"]{background:radial-gradient(ellipse at top,#65435d,#261a2d 72%)}
+.campus-surprise[data-theme="radio"]{background:radial-gradient(ellipse at top,#335975,#141e37 72%)}
+.campus-surprise[data-theme="party"]{background:radial-gradient(ellipse at top,#684e34,#30243b 72%)}
+
+#challengeCourt{touch-action:none;cursor:ew-resize}
+
+.surprise-locations li{padding-block:4px}

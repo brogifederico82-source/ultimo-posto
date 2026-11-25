@@ -70,7 +70,7 @@ const options = {
 };
 const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
 const totalSecrets=14;
-const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa"};
+const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
 const won=id=>Boolean(state?.wins[id]);
 const saveKey="ultimo-posto-v1";
@@ -312,8 +312,27 @@ function scene(title,text,...choices){return {title,text,choices};}
 function interact(){
   if(screen!=="game"||state.ending||state.prologue||$("campusSurprise").open)return;
   const spot=nearby();if(!spot)return;
+  const destination=doorDestination(spot);
+  if(destination){
+    keys.clear();controls.clear();
+    travel(...destination);save();renderScene();$("interact").focus();
+    return;
+  }
   state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);renderScene();
   if(!$("speakerPortrait").hidden)$("sceneTitle").focus();
+}
+const nativeDoors={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
+function doorDestination(spot){
+  if(gateLocked(spot.gate))return null;
+  if(spot.action==="portal"){
+    const destination=spot.target.split("#");
+    return Object.hasOwn(campus.zones,destination[0])?destination:null;
+  }
+  if(spot.action!=="native")return null;
+  if(spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
+  if(spot.kind!=="door"&&spot.kind!=="stairs")return null;
+  const destination=nativeDoors[spot.native];
+  return destination&&Object.hasOwn(campus.zones,destination)?[destination]:null;
 }
 function badge(reason){
   carry("Via libera");record(reason);
@@ -342,8 +361,7 @@ function storyObjective(){
 }
 function nativeScene(id){
   const t=state.traits;
-  const destinations={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
-  if(destinations[id])return scene(room(destinations[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(destinations[id])]);
+  if(nativeDoors[id])return scene(room(nativeDoors[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(nativeDoors[id])]);
   switch(id){
     case "trend":return scene("Lello e Bea, creator napoletani",
       "«Cinque mosse per il video. Sei nel cast dal momento in cui sei passato davanti alla telecamera.»",
@@ -375,6 +393,8 @@ function nativeScene(id){
     case "tutor-orientamento":
       return scene("Viola · Tutorato",has("Colloquio tutor")?"«Hai il piano del semestre. Aula Chiesa è al secondo piano.»":"«Tre anni sembrano tanti, finché non apri il calendario. Cominciamo dalla prima settimana?»",
         ...(!has("Colloquio tutor")?[["Prepara il piano di studio",()=>checkpoint("Colloquio tutor")]]:[]));
+    case "loft-cabinato":
+      return scene("LOFT · Sala arcade","Il cabinato è acceso. Scegli il gioco con la levetta, o con un clic.",["Pixel Mattoni",()=>openChallenge("mattoni")],["Salva i nastri",()=>openChallenge("nastri")]);
     case "loft-progetto":
       return scene("LOFT · Consegna del progetto",has("Progetto LOFT")?"«Progetto consegnato. La navetta ti aspetta alla piazzola del giardino.»":
         has("Lezione A200")&&has("Colloquio tutor")?"«Registra un minuto di vita a Romania per il tuo progetto di fine triennale.»":"«Prima passa dal tutorato e completa la lezione in Aula Chiesa.»",
@@ -453,7 +473,7 @@ function nativeScene(id){
     case "t04":return scene("Aula T04",has("Presa condivisa")?"Lo studente del giardino ti fa cenno. Ha tenuto una sedia e trovato una ciabatta.":"C’è una sedia occupata da una felpa. Nessun proprietario in vista. Sul banco accanto c’è un posto libero, lontano dalla presa.",
       reserve(has("Presa condivisa")?"T04, con corrente":"Studio in modalità risparmio",has("Presa condivisa")?"Una presa per due. Funziona meglio di certi lavori di gruppo.":"Il portatile segna 4%. Con carta e penna duri senz’altro più di lui."));
     case "ping":return scene("Terrazza ping pong","Si gioca a sette punti, con almeno due di vantaggio. Se vinci, il bar ti offre una limonata.",
-      ["Gioca a ping pong",()=>openChallenge("ping")]);
+      ["Gioca a ping pong",()=>openChallenge("ping")],["Allenati",()=>openChallenge("ping",true)]);
     case "lettura":return scene("Pergola di lettura",isFree()||won("bris")?
       "Mostri la carta fortunata al ragazzo che gestisce i tavoli. Ti indica il posto in fondo, lontano dal bar.":
       "I Nullafacenti hanno riservato questo tavolo al vincitore di Briscola. Li trovi al bar.",
@@ -470,7 +490,7 @@ function nativeScene(id){
     case "biliardo":return scene("Biliardini",won("foos")?
       "La prenotazione del bar apre le scale del primo piano. Il portiere chiede una rivincita.":
       "Vinci la partita e i baristi ti danno la prenotazione per salire al primo piano dell’edificio principale.",
-      ["Gioca a biliardino",()=>openChallenge("foos")]);
+      ["Gioca a biliardino",()=>openChallenge("foos")],["Allenati",()=>openChallenge("foos",true)]);
     case "mensa":return scene("Banco del pranzo",has("Vassoio")?"Ada ti indica i tavoli e il ritiro dei vassoi prima del chiostro.":"Sul bancone ci sono pasta al pomodoro, crocchette e frutta. Ada ti porge un vassoio.",
       ...(has("Vassoio")?[]:[
         ["Prendo la pasta al pomodoro.",()=>{carry("Vassoio");discover("mensa","La pasta portante");change("coraggio",5);}],
@@ -556,6 +576,10 @@ function paintSpeaker(now){
 function renderScene(){
   const scene=getScene();
   $("objective").textContent=(testMode?"Prova · ":"")+(state.ending?.traffic?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
+  const nextStep=isFree()?-1:storySteps.findIndex(([item])=>!has(item));
+  const chapter=nextStep<0?"":nextStep<4?"Romania":nextStep===4?"Parenzo":"Pola";
+  $("taskChapter").hidden=!chapter;
+  $("taskChapter").textContent=chapter?chapter+" · "+(nextStep+1)+"/"+storySteps.length:"";
   $("zone").textContent=tr(room(state.zone).name);
   updateCampusOverview();
   $("campusMap").replaceChildren();

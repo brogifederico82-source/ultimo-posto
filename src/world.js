@@ -402,6 +402,26 @@ function drawObject(c,o,now=0,editing=false){
   }
   c.restore();
 }
+// Campus perimeter and street alignment traced against the reference plan.
+function paintRomaniaEdges(c){
+  c.save();c.scale(16,16);
+  c.beginPath();c.rect(0,0,144,144);
+  c.moveTo(23,5);c.bezierCurveTo(46,11,60,17,70,28);
+  c.bezierCurveTo(81,41,88,56,86,70);
+  c.lineTo(83,87);c.lineTo(64,92);c.lineTo(9,78);
+  c.lineTo(7,45);c.bezierCurveTo(8,28,15,15,23,5);c.closePath();
+  c.fillStyle="#34464a45";c.fill("evenodd");
+  c.lineCap="round";c.lineJoin="round";
+  const street=(trace)=>{
+    c.beginPath();trace();
+    c.lineWidth=4.5;c.strokeStyle="#ad9c82";c.stroke();
+    c.lineWidth=3.65;c.strokeStyle="#535d66";c.stroke();
+    c.lineWidth=.07;c.strokeStyle="#f1d9a298";c.setLineDash([.55,.48]);c.stroke();c.setLineDash([]);
+  };
+  street(()=>{c.moveTo(2,78);c.bezierCurveTo(17,80,28,84,41,88);c.lineTo(79,98);c.lineTo(91,101);});
+  street(()=>{c.moveTo(22,3);c.bezierCurveTo(55,9,75,25,82,42);c.bezierCurveTo(91,56,92,66,89,79);});
+  c.restore();
+}
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
   const margin=2,left=Math.max(0,Math.floor(view.x/16)-margin),top=Math.max(0,Math.floor(view.y/16)-margin);
@@ -415,6 +435,8 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
     }
   }
+  if(visible.terreno&&id==="giardino"&&!editing&&z.width===144&&
+      z.objects.some(o=>o.uid==="entry-from-panama"&&o.x===72&&o.y===47))paintRomaniaEdges(c);
   // Connect the existing garden walks around the planted islands north of the bar.
   if(visible.terreno && id==="giardino" &&
       left<78 && right>11 && top<74 && bottom>13 &&
@@ -432,6 +454,10 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     c.moveTo(42,24);c.bezierCurveTo(50,24,58,30,63,34);
     c.bezierCurveTo(68,38,69,45,72,47);
     c.moveTo(72,47);c.bezierCurveTo(76,52,77,60,74,64);
+    c.moveTo(22,73);c.bezierCurveTo(25,68,28,65,36,64);
+    c.moveTo(37,66);c.bezierCurveTo(38,70,43,76,48,79);
+    c.moveTo(42,35);c.bezierCurveTo(43,40,52,44,59,54);
+    c.bezierCurveTo(66,57,71,59,78,60);
     c.lineCap="round";c.lineWidth=1.65;c.strokeStyle="#8c9470";c.stroke();
     c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }
