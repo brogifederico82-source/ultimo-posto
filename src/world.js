@@ -491,6 +491,17 @@ function drawObject(c,o,now=0,editing=false){
         c.fillText(({entrance:"↳",event:"!",goal:"★",sign:"·"})[o.kind]??"·",8,10);
     }
   }
+  const stairDirection=o.uid==="terra-primo"||/^(primo|secondo|terzo|quarto|quinto)-up$/.test(o.uid)?-1:
+    /^(secondo|terzo|quarto|quinto|loft)-down$/.test(o.uid)||o.uid==="primo-terra"?1:0;
+  if(stairDirection&&(o.kind==="door"||o.kind==="stairs")){
+    box("#182a41",2,1,12,14);
+    box("#7c98ac",2,1,12,1);
+    c.strokeStyle="#e6d8ac";c.lineWidth=1.3;c.lineCap="square";
+    c.beginPath();
+    c.moveTo(8,8-stairDirection*4);c.lineTo(8,8+stairDirection*4);
+    c.moveTo(5,8+stairDirection);c.lineTo(8,8+stairDirection*4);c.lineTo(11,8+stairDirection);
+    c.stroke();
+  }
   c.restore();
 }
 // Campus perimeter and street alignment traced against the reference plan.
