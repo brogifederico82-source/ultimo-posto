@@ -4,14 +4,30 @@
 </style>
 <main>
 <header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
-<section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1>Ultimo<br><em class="gold">posto</em></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions"><button id="start" class="primary">Storia</button><button id="free">Modalità libera</button><button id="resume" hidden>Nuovo protagonista</button><button id="edOpen">Editor</button></div><div class="actions" style="margin-top:12px"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
-<section id="creator" hidden><div class="grid">
-<section class="panel"><h2>Il ritratto</h2><div class="portrait-card"><canvas id="portrait" class="portrait" width="160" height="104" aria-label="Anteprima dell’avatar"></canvas><small id="ticket"></small></div><p class="actions"><button id="shuffle">Mescola il guardaroba</button></p><div id="fields" class="fields"></div></section>
-<section class="panel"><h2>Il carattere</h2><p class="hint">I tratti aprono opzioni diverse. Le scelte possono cambiarli durante la partita.</p><div id="traits" class="traits"></div><p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p><button id="play" class="primary">Entra a Viale Romania</button></section>
-</div></section>
-<section id="game" hidden><div class="frame"><canvas id="stage" width="320" height="192" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><section class="panel scene" aria-live="polite"><h3 id="sceneTitle"></h3><p id="playerLine" hidden></p><p id="sceneText"></p><div class="actions" id="choices"></div></section><div class="touch"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact">Interagisci</button></div><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1>Ultimo<br><em class="gold">posto</em></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
+<section id="creator" hidden>
+<div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
+<div class="grid creator-grid">
+<section class="panel creator-id"><h2>Badge studente</h2>
+<div class="portrait-card"><canvas id="portrait" class="portrait" width="240" height="144" aria-label="Anteprima dell’avatar"></canvas>
+<div class="badge-details"><strong id="ticket"></strong><span id="ticketNumber"></span></div></div>
+<div id="identityFields" class="fields"></div><p><button id="suggestName">Suggerisci un nome</button></p>
+</section>
+<div class="creator-settings">
+<section class="panel"><h2>Aspetto</h2><div id="fields" class="fields"></div></section>
+<section class="panel"><h2>Guardaroba</h2><div id="wardrobeFields" class="fields"></div><p><button id="shuffle">Mescola il guardaroba</button></p></section>
+<section class="panel"><h2>Carattere</h2><p class="hint">I tratti cambiano le risposte disponibili durante la storia.</p><div id="traits" class="traits"></div>
+<p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
+<button id="play" class="primary">Entra a Viale Romania</button></section>
+</div></div></section>
+<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><section class="panel scene" aria-live="polite"><canvas id="speakerPortrait" width="192" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><div class="touch"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact">Interagisci</button></div><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
+<details class="campus-reference"><summary>Confronta con la planimetria di Viale Romania</summary>
+<p>Riferimento reale per ingresso, Aula Chiesa, bar, edificio principale e Via Panama.</p>
+<img id="campusReference" alt="Planimetria di Viale Romania con ingresso, Aula Chiesa, The Dome e Via Panama">
+<p><a href="https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf" target="_blank" rel="noopener">Planimetria ECPR</a> · <a href="https://earth.google.com/web/@41.9245095,12.4939844,70a,520d,35y,0h,0t,0r" target="_blank" rel="noopener">Vista Google Earth</a></p>
+</details>
 <details><summary>Ambienti e attività</summary><ol id="campusMap" class="hint"></ol></details></details><details class="journal"><summary id="journalTitle">Diario di viaggio</summary><ul id="log"></ul></details></section>
 <dialog id="challenge" class="challenge" aria-labelledby="challengeTitle">
 <header><h2 id="challengeTitle"></h2><button id="challengeExit">Esci</button></header>
@@ -24,15 +40,27 @@
 <table><thead><tr><th>Carta, dalla più forte</th><th>Punti</th></tr></thead><tbody>
 <tr><td>Asso</td><td>11</td></tr><tr><td>Tre</td><td>10</td></tr><tr><td>Re</td><td>4</td></tr>
 <tr><td>Cavallo</td><td>3</td></tr><tr><td>Fante</td><td>2</td></tr><tr><td>7, 6, 5, 4, 2</td><td>0</td></tr>
-</tbody></table></details><p id="challengeScore" class="challenge-score"></p>
+</tbody></table></details>
+<details id="scopaLegend" class="bris-help" hidden><summary id="scopaHelpTitle">Come si gioca a Scopa</summary>
+<p id="scopaHelpCapture"></p>
+<p id="scopaHelpScore"></p>
+</details><p id="challengeScore" class="challenge-score"></p>
 <canvas id="challengeCourt" width="320" height="188" aria-label="Campo di gioco"></canvas>
 <div id="cardGame" hidden>
-<div class="cards-table"><div><span class="hint">Briscola</span><span id="trump" class="card-face"></span><span id="deckCount" class="hint"></span></div>
+<div id="brisTable" class="cards-table"><div><span class="hint">Briscola</span><span id="trump" class="card-face"></span><span id="deckCount" class="hint"></span></div>
 <div><span class="hint">Tu</span><span id="playedPlayer" class="card-face"></span></div>
-<div><span class="hint">Avversario</span><span id="playedRival" class="card-face"></span></div></div>
+<div><span class="hint">Avversario</span><span id="playedRival" class="card-face"></span><span id="rivalCardCount" class="hint"></span></div></div>
+<div id="scopaTable" class="scopa-table" hidden>
+<p id="scopaCount" class="hint"></p>
+<div id="scopaBoard" class="scopa-board"></div>
+<p id="scopaLast" class="hint"></p>
+<div id="scopaBreakdown" class="scopa-breakdown" hidden></div>
+<button id="scopaNext" class="primary" hidden>Prossima smazzata</button>
+<div id="scopaChoices" class="actions"></div>
+</div>
 <div id="cardHand" class="actions hand" aria-label="Le tue carte"></div>
 </div>
-<p id="challengeStatus" class="challenge-result" role="status"></p>
+<p id="challengeStatus" class="challenge-result" role="status" tabindex="-1"></p>
 <div class="actions challenge-controls">
 <button id="challengeLeft" aria-label="Sposta a sinistra">←</button><button id="challengeRight" aria-label="Sposta a destra">→</button>
 <button id="challengeShot">Tira</button><button id="challengeReplay" class="primary" hidden>Rivincita</button>
@@ -41,8 +69,8 @@
 <header class="editor-head"><div><h2>Editor del campus</h2><small id="edStatus" role="status">Mappa originale</small></div><div class="actions"><button id="edTest" class="primary">Prova il gioco</button><button id="edJson">Esporta JSON</button><button id="edImport">Importa JSON</button><button id="edHtml">Esporta HTML</button><input type="file" id="edFile" accept=".json,application/json" hidden></div></header>
 <div class="editor-bar">
 <label>Ambiente <select id="edZone"></select></label><button id="edNewZone">Nuovo ambiente</button>
-<label>Larghezza <input type="number" id="edWidth" min="8" max="120"></label>
-<label>Altezza <input type="number" id="edHeight" min="8" max="120"></label><button id="edResize">Ridimensiona</button>
+<label>Larghezza <input type="number" id="edWidth" min="8" max="144"></label>
+<label>Altezza <input type="number" id="edHeight" min="8" max="144"></label><button id="edResize">Ridimensiona</button>
 <label><input type="checkbox" id="edGrid" checked> Griglia</label>
 <label>Zoom <input type="range" id="edZoom" min="18" max="400" value="100"><output id="edZoomLabel">100%</output></label>
 <button id="edFit">Inquadra</button>
@@ -86,6 +114,12 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 </section>
 
 <footer>Satira studentesca · Pianta di gioco stilizzata · WASD o frecce, E per interagire.</footer>
+<details class="journal study-board" id="studyBoard">
+<summary>Materie e docenti · Scienze Politiche</summary>
+<p>Domande originali per il gioco. Le schede Luiss riportano il docente del relativo anno e canale. I personaggi del campus sono di finzione.</p>
+<div class="study-grid"><article><h3>Elementi di analisi matematica</h3><p>Come riconosci un massimo locale in un punto regolare?</p><details><summary>Mostra la risposta</summary><p>Controlla il passaggio della derivata da positiva a negativa. Una derivata nulla, da sola, non basta.</p></details></article><article><h3>Coding Lab</h3><p>Come conti quante volte compare ciascun valore in una lista?</p><details><summary>Mostra la risposta</summary><p>Scorri la lista e incrementa il contatore della voce corrispondente in una mappa chiave-valore.</p></details></article><article><h3>Filosofia politica</h3><p>Che cosa distingue legittimità e legalità?</p><details><summary>Mostra la risposta</summary><p>La legalità riguarda la conformità alle regole in vigore. La legittimità riguarda le ragioni per cui un potere può rivendicare obbedienza.</p></details></article><article><h3>Sociologia generale e politica</h3><p>Come distingueresti ribalta e retroscena alla radio del campus?</p><details><summary>Mostra la risposta</summary><p>La trasmissione è una situazione di ribalta. La preparazione a microfoni spenti è un possibile retroscena rispetto all’ascoltatore.</p></details></article><article><h3>Statistica</h3><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/358/a/l25psbase/2025/statistica" target="_blank" rel="noopener">Livia De Giovanni · A · 2025/26</a></li></ul><p>Nel campione 2, 3, 4, 5, 46 quale misura descrive meglio il centro se vuoi attenuare l’effetto dell’ultimo dato?</p><details><summary>Mostra la risposta</summary><p>La mediana è 4. La media è 12 e risente molto del valore 46.</p></details></article><article><h3>Istituzioni di diritto pubblico</h3><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/37/0/l25psbase/2026/istituzioni-di-diritto-pubblico" target="_blank" rel="noopener">Guido Meloni · Unico · 2026/27</a></li></ul><p>Qual è la differenza tra una Camera e il Parlamento in seduta comune?</p><details><summary>Mostra la risposta</summary><p>La Camera dei deputati e il Senato operano ordinariamente separati. La seduta comune riunisce i loro membri per le funzioni previste dalla Costituzione.</p></details></article><article><h3>Microeconomia</h3><p>Cosa isola la variazione compensata associata a un prezzo?</p><details><summary>Mostra la risposta</summary><p>L’effetto di sostituzione. Nella compensazione di Slutsky il reddito viene aggiustato per rendere ancora acquistabile il paniere iniziale.</p></details></article><article><h3>Storia contemporanea</h3><p>In che anno furono aperti i valichi del Muro di Berlino?</p><details><summary>Mostra la risposta</summary><p>Il 9 novembre 1989. La riunificazione tedesca avvenne l’anno successivo.</p></details></article><article><h3>Storia delle dottrine politiche</h3><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/264/a/l25psbase/2025/storia-delle-dottrine-politiche" target="_blank" rel="noopener">Sebastiano Maffettone · A · 2025/26</a></li><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/264/0/l25psbase/2026/storia-delle-dottrine-politiche" target="_blank" rel="noopener">Gaetano Pecora · Unico · 2026/27</a></li></ul><p>Che problema affronta il patto in Hobbes?</p><details><summary>Mostra la risposta</summary><p>Come uscire dall’insicurezza dello stato di natura mediante l’istituzione di un potere comune.</p></details></article><article><h3>Macroeconomia</h3><ul><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/672/a/l25psbase/2026/macroeconomia" target="_blank" rel="noopener">Gaetano Bloise · A · 2026/27</a></li><li><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/672/b/l25psbase/2026/macroeconomia" target="_blank" rel="noopener">Paolo Canofari · B · 2026/27</a></li></ul><p>Se i prezzi crescono meno rapidamente dell’anno scorso, si tratta necessariamente di deflazione?</p><details><summary>Mostra la risposta</summary><p>No. È disinflazione se l’inflazione rallenta pur restando positiva. La deflazione richiede una diminuzione del livello generale dei prezzi.</p></details></article></div>
+<p><a href="https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online" target="_blank" rel="noopener">Cattedre Online</a> · <a href="https://undergraduate.luiss.it/it/course/scienze-politiche/" target="_blank" rel="noopener">Piano di studi</a></p>
+</details>
 </main>
 <script id="edOriginal" type="application/json"><!-- BUILD_CAMPUS --></script>
 <script id="edEmbedded" type="application/json"></script>

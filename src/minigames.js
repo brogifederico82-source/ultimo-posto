@@ -5,11 +5,12 @@ court.tabIndex=0;
 const arcadeRules={
   arm:"Premi Spazio o Spingi nella fascia verde. Ogni passaggio concede un tentativo. Vince chi prende due round.",
   dance:"Segui le frecce prima che scada il tempo. Servono almeno quattro mosse su cinque.",
-  ping:"←/→ oppure A/D per muovere la racchetta. Mira con il bordo della racchetta. Premi Spazio o Schiaccia quando la pallina lampeggia. Vince chi fa 5 punti.",
-  foos:"Muovi le due stecche con ←/→ o A/D. La stecca arretrata para anche senza tirare. Premi Spazio o Tira mentre la palla lampeggia: colpisci a sinistra o a destra dell’omino per cambiare angolo. Vince chi segna 3 gol.",
+  ping:"Muovi la racchetta con ←/→ o A/D. Premi Spazio o il pulsante per servire. Durante lo scambio il bordo della racchetta cambia la direzione del tiro. Premi Schiaccia quando compare il mirino. Si gioca a 7 punti, con due di vantaggio.",
+  foos:"Muovi le stecche con ←/→ o A/D. La difesa para da sola. Premi Spazio o Tira quando si accende l’omino vicino alla palla. Tieni una direzione mentre tiri con il tempo giusto per usare la sponda. Vince chi segna 3 gol.",
   bris:"Scegli una carta con il mouse o con i tasti 1, 2 e 3. La briscola batte gli altri semi. Nel seme di apertura e in quello di briscola l’ordine è Asso, Tre, Re, Cavallo, Fante, 7, 6, 5, 4, 2. Vince chi supera 60 punti."
 };
 const prizes={
+  scopa:["Settebello del campus","Tessera del tavolo di Scopa aggiunta al diario."],
   arm:["Rivincita di Riccardo","Riccardo ti fa i complimenti e chiede la rivincita."],
   ping:["Gettone limonata","Hai ottenuto una limonata al bar."],
   dance:["Trend superato","Il video è pronto."],
@@ -130,17 +131,36 @@ function tickDance(now){
 for(const [i,button] of [...$("dancePad").querySelectorAll("button")].entries())button.onclick=()=>danceInput(i);
 function openChallenge(id){
   keys.clear();controls.clear();
-  const isCards=id==="bris",isDance=id==="dance",isArm=id==="arm";
+  const isScopa=id==="scopa",isCards=id==="bris"||isScopa,isDance=id==="dance",isArm=id==="arm";
   $("dancePad").hidden=!isDance;
   if(isDance)minigame={id,kind:"dance",index:0,score:0,result:null,hits:[],steps:Array.from({length:5},()=>Math.floor(Math.random()*4)),deadline:0};
   else if(isArm)minigame=startArm();
-  else minigame=isCards?startBriscola():startArcade(id);
+  else minigame=isScopa?startScopa():isCards?startBriscola():startArcade(id);
   $("challengeTitle").textContent=tr(challengeNames[id]);
-  $("challengeRules").textContent=tr(arcadeRules[id]);
+  $("challengeRules").textContent=isScopa?local(
+    "Gioca con mouse, tocco o tasti 1, 2, 3. Se puoi fare più prese, scegli quella che preferisci.",
+    "Play with mouse, touch, or keys 1, 2, 3. If there are several captures, choose the one you want."
+  ):tr(arcadeRules[id]);
   $("challengeReplay").hidden=true;
   $("cardGame").hidden=!isCards;
-  $("brisLegend").hidden=!isCards;
-  $("brisLegend").open=isCards;refreshLanguage();
+  $("brisLegend").hidden=id!=="bris";
+  $("brisLegend").open=id==="bris";
+  $("scopaLegend").hidden=!isScopa;
+  $("scopaLegend").open=isScopa;
+  $("brisTable").hidden=id!=="bris";
+  $("scopaTable").hidden=!isScopa;
+  if(isScopa){
+    $("scopaHelpTitle").textContent=local("Come si gioca a Scopa","How to play Scopa");
+    $("scopaHelpCapture").textContent=local(
+      "Prendi una carta dello stesso valore, oppure carte che sommate danno quel valore. Asso vale 1, fante 8, cavallo 9, re 10. Una carta uguale ha la precedenza sulla somma. Se non puoi prendere, lasci la carta sul tavolo.",
+      "Capture a card of equal value, or cards that add to that value. Ace is 1, jack 8, knight 9, and king 10. An equal card takes precedence. If you cannot capture, leave your card on the table."
+    );
+    $("scopaHelpScore").textContent=local(
+      "Svuotare il tavolo vale una scopa, salvo all’ultima giocata. Più carte, più denari, settebello e primiera valgono un punto ciascuno. Vince chi arriva ad almeno 11 con più punti dell’avversario.",
+      "Clearing the table scores a sweep, except on the final play. Most cards, most coins, the seven of coins, and the best prime each score one. Reach at least 11 and outscore your opponent to win."
+    );
+  }
+  refreshLanguage();
   court.hidden=isCards||isDance;
   $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm;
   $("challengeShot").hidden=isCards||isDance;
@@ -148,6 +168,7 @@ function openChallenge(id){
   $("challengeStatus").textContent="";
   if(!$("challenge").open)$("challenge").showModal();
   if(isDance){renderDance();$("dancePad").querySelector("button").focus();}
+  else if(isScopa)renderScopa(true);
   else if(isCards)renderBriscola(true);
   else{if(isArm)paintArm(minigame,performance.now());else paintCourt(minigame);court.focus();}
 }
@@ -200,18 +221,31 @@ function startArcade(id){
   return g;
 }
 function serve(g,towardPlayer){
-  g.ball={x:160,y:94,vx:[39,-32,24,-45][(g.you+g.them)%4],vy:(towardPlayer?1:-1)*(g.id==="ping"?108:100)};
+  if(g.id==="ping"){
+    g.pingPlayerServe=(g.you+g.them<12?Math.floor((g.you+g.them)/2):g.you+g.them)%2===0;
+    g.ball={x:g.pingPlayerServe?g.player:g.rival,y:g.pingPlayerServe?bounds.player-5:bounds.rival+5,vx:0,vy:0};
+    g.wait=g.pingPlayerServe?0:.76;g.rally=0;g.kick=0;g.impact=0;g.powerHit=false;
+    return;
+  }
+  g.ball={x:160,y:94,vx:[39,-32,24,-45][(g.you+g.them)%4],vy:towardPlayer?100:-100};
   g.wait=.72;g.rally=0;g.kick=0;g.guardX=160;g.rivalGuard=160;g.impact=0;g.powerHit=false;
 }
 function arcadeAction(){
   const g=minigame;
+  if(g?.id==="ping"&&!g.result&&g.pingPlayerServe){
+    const aim=clamp(160+(g.player-160)*1.15,48,272);
+    Object.assign(g.ball,{x:g.player,y:bounds.player-5,vx:(aim-g.player)*130/109,vy:-130});
+    g.pingPlayerServe=false;
+    chime([62,69]);
+    return;
+  }
   if(g?.kind!=="arcade"||g.result||g.wait>0||g.kick!==0)return;
   g.kick=g.id==="ping"?.15:.25;
 }
 function arcadePoint(g,player){
   if(player)g.you++;else g.them++;
-  const target=g.id==="ping"?5:3;
-  if(g.you===target||g.them===target){
+  const matchOver=g.id==="ping"?Math.max(g.you,g.them)>=7&&Math.abs(g.you-g.them)>=2:g.you===3||g.them===3;
+  if(matchOver){
     g.ball.vx=0;g.ball.vy=0;
     endChallenge(g,player?"win":"loss");
   }else{
@@ -227,16 +261,14 @@ function tickArcade(now){
     const left=keys.has("a")||keys.has("arrowleft")||controls.has("left");
     const right=keys.has("d")||keys.has("arrowright")||controls.has("right");
     g.player=clamp(g.player+(Number(right)-Number(left))*227*dt,54,266);
-    if(g.wait>0)g.wait=Math.max(0,g.wait-dt);
+    if(g.id==="ping")tickPing(g,dt);
+    else if(g.wait>0)g.wait=Math.max(0,g.wait-dt);
     else if(g.id==="foos"){
       let remaining=dt;
       while(remaining>0&&g.wait===0&&!g.result){
         const step=Math.min(remaining,1/120);
         stepFoos(g,step);remaining-=step;
       }
-    }else{
-      if(g.kick>0)g.kick=Math.max(0,g.kick-dt);
-      stepBall(g,dt);
     }
   }
   paintCourt(g);
@@ -249,6 +281,11 @@ function rodOffset(ballX,rodX){
 }
 const foosRows={attack:128,defense:154,rivalAttack:60,rivalDefense:34};
 const goalHalf=49;
+function foosDirection(){
+  const left=keys.has("a")||keys.has("arrowleft")||controls.has("left");
+  const right=keys.has("d")||keys.has("arrowright")||controls.has("right");
+  return Number(right)-Number(left);
+}
 function reflectCourt(x){
   const width=bounds.right-bounds.left;
   const folded=((x-bounds.left)%(width*2)+width*2)%(width*2);
@@ -268,8 +305,10 @@ function stepFoos(g,dt){
   const attacking=b.vy<0&&b.y>foosRows.rivalAttack;
   const defending=b.vy<0&&b.y>foosRows.rivalDefense;
   const slip=[-14,8,19,-8,4][(g.rally+g.you+g.them)%5];
-  const attackAim=attacking?predicted(foosRows.rivalAttack)+slip:160;
-  const defenseAim=defending?predicted(foosRows.rivalDefense)-slip:160;
+  // Leave a short reaction window after possession changes, even on a bank shot.
+  const tracking=g.impact<.09;
+  const attackAim=attacking?(tracking?predicted(foosRows.rivalAttack)+slip:g.rival):160;
+  const defenseAim=defending?(tracking?predicted(foosRows.rivalDefense)-slip:g.rivalGuard):160;
   g.rival=approach(g.rival,clamp(attackAim,63,257),102*dt);
   g.rivalGuard=approach(g.rivalGuard,clamp(defenseAim,105,215),64*dt);
   if(g.kick>0){
@@ -285,10 +324,13 @@ function stepFoos(g,dt){
       const perfect=g.kick>=.055&&g.kick<=.15;
       const power=g.kick>0?(perfect?265:196):145;
       const aim=clamp(160+offset*7+(g.player-160)*.13,114,206);
+      const direction=perfect&&!defender?foosDirection():0;
+      const wall=direction<0?bounds.left:bounds.right;
+      const targetX=direction?2*wall-aim:aim;
       b.y=row-.4;b.vy=-power;
-      b.vx=(aim-b.x)*power/(row-bounds.top);
+      b.vx=(targetX-b.x)*power/(b.y-bounds.top);
       if(g.kick>0)g.kick=-.17;
-      g.rally++;g.impact=perfect?.28:.13;g.powerHit=perfect;chime(perfect?[61,73]:[61]);return;
+      g.rally++;g.impact=perfect?.28:.13;g.powerHit=perfect;g.bankHit=Boolean(direction);chime(perfect?[61,73]:[61]);return;
     }
   }else{
     for(const [row,rod,radius] of [[foosRows.rivalAttack,g.rival,6],[foosRows.rivalDefense,g.rivalGuard,7]]){
@@ -297,7 +339,7 @@ function stepFoos(g,dt){
       const aim=[122,200,145,178,130][g.rally%5];
       b.y=row+.4;b.vy=175+Math.min(g.rally*5,34);
       b.vx=(aim-b.x)*b.vy/(bounds.bottom-row);
-      g.rally++;g.impact=.13;g.powerHit=false;chime([53]);return;
+      g.rally++;g.impact=.13;g.powerHit=false;g.bankHit=false;chime([53]);return;
     }
   }
   if(b.y<bounds.top||b.y>bounds.bottom){
@@ -307,38 +349,70 @@ function stepFoos(g,dt){
     b.vx=clamp(b.vx+(160-b.x)*.20,-170,170);
   }
 }
-function stepBall(g,dt){
-  const b=g.ball,previousY=b.y;
+function tickPing(g,dt){
+  if(g.pingPlayerServe){g.ball.x=g.player;return;}
+  if(g.wait>0){
+    g.wait=Math.max(0,g.wait-dt);
+    if(g.wait===0){
+      const aim=[110,204,155,224,94][(g.you+g.them)%5];
+      g.ball.vy=123;g.ball.vx=(aim-g.ball.x)*123/(bounds.player-g.ball.y);
+      chime([55,60]);
+    }
+    return;
+  }
+  while(dt>0&&!g.wait&&!g.result&&!g.pingPlayerServe){
+    const step=Math.min(dt,1/120);
+    stepPingBall(g,step);
+    dt-=step;
+  }
+}
+function pingIntercept(b,row){
+  return reflectCourt(b.x+b.vx*((row-b.y)/b.vy));
+}
+function stepPingBall(g,dt){
+  const b=g.ball,previousY=b.y,previousX=b.x;
   g.impact=Math.max(0,g.impact-dt);
-  const target=b.vy<0?b.x+[19,-21,3,-11,16][g.rally%5]:160;
-  g.rival=approach(g.rival,clamp(target,70,250),125*dt);
+  g.kick=Math.max(0,g.kick-dt);
+  const rivalCanRead=b.vy<0&&b.y<108&&b.y>bounds.rival;
+  const error=[-10,12,-17,8,16][(g.rally+g.you+g.them)%5];
+  const target=rivalCanRead?pingIntercept(b,bounds.rival)+error:160;
+  g.rival=approach(g.rival,clamp(target,56,264),(rivalCanRead?140:72)*dt);
   b.x+=b.vx*dt;b.y+=b.vy*dt;
   if(b.x<bounds.left||b.x>bounds.right){b.x=reflectCourt(b.x);b.vx*=-1;}
-  if(b.vy>0&&previousY<bounds.player&&b.y>=bounds.player&&Math.abs(b.x-g.player)<=23){
+  const row=b.vy>0?bounds.player:bounds.rival;
+  const crossed=b.vy>0?previousY<row&&b.y>=row:previousY>row&&b.y<=row;
+  const hitX=crossed?previousX+(b.x-previousX)*(row-previousY)/(b.y-previousY):b.x;
+  if(crossed&&b.vy>0&&Math.abs(hitX-g.player)<=23){
     const smash=g.kick>0;
-    b.vx=(b.x-g.player)*(smash?8:6);b.vy=-Math.min(smash?251:195,b.vy+(smash?76:9));
-    g.kick=0;g.powerHit=smash;g.impact=smash?.34:0;
+    const aim=clamp(hitX+(hitX-g.player)*(smash?6.5:4.5),46,274);
+    b.x=hitX;b.y=row-.1;b.vy=-Math.min(smash?263:195,b.vy+(smash?76:10));
+    b.vx=(aim-hitX)*-b.vy/(bounds.player-bounds.rival);
+    g.kick=0;g.powerHit=smash;g.impact=smash?.34:.12;
     g.rally++;chime(smash?[66,78]:[66]);
-  }
-  if(b.vy<0&&previousY>bounds.rival&&b.y<=bounds.rival&&Math.abs(b.x-g.rival)<=18){
-    const aim=[116,204,150,187,130][g.rally%5];
-    b.vy=Math.min(195,-b.vy+7);b.vx=(aim-b.x)*b.vy/(bounds.player-bounds.rival);
+  }else if(crossed&&b.vy<0&&Math.abs(hitX-g.rival)<=18){
+    const aim=clamp(160+(g.player<160?1:-1)*(43+g.rally%4*11),53,267);
+    b.x=hitX;b.y=row+.1;b.vy=Math.min(200,-b.vy+9);
+    b.vx=(aim-hitX)*b.vy/(bounds.player-bounds.rival);
+    g.powerHit=false;
     g.rally++;chime([54]);
   }
   if(b.y<bounds.top||b.y>bounds.bottom)arcadePoint(g,b.y<bounds.top);
 }
 function foosReady(g){
   const b=g.ball;
-  return b.vy>0&&g.wait===0&&g.kick===0&&
-    [foosRows.attack,foosRows.defense].some(row=>{
-      const time=(row-b.y)/b.vy;
-      const rod=row===foosRows.attack?g.player:g.guardX;
-      return time>=0&&time<.19&&Math.abs(rodOffset(reflectCourt(b.x+b.vx*time),rod))<=12;
-    });
+  if(b.vy<=0||g.wait!==0||g.kick!==0)return null;
+  for(const [row,rod,radius] of [[foosRows.attack,g.player,12],[foosRows.defense,g.guardX,10]]){
+    const time=(row-b.y)/b.vy;
+    if(time<.10||time>.18)continue;
+    const x=reflectCourt(b.x+b.vx*time);
+    const offset=rodOffset(x,rod);
+    if(Math.abs(offset)<=radius)return {x:x-offset,row};
+  }
+  return null;
 }
 function pingReady(g){
   const b=g.ball,time=(bounds.player-b.y)/b.vy;
-  return b.vy>0&&g.wait===0&&time>=0&&time<.15&&Math.abs(reflectCourt(b.x+b.vx*time)-g.player)<=23;
+  return !g.result&&b.vy>0&&g.wait===0&&time>=0&&time<=.15&&Math.abs(pingIntercept(b,bounds.player)-g.player)<=23;
 }
 function paintCourt(g){
   const c=courtInk,ping=g.id==="ping";
@@ -353,6 +427,10 @@ function paintCourt(g){
     for(let x=35;x<285;x+=5)rect(c,"#e8ddab",x,93,2,2);
     rect(c,"#d67561",g.rival-16,bounds.rival-5,32,5);
     rect(c,"#e7b567",g.player-21,bounds.player,42,5);
+    if(g.ball.vy>0&&g.ball.y>94){
+      const landing=pingIntercept(g.ball,bounds.player);
+      rect(c,pingReady(g)?"#ffd782":"#c9e4d18f",landing-3,bounds.player+8,7,2);
+    }
   }else{
     for(const y of [9,174]){
       rect(c,"#172626",160-goalHalf,y,goalHalf*2,5);
@@ -373,6 +451,10 @@ function paintCourt(g){
     rect(c,ready?"#ffd364":"#fff1bc88",g.ball.x-4,g.ball.y-4,8,1);
     rect(c,ready?"#ffd364":"#fff1bc88",g.ball.x-4,g.ball.y+4,8,1);
   }
+  if(ready){
+    rect(c,"#ffd364",ready.x-7,ready.row-10,14,1);
+    rect(c,"#ffd364",ready.x-7,ready.row+7,14,1);
+  }
   if(ping&&pingReady(g))rect(c,"#efba62",g.ball.x-4,g.ball.y-4,8,8);
   if(ping&&g.powerHit&&g.impact>0){
     rect(c,"#b4d7ce99",g.ball.x-1,g.ball.y+3,3,6);
@@ -383,12 +465,16 @@ function paintCourt(g){
   $("challengeScore").textContent=tr("Tu")+" "+g.you+" · "+g.them+" "+tr("Avversario");
   if(!g.result){
     let prompt=g.wait>0?"Servizio…":"Rimanda la pallina.";
-    if(ping&&g.wait===0){
-      if(g.impact>0)prompt="Schiacciata!";
+    if(ping){
+      $("challengeShot").textContent=g.pingPlayerServe?local("Servi","Serve"):local("Schiaccia","Smash");
+      if(g.pingPlayerServe)prompt=local("Servizio tuo · Spazio o Servi","Your serve · Space or Serve");
+      else if(g.wait>0)prompt=local("Serve l’avversario","Opponent serves");
+      else if(g.impact>0&&g.powerHit)prompt=local("Schiacciata!","Smash!");
       else if(pingReady(g))prompt=local("Ora · Spazio o Schiaccia","Now · Space or Smash");
+      else prompt=local("Segui la tacca sotto la racchetta","Follow the mark below the paddle");
     }
     if(!ping&&g.wait===0){
-      prompt=g.impact>0?(g.powerHit?"Timing perfetto!":"Palla colpita!"):g.kick>0?"Tiro!":ready?"Ora · Spazio o Tira":"Intercetta la palla con una delle due stecche.";
+      prompt=g.impact>0?(g.bankHit?local("Tiro di sponda!","Bank shot!"):g.powerHit?"Timing perfetto!":"Palla colpita!"):g.kick>0?"Tiro!":ready?"Ora · Spazio o Tira":"Intercetta la palla con una delle due stecche.";
     }
     if($("challengeStatus").textContent!==tr(prompt))$("challengeStatus").textContent=tr(prompt);
   }
@@ -399,12 +485,20 @@ const ranks=[
   ["Asso",11],["Tre",10],["Re",4],["Cavallo",3],["Fante",2],
   ["Sette",0],["Sei",0],["Cinque",0],["Quattro",0],["Due",0]
 ];
-function startBriscola(){
-  const deck=suits.flatMap(suit=>ranks.map(([name,points],order)=>({suit,name,points,order})));
+const scopaValues=[1,3,10,9,8,7,6,5,4,2];
+const suitMarks={Denari:"●",Coppe:"♥",Spade:"♠",Bastoni:"♣"};
+function shuffleCards(deck){
   for(let i=deck.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [deck[i],deck[j]]=[deck[j],deck[i]];
   }
+  return deck;
+}
+function makeCardDeck(){
+  return shuffleCards(suits.flatMap(suit=>ranks.map(([name,points],order)=>({suit,name,points,order,value:scopaValues[order]}))));
+}
+function startBriscola(){
+  const deck=makeCardDeck();
   const hands=[deck.splice(0,3),deck.splice(0,3)];
   return {id:"bris",kind:"cards",deck,hands,trump:deck.at(-1),table:[null,null],score:[0,0],
     leader:0,turn:0,tricks:0,phase:"playing",result:null,note:"Tocca a te."};
@@ -416,6 +510,10 @@ function cardName(card){
   return card?tr(card.name)+local(" di "," of ")+tr(card.suit):"—";
 }
 function playCard(g,side,index){
+  if(g?.id==="scopa"){
+    if(side===0)chooseScopaCard(g,index);
+    return;
+  }
   if(g!==minigame||g.phase!=="playing"||g.turn!==side||!g.hands[side][index])return;
   g.table[side]=g.hands[side].splice(index,1)[0];
   if(!g.table[1-side]){
@@ -452,10 +550,11 @@ function playCard(g,side,index){
 function rivalCard(g){
   if(g!==minigame)return;
   const hand=g.hands[1],lead=g.table[0],trump=g.trump.suit;
-  const cost=card=>card.points*3+(card.suit===trump?21:0)+(9-card.order);
+  const cost=card=>card.points*3+(card.suit===trump?24:0)+(9-card.order);
   const sorted=[...hand].sort((a,b)=>cost(a)-cost(b));
   const winning=lead&&sorted.find(card=>takesTrick(lead,card,trump));
-  const chosen=winning&&(lead.points>=2||winning.suit===lead.suit||!g.deck.length)?winning:sorted[0];
+  const losing=lead&&sorted.find(card=>!takesTrick(lead,card,trump));
+  const chosen=winning&&(lead.points>=4||winning.suit!==trump||!g.deck.length||!losing)?winning:losing||sorted[0];
   playCard(g,1,hand.indexOf(chosen));
 }
 function renderBriscola(focus=false){
@@ -465,6 +564,7 @@ function renderBriscola(focus=false){
   $("deckCount").textContent=g.deck.length+local(" da pescare · Mano "," left · Trick ")+Math.min(g.tricks+(g.phase==="trick"?0:1),20)+"/20";
   $("playedPlayer").textContent=cardName(g.table[0]);
   $("playedRival").textContent=cardName(g.table[1]);
+  $("rivalCardCount").textContent=local("Carte in mano: ","Cards in hand: ")+g.hands[1].length;
   $("challengeStatus").textContent=tr(g.note.split(" · ")[0])+(g.note.includes(" · ")?" · "+local(g.note.split(" · ")[1],g.note.split(" · ")[1].replace(/punt[oi]/,"pt")):"");
   const hand=$("cardHand");
   hand.replaceChildren();
@@ -472,8 +572,9 @@ function renderBriscola(focus=false){
     const button=document.createElement("button");
     const suit=document.createElement("span");
     button.textContent=(index+1)+". "+tr(card.name);
-    suit.textContent=tr(card.suit)+" · "+card.points+" pt";
+    suit.textContent=suitMarks[card.suit]+" "+tr(card.suit)+" · "+card.points+" pt";
     suit.className="card-suit";
+    button.dataset.suit=card.suit;
     button.classList.toggle("trump-card",card.suit===g.trump.suit);
     button.append(suit);
     button.disabled=g.turn!==0||g.phase!=="playing";
@@ -481,4 +582,169 @@ function renderBriscola(focus=false){
     hand.append(button);
   }
   if(focus)hand.querySelector("button:not(:disabled)")?.focus();
+}
+
+function startScopa(score=[0,0],leader=0,round=1){
+  const deck=makeCardDeck();
+  const board=deck.splice(0,4);
+  // Redeal three or four kings, which prevent a normal opening.
+  while(board.filter(card=>card.value===10).length>=3){
+    deck.push(...board.splice(0));
+    shuffleCards(deck);
+    board.push(...deck.splice(0,4));
+  }
+  return {id:"scopa",kind:"cards",deck,board,hands:[deck.splice(0,3),deck.splice(0,3)],
+    taken:[[],[]],sweeps:[0,0],score,leader,round,turn:leader,lastCapture:1-leader,
+    selected:-1,options:[],result:null,last:null,breakdown:null};
+}
+function scopaCaptures(board,value){
+  const matches=board.flatMap((card,i)=>card.value===value?[[i]]:[]);
+  if(matches.length)return matches;
+  const options=[];
+  function add(from,remaining,indices){
+    if(remaining===0){options.push(indices);return;}
+    for(let i=from;i<board.length;i++){
+      const difference=remaining-board[i].value;
+      if(difference>=0)add(i+1,difference,[...indices,i]);
+    }
+  }
+  add(0,value,[]);
+  return options;
+}
+function chooseScopaCard(g,index){
+  if(g!==minigame||g.result||g.breakdown||g.turn!==0||!g.hands[0][index])return;
+  const options=scopaCaptures(g.board,g.hands[0][index].value);
+  if(options.length<=1){playScopa(g,0,index,options[0]??[]);return;}
+  g.selected=index;g.options=options;renderScopa(false,true);
+}
+function playScopa(g,side,index,capture){
+  if(g!==minigame||g.result||g.breakdown||g.turn!==side||!g.hands[side][index])return;
+  const [card]=g.hands[side].splice(index,1);
+  g.selected=-1;g.options=[];
+  const captured=capture.map(i=>g.board[i]);
+  const lastPlay=!g.deck.length&&g.hands.every(hand=>!hand.length);
+  let sweep=false;
+  if(captured.length){
+    g.taken[side].push(card,...captured);
+    const indices=new Set(capture);
+    g.board=g.board.filter((_,i)=>!indices.has(i));
+    g.lastCapture=side;
+    sweep=!g.board.length&&!lastPlay;
+    if(sweep){g.sweeps[side]++;chime([65,69,72]);}
+  }else g.board.push(card);
+  g.last={side,card,captured,sweep};
+  if(lastPlay){finishScopaRound(g);return;}
+  if(g.hands.every(hand=>!hand.length)){
+    g.hands=[g.deck.splice(0,3),g.deck.splice(0,3)];
+  }
+  g.turn=1-side;
+  renderScopa(g.turn===0);
+  if(g.turn===1)g.timer=setTimeout(()=>rivalScopa(g),540);
+}
+function rivalScopa(g){
+  if(g!==minigame||g.result||g.breakdown||g.turn!==1)return;
+  const actions=g.hands[1].flatMap((card,index)=>{
+    const options=scopaCaptures(g.board,card.value);
+    return (options.length?options:[[]]).map(capture=>{
+      const cards=capture.map(i=>g.board[i]);
+      const quality=cards.length?cards.length*2+(cards.length===g.board.length?8:0)+
+        [card,...cards].reduce((sum,item)=>sum+(item.suit==="Denari"?1:0)+(item.value===7?2:0)+
+          (item.value===7&&item.suit==="Denari"?7:0),0):
+        -card.value*.15-(card.suit==="Denari"?1:0)-(card.value===7?2:0);
+      return {index,capture,quality};
+    });
+  });
+  actions.sort((a,b)=>b.quality-a.quality);
+  const move=actions[0];
+  if(move)playScopa(g,1,move.index,move.capture);
+}
+function scopaPrimiera(cards){
+  const strengths=[0,16,12,13,14,15,18,21,10,10,10];
+  const maxima=suits.map(suit=>Math.max(0,...cards.filter(card=>card.suit===suit).map(card=>strengths[card.value])));
+  return maxima.every(Boolean)?maxima.reduce((a,b)=>a+b,0):0;
+}
+function finishScopaRound(g){
+  g.taken[g.lastCapture].push(...g.board.splice(0));
+  const totals=g.taken.map(cards=>[cards.length,cards.filter(card=>card.suit==="Denari").length,
+    Number(cards.some(card=>card.suit==="Denari"&&card.value===7)),scopaPrimiera(cards)]);
+  const calculated=g.sweeps.slice();
+  for(let i=0;i<4;i++){
+    if(totals[0][i]>totals[1][i])calculated[0]++;
+    if(totals[1][i]>totals[0][i])calculated[1]++;
+  }
+  g.breakdown={totals,calculated};
+  g.score=g.score.map((score,i)=>score+calculated[i]);
+  renderScopa();
+  if(Math.max(...g.score)>=11&&g.score[0]!==g.score[1])endChallenge(g,g.score[0]>g.score[1]?"win":"loss");
+  else $("scopaNext").focus();
+}
+function scopaCardButton(card,label){
+  const button=document.createElement("button");
+  const suit=document.createElement("span");
+  button.textContent=label;
+  suit.textContent=suitMarks[card.suit]+" "+tr(card.suit);
+  suit.className="card-suit";
+  button.dataset.suit=card.suit;
+  button.append(suit);
+  return button;
+}
+function renderScopa(focusHand=false,focusCapture=false){
+  const g=minigame;
+  $("challengeScore").textContent=local("Tu ","You ")+g.score[0]+" · "+g.score[1]+" "+tr("Avversario")+" · "+local("a 11 punti","to 11 points");
+  $("scopaCount").textContent=local("Smazzata ","Deal ")+g.round+" · "+local("Mazzo: ","Deck: ")+g.deck.length+
+    " · "+local("Avversario: ","Opponent: ")+g.hands[1].length+local(" carte"," cards");
+  const layout=$("scopaBoard");layout.replaceChildren();
+  for(const card of g.board){
+    const tile=document.createElement("span");
+    tile.className="scopa-face";tile.dataset.suit=card.suit;
+    tile.textContent=suitMarks[card.suit]+" "+cardName(card);
+    layout.append(tile);
+  }
+  if(!g.board.length)layout.textContent=local("Tavolo vuoto","Empty table");
+  $("scopaLast").textContent=g.last?
+    (g.last.side===0?local("Tu: ","You: "):local("Avversario: ","Opponent: "))+cardName(g.last.card)+
+    (g.last.captured.length?" → "+g.last.captured.map(cardName).join(", "):local(" resta sul tavolo"," stays on the table"))+
+    (g.last.sweep?local(" · Scopa!"," · Sweep!"):""):"";
+  const details=$("scopaBreakdown");details.hidden=!g.breakdown;details.replaceChildren();
+  if(g.breakdown){
+    const header=document.createElement("strong");
+    header.textContent=local("Punti della smazzata","Deal points")+" · "+g.breakdown.calculated.join("–");details.append(header);
+    const names=[local("Carte","Cards"),local("Denari","Coins"),"Settebello",local("Primiera","Prime")];
+    for(const [index,name] of names.entries()){
+      const line=document.createElement("span");
+      line.textContent=name+" · "+g.breakdown.totals.map(side=>side[index]).join("–");details.append(line);
+    }
+    const sweeps=document.createElement("span");sweeps.textContent=local("Scope","Sweeps")+" · "+g.sweeps.join("–");details.append(sweeps);
+  }
+  $("scopaNext").hidden=!g.breakdown||Math.max(...g.score)>=11&&g.score[0]!==g.score[1];
+  $("scopaNext").textContent=local("Prossima smazzata","Next deal");
+  $("scopaNext").onclick=()=>{
+    if(minigame!==g||!g.breakdown||g.result)return;
+    minigame=startScopa(g.score,1-g.leader,g.round+1);renderScopa(minigame.turn===0);
+    if(minigame.turn===1){
+      const next=minigame;
+      next.timer=setTimeout(()=>rivalScopa(next),540);
+      $("challengeStatus").focus();
+    }
+  };
+  const captures=$("scopaChoices");captures.replaceChildren();
+  for(const option of g.options){
+    const button=document.createElement("button");
+    button.textContent=option.map(index=>cardName(g.board[index])).join(" + ");
+    button.onclick=()=>playScopa(g,0,g.selected,option);
+    captures.append(button);
+  }
+  const hand=$("cardHand");hand.replaceChildren();
+  for(const [index,card] of g.hands[0].entries()){
+    const button=scopaCardButton(card,(index+1)+". "+tr(card.name));
+    button.disabled=g.turn!==0||Boolean(g.breakdown);
+    button.setAttribute("aria-pressed",String(g.selected===index));
+    button.onclick=()=>chooseScopaCard(g,index);
+    hand.append(button);
+  }
+  $("challengeStatus").textContent=g.breakdown?local("Smazzata conclusa.","Deal complete."):
+    g.options.length?local("Scegli quali carte prendere.","Choose which cards to capture."):
+      tr(g.turn===0?"Tocca a te.":"L’avversario sceglie…");
+  if(focusCapture)captures.querySelector("button")?.focus();
+  else if(focusHand)hand.querySelector("button:not(:disabled)")?.focus();
 }

@@ -11,6 +11,16 @@ dialog.challenge::backdrop{background:#0c1316dd}
 .cards-table div{flex:1;min-width:105px}.cards-table span{display:block}.card-face{font-family:Georgia,serif;color:#fff0cc;font-weight:bold;font-size:18px}
 .hand button{background:#f1deb4;color:#293630;border:2px solid #a8804b;min-width:95px;display:grid;gap:3px;text-align:left}
 .hand button:disabled{opacity:.58;cursor:default}.card-suit{font:12px monospace}.trump-card{box-shadow:inset 0 -4px #b15d44}
+.hand button[data-suit="Denari"] .card-suit,.scopa-face[data-suit="Denari"]{color:#775016}
+.hand button[data-suit="Coppe"] .card-suit,.scopa-face[data-suit="Coppe"]{color:#8b2839}
+.hand button[data-suit="Spade"] .card-suit,.scopa-face[data-suit="Spade"]{color:#263753}
+.hand button[data-suit="Bastoni"] .card-suit,.scopa-face[data-suit="Bastoni"]{color:#30482b}
+.hand button[aria-pressed="true"]{border-color:#9e392e;box-shadow:inset 0 -4px #9e392e}
+.scopa-table{padding:12px;margin:10px 0;background:#25453c;border:1px solid #667987}
+.scopa-board{display:flex;flex-wrap:wrap;gap:6px;min-height:2em;align-items:center}
+.scopa-face{display:inline-block;padding:4px 7px;background:#f1deb4;border:1px solid #b89155;border-radius:4px;font-size:.82rem;font-weight:700}
+.scopa-breakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding:8px 0;font-size:.86rem}
+.scopa-breakdown strong{grid-column:1/-1}
 body:has(#editor:not([hidden])) main{max-width:1700px}
 .map-editor{margin-top:16px}.map-editor h2{font-size:29px}
 .editor-head,.editor-bar,.editor-layers{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
@@ -155,3 +165,53 @@ button.primary:hover:not(:disabled) { background: #ffdbab; }
   .hero button { padding: 9px 11px; }
   .frame { border-radius: 8px; }
 }
+
+.home-tools,.home-language{margin-top:12px}
+.home-tools button,.home-language button{font-size:.875rem}
+.home-language button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+@media(max-width:540px){
+  .hero-copy{background:linear-gradient(0deg,#101717f5,#101717d9 62%,#10171765)}
+  .home-actions button{flex:1 1 100%}
+}
+
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .15s,border-color .15s}
+.scene{display:flow-root;background:#192736}
+.scene h3{font-family:monospace;color:var(--gold)}
+#sceneText{color:#fff;min-height:2.8em;line-height:1.5}
+#speakerPortrait{float:right;width:min(35%,192px);height:auto;margin:0 0 12px 16px;border:1px solid var(--line);border-radius:8px}
+#skipCaption{font-size:.85rem;margin-bottom:12px}
+.scene .actions{clear:both}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+
+#speakerPortrait{float:none;display:block;width:min(100%,640px);margin:0 auto 12px}
+
+.game-conversation .frame,.game-conversation .touch{display:none}
+.game-conversation .scene{max-width:780px;margin:0 auto;padding:clamp(14px,3vw,26px)}
+.game-conversation #speakerPortrait{border-color:var(--gold)}
+
+.study-board{padding:14px 0}
+.study-board summary{cursor:pointer;color:var(--gold)}
+.study-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
+.study-grid article{background:var(--panel);border:1px solid var(--line);padding:14px}
+.study-grid a,.study-board>p a{color:#a8d7f1}
+.study-grid li{margin-block:6px}
+
+.creator-heading{margin:30px 0 12px}
+.creator-heading h1{font-size:clamp(2rem,5vw,4rem);line-height:1.04;letter-spacing:-.04em}
+.creator-heading p{color:#c4d0dc}
+.creator-grid{grid-template-columns:minmax(245px,.8fr) minmax(0,1.35fr);align-items:start}
+.creator-id{position:sticky;top:14px}
+.creator-id h2,.creator-settings h2{font-size:clamp(1.4rem,3vw,2rem);margin-bottom:14px}
+.creator-settings{display:grid;gap:14px}
+.creator-id .portrait{display:block;height:auto}
+.badge-details{display:grid;gap:4px;padding:12px 14px;background:#102034;border:1px solid var(--line)}
+.badge-details strong{font-size:1.2rem;color:#fff4dc}
+.badge-details span{font-family:monospace;color:#f0be75}
+.creator-id .fields{grid-template-columns:1fr}
+.creator-id .fields select{width:100%}
+@media(max-width:760px){.creator-grid{grid-template-columns:1fr}.creator-id{position:static}}
+
+.campus-reference img{display:block;width:min(100%,660px);height:auto;background:#fff;margin:12px 0}
+.campus-reference a{color:#a8d7f1}
+.campus-reference summary{cursor:pointer;color:var(--gold)}

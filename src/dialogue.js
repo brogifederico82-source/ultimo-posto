@@ -216,7 +216,7 @@ function getScene(){
     keys.clear();controls.clear();activeScene=null;
   }]);
   if(state.ending)return scene(state.ending.title,state.ending.text,
-    testMode?["Torna all’editor",()=>leaveTest()]:["Crea un altro protagonista",()=>show("creator")]);
+    testMode?["Torna all’editor",()=>leaveTest()]:["Continua il percorso",()=>{state.ending=null;activeScene=null;}]);
   if(state.freeMoment)return scene(state.freeMoment.title,state.freeMoment.text);
   const o=currentObject();
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
@@ -229,8 +229,9 @@ function getScene(){
   }
   if(o.action==="native"){
     const result=nativeScene(o.native);
+    if(o.native==="navetta"||o.native==="autista")return result;
     if(originalMap.zones[state.zone]?.objects.find(item=>item.uid===o.uid)?.name!==o.name)result.title=o.name;
-    const profile=conversationFor(o)??(Object.hasOwn(nativeConversations,o.native)?[result.text,...nativeConversations[o.native]]:null);
+    const profile=(o.native==="radio"?null:conversationFor(o))??(Object.hasOwn(nativeConversations,o.native)?[result.text,...nativeConversations[o.native]]:null);
     if(o.text)result.text=o.text;
     if(profile)return addConversation(result,o,o.text?[o.text,...profile.slice(1)]:profile);
     if(state.chatTopic?.uid===o.uid)return {...result,playerLine:state.chatTopic.prompt,text:state.chatTopic.reply};
@@ -270,11 +271,14 @@ function autoEncounter(o){
 function draw(now){
   const z=room(state.zone),x=state.x*16,y=state.y*16;
   const time=reducedMotion?0:now;
-  const cameraX=Math.round(clamp(x+8-160,0,Math.max(0,z.width*16-320)));
-  const cameraY=Math.round(clamp(y+8-96,0,Math.max(0,z.height*16-192)));
+  const zoom=["aula-chiesa","dome","tutorato"].includes(state.zone)?1.25:1;
+  const viewWidth=320/zoom,viewHeight=192/zoom;
+  const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
+  const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
+  stage.setTransform(2,0,0,2,0,0);
   rect(stage,"#182625",0,0,320,192);
-  stage.save();stage.translate(-cameraX,-cameraY);
-  worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:320,h:192},layers,false,
+  stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
+  worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},layers,false,
     {row:state.y+.86,draw:()=>sprite(stage,state.avatar,x+8,y+14,now-lastWalk<160?Math.floor(now/75)%3:0,state.look)});
   if(z.ground==="grass"&&!reducedMotion){
     for(let i=0;i<18;i++){
@@ -284,13 +288,19 @@ function draw(now){
     }
   }
   stage.restore();
+  const waypoint=nextCampusWaypoint();
+  if(waypoint&&!activeScene){
+    const px=((waypoint.x+waypoint.w/2)*16-cameraX)*zoom;
+    const py=((waypoint.y-.5)*16-cameraY)*zoom;
+    paintCampusWaypoint(stage,clamp(px,9,311),clamp(py,9,183));
+  }
   const nearest=nearby();
   if(nearest&&!activeScene&&!state.ending){
     const label="E · "+tr(nearest.label);
     stage.font="bold 8px monospace";stage.textAlign="center";
     const width=Math.min(302,stage.measureText(label).width+9);
-    const sx=clamp((nearest.x+nearest.w/2)*16-cameraX,width/2,320-width/2);
-    const sy=clamp(nearest.y*16-13-cameraY,3,178);
+    const sx=clamp(((nearest.x+nearest.w/2)*16-cameraX)*zoom,width/2,320-width/2);
+    const sy=clamp((nearest.y*16-cameraY)*zoom-13,3,178);
     rect(stage,"#221f2d",sx-width/2,sy,width,11);
     stage.fillStyle="#ffd499";stage.fillText(label,sx,sy+8,width-6);
   }
@@ -310,6 +320,7 @@ function draw(now){
       const point=sceneObjects(z).find(o=>o.native===id&&o.action);
       if(point)stage.fillText(label,mx(point.x)+1,my(point.y)-2);
     }
+    if(waypoint)paintCampusWaypoint(stage,mx(waypoint.x+.5),my(waypoint.y+.5));
     rect(stage,"#f5f7d9",mx(state.x),my(state.y),3,3);
   }
 }
@@ -333,7 +344,9 @@ const campusLandmarks=[
   ["giardino-uscita","Viale Romania · Ingresso","Viale Romania · Entrance"],
   ["giardino-evento","A200 · Aula Chiesa","A200 · Aula Chiesa"],
   ["giardino-terra","Edificio principale","Main building"],
-  ["giardino-dome","The Dome","The Dome"],
+  ["giardino-dome","The Dome 1","The Dome 1"],
+  ["dome2-door","The Dome 2","The Dome 2"],
+  ["polivalente-door","Aula Polivalente","Multipurpose hall"],
   ["giardino-caffe","Bar e terrazza giochi","Café and games terrace"],
   ["giardino-lettura","Pergola di lettura","Reading pergola"],
   ["campus-extra-1027","Ingresso di Via Panama","Via Panama entrance"],
@@ -347,13 +360,15 @@ const campusLandmarks=[
 ];
 let overviewZone,overviewLayer,overviewMarkers=[],overviewScale=1,overviewX=0,overviewY=0;
 function updateCampusOverview(){
+  const reference=$("campusReference");
+  if(!reference.src)reference.src=$("edPlanImage").src;
   const zone=campus.zones.giardino;
   const canvas=$("campusOverview");
   canvas.hidden=!zone;
   $("campusLegend").replaceChildren();
   $("campusPosition").textContent=local(
-    "Il punto bianco indica la tua posizione quando sei all’aperto nel campus.",
-    "The white dot marks your position while you are outdoors on campus.");
+    "Il punto bianco sei tu. Il rombo dorato indica la prossima tappa della storia.",
+    "The white dot is your position. The gold diamond marks your next story waypoint.");
   if(!zone)return;
   if(overviewZone!==zone){
     overviewZone=zone;
@@ -391,6 +406,8 @@ function paintCampusOverview(){
   const ctx=$("campusOverview").getContext("2d");
   ctx.drawImage(overviewLayer,0,0);
   if(state.zone!=="giardino")return;
+  const waypoint=nextCampusWaypoint();
+  if(waypoint)paintCampusWaypoint(ctx,overviewX+(waypoint.x+.5)*overviewScale,overviewY+(waypoint.y+.5)*overviewScale);
   ctx.beginPath();
   ctx.arc(overviewX+(state.x+.5)*overviewScale,overviewY+(state.y+.5)*overviewScale,3.5,0,Math.PI*2);
   ctx.fillStyle="#fffbe9";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#202321";ctx.stroke();
@@ -418,7 +435,8 @@ function frame(now){
   lastTrafficFrame=now;
   if(screen==="editor")drawEditor(now);
   if(screen==="game"){
-    if(!state.ending&&!minigame)trafficClock+=delta;
+    if(!state.ending&&!minigame&&!activeScene&&!state.prologue)trafficClock+=delta;
+    if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
     const move=moves.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
     if(move && !state.prologue && !minigame && !activeScene && !state.ending && now-lastWalk>=95){
@@ -441,26 +459,39 @@ function frame(now){
   }
   requestAnimationFrame(frame);
 }
-let audioContext=null,audioOn=false;
+let audioContext=null,audioOn=false,campusMusicTimer=0;
+const campusMelody=[64,null,67,71,69,67,null,62,64,67,69,null,72,71,67,null];
+function playCampusMusic(){
+  clearInterval(campusMusicTimer);
+  let step=0;
+  function beat(){
+    if(!audioOn||document.hidden||minigame)return;
+    const note=campusMelody[step];
+    if(note!==null)chime([note],.12,.021);
+    if(step%4===0)chime([[48,45,50,43][step/4]],.12,.028);
+    step=(step+1)%campusMelody.length;
+  }
+  beat();campusMusicTimer=setInterval(beat,250);
+}
 function enableAudio(){
   const Audio=window.AudioContext||window.webkitAudioContext;
   if(!Audio)return;
   audioContext??=new Audio();audioContext.resume().catch(()=>{});
   audioOn=true;$("audio").textContent=tr("Audio acceso");$("audio").setAttribute("aria-pressed","true");
 }
-function chime(notes,spacing=.12){
+function chime(notes,spacing=.12,volume=.065){
   if(!audioOn || !audioContext)return;
   for(const [i,note] of notes.entries()){
     const at=audioContext.currentTime+i*spacing;
     const osc=audioContext.createOscillator(), gain=audioContext.createGain();
     osc.type="triangle";osc.frequency.value=440*2**((note-69)/12);
-    gain.gain.setValueAtTime(.065,at);gain.gain.exponentialRampToValueAtTime(.001,at+.22);
+    gain.gain.setValueAtTime(volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.22);
     osc.connect(gain);gain.connect(audioContext.destination);osc.start(at);osc.stop(at+.24);
   }
 }
 $("audio").onclick=()=>{
-  if(audioOn){audioOn=false;$("audio").textContent=tr("Audio spento");$("audio").setAttribute("aria-pressed","false");audioContext.suspend().catch(()=>{});}
-  else{enableAudio();chime([60,67]);}
+  if(audioOn){audioOn=false;clearInterval(campusMusicTimer);$("audio").textContent=tr("Audio spento");$("audio").setAttribute("aria-pressed","false");audioContext.suspend().catch(()=>{});}
+  else{enableAudio();playCampusMusic();}
 };
 window.addEventListener("keydown",event=>{
   if(screen!=="game"||event.ctrlKey||event.altKey||event.metaKey)return;
@@ -485,10 +516,14 @@ window.addEventListener("keydown",event=>{
     }
     return;
   }
+  if(key==="e"&&!event.repeat&&finishCaption()){event.preventDefault();return;}
   if(["arrowleft","arrowright","arrowup","arrowdown","a","d","w","s","e","escape"].includes(key))event.preventDefault();
   keys.add(key);
-  if(key==="e"&&!event.repeat)interact();
-  if(key==="escape"&&activeScene){activeScene=null;state.chatTopic=null;state.freeMoment=null;renderScene();}
+  if(key==="e"&&!event.repeat&&!activeScene)interact();
+  if(key==="escape"&&activeScene){
+    activeScene=null;state.chatTopic=null;state.freeMoment=null;
+    keys.clear();controls.clear();renderScene();$("interact").focus();
+  }
 });
 window.addEventListener("keyup",event=>keys.delete(event.key.toLowerCase()));
 window.addEventListener("blur",()=>{keys.clear();controls.clear();if(dirty){save();dirty=false;}});
@@ -498,6 +533,14 @@ for(const button of document.querySelectorAll("[data-move]")){
   button.onlostpointercapture=()=>controls.delete(direction);
   button.onpointerup=()=>controls.delete(direction);
   button.onpointercancel=()=>controls.delete(direction);
+  button.onkeydown=event=>{
+    if(event.key!==" "&&event.key!=="Enter")return;
+    event.preventDefault();controls.add(direction);
+  };
+  button.onkeyup=event=>{
+    if(event.key===" "||event.key==="Enter")controls.delete(direction);
+  };
+  button.onblur=()=>controls.delete(direction);
 }
 $("interact").onclick=interact;
 $("homeButton").onclick=()=>{if(screen==="game")save();show("home");};
@@ -515,8 +558,8 @@ $("observer").onclick=()=>preset({curiosita:82,razionalita:85,autocontrollo:68})
 $("mediator").onclick=()=>preset({empatia:85,socialita:75,fiducia:72});
 $("reckless").onclick=()=>preset({coraggio:88,rischio:84,ambizione:72});
 $("shuffle").onclick=()=>{
-  for(const [id,select] of Object.entries(selectors)){
-    if(id!=="passato"&&id!=="meta")select.value=Math.floor(Math.random()*options[id].length);
+  for(const id of wardrobeFields){
+    selectors[id].value=Math.floor(Math.random()*options[id].length);
   }
   preview();
 };
