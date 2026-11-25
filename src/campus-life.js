@@ -96,3 +96,70 @@ function shopScene(){
   const prices=campusMerch.map(item=>item.name+" "+(purse.owned.includes(item.id)?"(già tuo)":item.cost+" monete")).join(" · ");
   return scene("Luiss Shop",description+" "+prices,...options);
 }
+
+const unarmedGuard=$("unarmedGuard");
+try{unarmedGuard.checked=localStorage.getItem("ultimo-posto-guardia") === "disarmata";}catch{}
+unarmedGuard.onchange=()=>{
+  try{localStorage.setItem("ultimo-posto-guardia",unarmedGuard.checked?"disarmata":"armata");}catch{}
+};
+let guardOutcomeStart=0;
+function refreshGateWarning(){
+  $("gateWarning").hidden=!atViale(state)||!state.guardWarned||has("Via libera")||Boolean(state.ending);
+}
+function warnAtGate(){
+  if(isFree()||state.campusGateOpen||has("Via libera"))return;
+  state.guardWarned=true;
+  refreshGateWarning();
+  save();
+}
+function crossRestrictedLine(x,y){
+  if(testMode||isFree()||state.ending||state.campusGateOpen||has("Via libera")||
+     !atViale(state)||!hasIntegratedEntrance())return false;
+  const gateX=vialeEntrance.x+15;
+  if(x!==gateX||y!==vialeEntrance.gateY||state.y!==y+1)return false;
+  if(!state.guardWarned){
+    warnAtGate();
+    chime([52,47],.14);
+    return true;
+  }
+  const armed=!unarmedGuard.checked;
+  state.ending={guard:true,armed,title:"Game Over · Tornello",text:
+    (armed?"Dopo l’avvertimento, la guardia ha sparato.":"Dopo l’avvertimento, la guardia ti ha bloccato a terra.")+
+    " Per passare, dovevi fermarti sulla linea, mostrare il badge alla guardia e aprire il tornello."};
+  activeScene=null;keys.clear();controls.clear();
+  guardOutcomeStart=performance.now();
+  record("Game Over · Hai forzato il tornello dopo l’avvertimento.");
+  chime(armed?[35,29]:[42,34],.09,.09);
+  save();renderScene();$("sceneTitle").focus();
+  return true;
+}
+function paintRestrictedLine(c,zone){
+  if(zone!=="giardino"||!hasIntegratedEntrance()||state.campusGateOpen||isFree())return;
+  const x=(vialeEntrance.x+15)*16,y=(vialeEntrance.gateY+1)*16+1;
+  for(let i=0;i<5;i++)rect(c,i%2?"#211e26":"#e9b76a",x+i*3,y,3,2);
+}
+function paintGuardOutcome(now){
+  const canvas=$("guardOutcome");
+  if(canvas.hidden||!state.ending?.guard)return;
+  const c=canvas.getContext("2d"), t=reducedMotion||!guardOutcomeStart?1:Math.min(1,Math.max(0,(now-guardOutcomeStart)/360));
+  const armed=state.ending.armed;
+  rect(c,"#1e1c2b",0,0,320,128);
+  rect(c,"#373141",0,84,320,44);
+  for(let x=0;x<320;x+=27)rect(c,"#493d4b",x,105,22,1);
+  rect(c,"#d2a565",24,87,101,3);
+  sprite(c,guard,armed?78:152,94,0,"right",2.55);
+  if(armed){
+    rect(c,"#30343e",91,68,16,4);
+    rect(c,"#424452",102,68,5,3);
+  }
+  c.save();c.translate(175,100);c.rotate(-Math.PI/2);
+  sprite(c,state.avatar,0,0,0,"down",2.15);
+  c.restore();
+  for(let i=0;i<34;i++){
+    const angle=i*2.39996,radius=(armed?64:31)*(i%8+2)/10;
+    const x=168+Math.cos(angle)*radius*t,y=101+Math.sin(angle)*radius*t*.43;
+    rect(c,["#9d233d","#df4650","#701831"][i%3],x,y,i%4+2,i%3+2);
+  }
+  rect(c,"#a2203b",158,105,16+31*t,5);
+  rect(c,"#711831",154,110,20+22*t,3);
+}

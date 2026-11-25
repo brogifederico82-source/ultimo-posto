@@ -268,3 +268,6 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 .wallet-coins{background:#6c5333;color:#ffe3a2;border:1px solid #b38c52;padding:5px 9px;border-radius:10px;font-weight:700}
 .audio-level{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-block:9px}
 #audioFeedback{max-width:170px;color:#ffc997}
+
+.gate-warning{padding:10px 14px;border:1px solid #d8a260;border-left:4px solid #d8a260;border-radius:8px;background:#382a2d;color:#ffdfaa}
+#guardOutcome{display:block;width:min(100%,580px);margin:0 auto 12px;border:1px solid #765065;border-radius:12px}

@@ -329,6 +329,7 @@ function interact(){
     syncBackgroundMusic();save();renderScene();$("interact").focus();
     return;
   }
+  if(spot.uid==="viale-ingresso-varco")warnAtGate();
   const destination=doorDestination(spot);
   if(destination){
     keys.clear();controls.clear();
@@ -611,10 +612,10 @@ function paintSpeaker(now){
 }
 function renderScene(){
   const scene=getScene();
-  $("objective").textContent=(testMode?"Prova · ":"")+(state.ending?.traffic?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
+  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
   const nextStep=isFree()?-1:storySteps.findIndex(([item])=>!has(item));
   const chapter=nextStep<0?"":nextStep<4?"Romania":nextStep===4?"Parenzo":"Pola";
-  $("taskChapter").hidden=!chapter;
+  $("taskChapter").hidden=!chapter||Boolean(state.ending);
   $("taskChapter").textContent=chapter?chapter+" · "+(nextStep+1)+"/"+storySteps.length:"";
   $("zone").textContent=tr(room(state.zone).name);
   updateCampusOverview();
@@ -632,7 +633,9 @@ function renderScene(){
   const speaker=currentObject();
   const conversation=Boolean(speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
   $("speakerPortrait").hidden=!conversation;
-  $("game").classList.toggle("game-conversation",conversation);
+  $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
+  $("guardOutcome").hidden=!state.ending?.guard;
+  refreshGateWarning();paintGuardOutcome(performance.now());
   paintSpeaker(performance.now());
   showCaption(tr(scene.text),Boolean(activeScene||state.prologue));
   $("playerLine").hidden=!scene.playerLine;

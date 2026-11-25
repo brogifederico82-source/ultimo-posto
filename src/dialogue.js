@@ -211,6 +211,11 @@ function addConversation(scene,o,profile){
 
 function getScene(){
   if(state.prologue)return openingScene();
+  if(state.ending?.guard)return scene(state.ending.title,state.ending.text,["Riprova dall’ingresso",()=>{
+    state.ending=null;state.guardWarned=false;
+    [state.x,state.y]=reachEntry(state.zone,"viale");
+    keys.clear();controls.clear();activeScene=null;syncBackgroundMusic();
+  }]);
   if(state.ending?.traffic)return scene("Game Over",state.ending.text,[atViale(state)?"Riprova dall’ingresso":local("Riprova dal giardino","Retry from the garden"),()=>{
     state.ending=null;[state.x,state.y]=reachEntry(state.zone,atViale(state)&&hasIntegratedEntrance()?"viale":state.zone==="giardino"?"ingresso":undefined);
     keys.clear();controls.clear();activeScene=null;
@@ -301,6 +306,7 @@ function draw(now){
       rect(stage,i%2?"#afc68280":"#ecdb9580",px,py,2,1);
     }
   }
+  paintRestrictedLine(stage,state.zone);
   paintCampusCoins(stage,state.zone,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},time);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
@@ -470,7 +476,7 @@ function frame(now){
     if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
-      if(!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
+      if(!crossRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
         state.x=x;state.y=y;dirty=true;
         collectCampusCoin();syncBackgroundMusic();
         paintCampusOverview();
@@ -486,7 +492,8 @@ function frame(now){
     if(minigame?.kind==="loft")tickLoftGame(now);
     if(minigame?.kind==="arm")tickArm(now);
     if(minigame?.kind==="dance")tickDance(now);
-    if(!minigame)draw(now);
+    if(state.ending?.guard)paintGuardOutcome(now);
+    else if(!minigame)draw(now);
   }
   requestAnimationFrame(frame);
 }

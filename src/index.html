@@ -32,7 +32,8 @@
 <summary>Guida ai comandi</summary>
 <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa.</p>
 </details>
-<section class="panel scene" aria-live="polite"><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<p id="gateWarning" class="gate-warning" role="status" hidden>Guardia: «Fermati alla linea gialla. Mostrami il badge, poi passa dal tornello.»</p>
+<section class="panel scene" aria-live="polite"><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
 <details id="surpriseHint">
@@ -151,6 +152,7 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <footer>Satira studentesca · Pianta di gioco stilizzata · WASD o frecce, E per interagire.</footer>
 <details class="journal campus-options">
 <summary>Opzioni</summary>
+<label><input type="checkbox" id="unarmedGuard"> Usa la variante con guardia disarmata</label>
 <label class="audio-level">Volume musica <input id="musicVolume" type="range" min="0" max="100" value="65"></label>
 <label><input type="checkbox" id="surpriseEnabled" checked> Sorprese horror-comiche</label>
 <p class="hint">Attive di default. Puoi disattivarle qui. La voce segue l’impostazione audio del gioco.</p>

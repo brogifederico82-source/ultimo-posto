@@ -79,3 +79,5 @@ Dal LOFT, interagisci con il cabinato per giocare a Pixel Mattoni o Salva i nast
 Il [LOFT Luiss](https://www.luiss.it/it/ateneo/luiss-life/studentesse-e-studenti-iscritti/digital-skills/loft) è all’ultimo piano. Nel gioco si raggiunge dall’atrio, usando le scale di ogni piano. La navata di Aula Chiesa riprende la funzione originaria dell’edificio; l’assetto dei banchi e della sala polivalente è una ricostruzione giocabile. Per le voci horror si usa una voce italiana disponibile sul dispositivo in attesa di una registrazione originale.
 
 Nella mappa standard di Romania, strada, strisce, guardia, tornello e Luiss Shop fanno parte dello stesso ambiente del giardino. Le monete si trovano esplorando o completando le attività e si possono spendere al Luiss Shop. In Opzioni regoli il volume. Sunny Underground accompagna la strada e Arcade Sunset accompagna il campus.
+
+Al tornello di Romania, un tentativo di passare senza badge fa scattare l’avvertimento. Insistere sulla linea porta al Game Over con una scena splatter in pixel art. In Opzioni è disponibile anche la variante con la guardia disarmata.
