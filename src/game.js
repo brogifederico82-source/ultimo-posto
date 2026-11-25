@@ -486,7 +486,13 @@ function nativeScene(id){
       ...(t.empatia>=65?[["Presta il tuo caricatore",()=>{carry("Presa condivisa");change("empatia",3);}]]:[]));
     case "t04":return scene("Aula T04",has("Presa condivisa")?"Lo studente del giardino ti fa cenno. Ha tenuto una sedia e trovato una ciabatta.":"C’è una sedia occupata da una felpa. Nessun proprietario in vista. Sul banco accanto c’è un posto libero, lontano dalla presa.",
       reserve(has("Presa condivisa")?"T04, con corrente":"Studio in modalità risparmio",has("Presa condivisa")?"Una presa per due. Funziona meglio di certi lavori di gruppo.":"Il portatile segna 4%. Con carta e penna duri senz’altro più di lui."));
-    case "cavalli":return scene(local("Sala giochi · Viale Romania","Arcade · Viale Romania"),
+    case "rosticceria":return scene(local("Rosticceria · Viale Romania","Rotisserie · Viale Romania"),
+      local("«Supplì appena fritti! Se esci dal campus tardi, ti tengo da parte l’ultimo.»",
+        "“Fresh supplì! If you leave campus late, I’ll save you the last one.”"),
+      ...(!has("Supplì")&&wallet().coins>0?[[local("Compra un supplì · 1 moneta","Buy a supplì · 1 coin"),()=>{
+        wallet().coins--;carry("Supplì");refreshWallet();chime([65,72]);save();
+      }]]:[]));
+    case "cavalli":return scene(local("Sala scommesse · Viale Romania","Betting arcade · Viale Romania"),
       local("Sul monitor ci sono quattro cavalli virtuali. Scegline uno e guarda la corsa. Puoi usare le monete del campus oppure correre gratis.",
         "Four virtual horses are on the screen. Pick one and watch the race. Use campus coins or race for free."),
       [local("Vai alle corse","Go to the races"),()=>openChallenge("cavalli")]);

@@ -331,3 +331,26 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 @media (max-width: 420px) {
   .race-horses > div { grid-template-columns: minmax(7rem, 1fr) minmax(2rem, 1fr) 1.1rem; gap: .25rem; }
 }
+
+/* Condensed arcade labels and high-contrast title lettering */
+:root {
+  --display: "Arial Black", "DejaVu Sans", system-ui, sans-serif;
+  --interface: "Segoe UI", "DejaVu Sans", system-ui, sans-serif;
+}
+body { line-height: 1.45; }
+button, select, input { font-family: var(--interface); }
+.brand, .zone, .challenge-score { letter-spacing: .05em; }
+.hero .arcade-title {
+  line-height: .86;
+  font-weight: 950;
+  letter-spacing: -.055em;
+  -webkit-text-stroke: 2px #d6f6ff;
+  paint-order: stroke fill;
+  text-shadow: 0 3px #2073e3, 0 6px #1747a7, 0 9px #122661, 3px 12px 16px #020817;
+}
+.hero .arcade-title span {
+  color: #6edbff;
+}
+.hero .arcade-title span:last-child {
+  color: #91e5ff;
+}

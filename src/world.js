@@ -223,6 +223,7 @@ function terrainMap(zone){
 }
 const isVehicle=o=>["car","scooter","bus","shuttle"].includes(o.kind);
 function positionOf(o,now,width){
+  if(width>94&&o.uid==="viale-bus-360"&&o.behavior==="loop")return vialeBusAt(o,now);
   if(width&&isVehicle(o)&&o.behavior==="loop"){
     const integrated=o.uid.startsWith("viale-");
     const start=integrated?vialeEntrance.x:0;

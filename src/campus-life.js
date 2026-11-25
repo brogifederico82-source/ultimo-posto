@@ -35,29 +35,78 @@ function joinRomaniaEntrance(map){
   );
   return map;
 }
+const vialeRoad=[[1,81],[12,81],[15,83],[35,83],[42,84],[51,87],[55,88],[57,89],[60,90],[62,93],[65,94],[74,95],[85,95],[94,97]];
+const vialeRoadDistances=[0];
+for(let i=1;i<vialeRoad.length;i++){
+  const [x,y]=vialeRoad[i], [px,py]=vialeRoad[i-1];
+  vialeRoadDistances.push(vialeRoadDistances.at(-1)+Math.hypot(x-px,y-py));
+}
+function vialeRoadY(x){
+  const i=vialeRoad.findIndex(([end])=>end>=x);
+  if(i<=0)return vialeRoad[i===0?0:vialeRoad.length-1][1];
+  const [a,y]=vialeRoad[i-1], [b,endY]=vialeRoad[i];
+  return y+(endY-y)*(x-a)/(b-a);
+}
+function vialeBusAt(bus,now){
+  const length=vialeRoadDistances.at(-1);
+  const initial=Math.max(0,bus.x+bus.w/2-vialeRoad[0][0]);
+  const cycle=(initial+now*bus.speed/1000)%(length*2);
+  const east=cycle<length,distance=east?cycle:length*2-cycle;
+  const i=Math.max(1,vialeRoadDistances.findIndex(end=>end>=distance));
+  const fraction=(distance-vialeRoadDistances[i-1])/(vialeRoadDistances[i]-vialeRoadDistances[i-1]);
+  const [x,y]=vialeRoad[i-1], [nx,ny]=vialeRoad[i];
+  return {...bus,x:x+(nx-x)*fraction-bus.w/2,y:y+(ny-y)*fraction+(east?-.7:.2),look:east?"right":"left"};
+}
 function addVialeArcade(map){
-  for(const [zone,x,y] of [["ingresso",24,17],["giardino",32,86]]){
-    const area=map.zones[zone];
-    if(!area||x+2>area.width||y>=area.height||(zone==="giardino"&&!area.objects.some(o=>o.uid==="viale-ingresso-start")))continue;
-    const uid=zone+"-sala-giochi";
-    if(area.objects.some(o=>o.uid===uid||o.solid&&o.x<x+2&&o.x+(o.w??1)>x&&o.y<y+1&&o.y+(o.h??1)>y))continue;
-    area.objects.push({uid,kind:"booth",name:"Sala giochi · Viale Romania",x,y,w:2,h:1,
-      color:"#8b527e",solid:true,action:"native",native:"cavalli",gate:"",target:"",route:[],rotation:0,variant:0});
+  const street=map.zones.ingresso;
+  const garden=map.zones.giardino;
+  const integrated=garden?.objects.some(o=>o.uid==="viale-ingresso-start");
+  if(integrated&&garden.width>94&&garden.height>104){
+    const blocked=new Set(), roads=new Set();
+    for(const o of garden.objects){
+      if(!o.solid&&o.kind!=="road")continue;
+      for(let x=Math.floor(o.x);x<o.x+(o.w??1);x++)
+        for(let y=Math.floor(o.y);y<o.y+(o.h??1);y++)
+          (o.solid?blocked:roads).add(x+y*garden.width);
+    }
+    for(let x=38;x<=94;x++)for(let offset=-1;offset<=1;offset++){
+      const y=Math.round(vialeRoadY(x))+offset,key=x+y*garden.width;
+      if(blocked.has(key)||roads.has(key))continue;
+      garden.objects.push({uid:"viale-prolungamento-"+x+"-"+y,kind:"road",name:"Viale Romania",x,y,w:1,h:1,
+        color:"#687078",solid:false,action:"",native:"",gate:"",target:"",rotation:0,variant:0});
+    }
+  }
+  for(const [area,uid,name,x,y,w,color,native] of [
+    [street,"ingresso-sala-giochi","Sala scommesse · Viale Romania",24,17,2,"#a45153","cavalli"],
+    [integrated?garden:null,"giardino-sala-giochi","Sala scommesse · Viale Romania",63,102,3,"#a45153","cavalli"],
+    [integrated?garden:null,"giardino-rosticceria","Rosticceria · Viale Romania",64,96,2,"#8b527e","rosticceria"]
+  ]){
+    if(!area||x+w>area.width||y>=area.height)continue;
+    const existing=area.objects.find(o=>o.uid===uid);
+    if(existing){
+      if(uid==="giardino-sala-giochi"&&existing.x===32&&existing.y===86&&existing.name==="Sala giochi · Viale Romania"){
+        Object.assign(existing,{x,y,w,color,name});
+      }
+      continue;
+    }
+    if(area.objects.some(o=>o.solid&&o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+1&&o.y+(o.h??1)>y))continue;
+    area.objects.push({uid,kind:"booth",name,x,y,w,h:1,color,solid:true,action:"native",native,gate:"",target:"",route:[],rotation:0,variant:0});
   }
   return map;
 }
 function hasIntegratedEntrance(){
   return Boolean(campus.zones.giardino?.objects.some(o=>o.uid==="viale-ingresso-start"));
 }
+function inVialeDistrict(x,y){
+  if(x>=vialeEntrance.x&&x<vialeEntrance.x+vialeEntrance.width)return y>vialeEntrance.gateY;
+  return x>=38&&x<=96&&y>=Math.floor(vialeRoadY(x))-1&&y<=105;
+}
 function atViale(s){
-  if(!s)return false;
-  if(s.zone==="ingresso")return true;
-  return s.zone==="giardino"&&hasIntegratedEntrance()&&s.y>vialeEntrance.gateY&&
-    s.x>=vialeEntrance.x&&s.x<vialeEntrance.x+vialeEntrance.width;
+  return Boolean(s&&(s.zone==="ingresso"||
+    s.zone==="giardino"&&hasIntegratedEntrance()&&inVialeDistrict(s.x,s.y)));
 }
 function blockedBeforeCampus(x,y){
-  return state.zone==="giardino"&&hasIntegratedEntrance()&&!state.campusGateOpen&&!isFree()&&
-    (y<=vialeEntrance.gateY||x<vialeEntrance.x||x>=vialeEntrance.x+vialeEntrance.width);
+  return state.zone==="giardino"&&hasIntegratedEntrance()&&!state.campusGateOpen&&!isFree()&&!inVialeDistrict(x,y);
 }
 function wallet(){
   return (state.wallet??={coins:0,picked:[],owned:[]});
