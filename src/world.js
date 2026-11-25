@@ -232,10 +232,16 @@ function colorVariant(hex,variant){
 function groundTile(c,kind,x,y,hex,variant=0){
   const color=colorVariant(hex??assets[kind][3],variant);
   rect(c,color,x*16,y*16,16,16);
-  if((x+y)%2===0)rect(c,"#151d2014",x*16,y*16,16,16);
+  if(kind!=="grass"&&kind!=="path"&&(x+y)%2===0)rect(c,"#151d2014",x*16,y*16,16,16);
   if(kind==="grass"){
+    const patch=Math.sin(x*.38+y*.19)+Math.cos(y*.41-x*.12);
+    rect(c,patch>0?"#a9af5820":"#244d4020",x*16,y*16,16,16);
     rect(c,"#d5df9b31",x*16+(x*5+y*3)%13,y*16+5,2,1);
     rect(c,"#17372d48",x*16+4,y*16+12,3,2);
+  }else if(kind==="path"){
+    const seed=(x*37+y*71)%13;
+    rect(c,"#ead4ac65",x*16+seed,y*16+4,2,1);
+    rect(c,"#705c4440",x*16+2,y*16+seed,1,1);
   }else if(kind==="road"){
     if(x%2===0)rect(c,"#e9d8a77a",x*16+1,y*16+8,14,1);
   }else{
@@ -304,31 +310,63 @@ function drawObject(c,o,now=0,editing=false){
         box("#afa691",4,1,8,2);box(light,5,0,6,2);box("#c6baa2",5,2,6,2);box("#777266",5,8,4,2);break;
       case "booth":
         box("#4f4140",0,1,16,14);box(color,1,2,14,12);box("#f7e4ba",1,2,14,2);box("#3d5051",3,7,4,4);box("#725746",10,7,3,7);break;
-      case "pine":
-        box("#453c35",7,6,2,10);box("#355344",0,3,16,7);box(color,2,1,12,8);box("#7a9360",4,2,7,2);box("#426147",2,7,11,3);break;
+      case "tree":case "pine":{
+        const pine=o.kind==="pine";
+        const crown=(tone,cx,cy,rx,ry)=>{
+          c.fillStyle=tone;c.beginPath();c.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);c.fill();
+        };
+        crown("#192d3340",9,12,6.8,2.8);
+        box("#665442",7,7,1.6,8);
+        crown("#304c3d",8,7,7.6,pine?4.6:6.4);
+        crown(color,6.5,5.8,6.1,pine?3.8:5.2);
+        crown(color,11,6.4,4.3,3.6);
+        crown("#b1b87544",5.2,4.2,3.5,2);
+        break;
+      }
       case "cypress":
         box("#303f38",7,10,2,6);box(color,5,3,6,11);box(color,7,0,2,4);box("#78915c",6,5,2,6);break;
       case "luiss":
         c.font="bold 5px monospace";c.textAlign="center";c.fillStyle="#243230";c.fillText("LUISS",8,10);c.fillStyle=color;c.fillText("LUISS",8,9.5);break;
       case "zebra":box(color,2,0,11,16);break;
-      case "domeHall":
-        box("#263637",0,1,16,15);box(color,1,1,14,12);box("#39494e",1,13,14,2);
-        for(let i=2;i<15;i++)box(i%3?"#a3b2b74f":"#24333888",i,2,.18,10);
-        box("#728b99",4,5,8,3);box("#c2cacf",7.9,5,.2,3);break;
-      case "faculty":case "chapel":
-        box("#403938",0,1,16,15);box(color,1,1,14,10);box("#e0bf93",1,11,14,4);
-        box("#e2a67d",2,4,12,.55);
-        for(let i=2;i<15;i++){box("#412c213a",i,2,.22,8);if(i%2===0)box("#505557",i,12,.65,1.3);}
-        if(o.kind==="chapel"){box("#e8c6a0",6,12,4,3);box("#655154",7,13,2,2);}
+      case "domeHall":{
+        // Barrel roof: a continuous curved highlight and transverse ribs.
+        box(shadow,0,.6,16,15.4);
+        const vault=c.createLinearGradient(0,0,16,0);
+        for(const [stop,tone] of [[0,"#53666b"],[.25,"#acbabc"],[.45,"#e2e6dc"],[.78,color],[1,"#59696d"]])
+          vault.addColorStop(stop,tone);
+        c.fillStyle=vault;c.fillRect(.2,.2,15.4,13.8);
+        for(let i=1;i<14;i+=1.7)box("#42596366",.3,i,15.2,.12);
+        box("#384f54",.5,14,15,1.4);
+        for(let i=1;i<16;i+=2)box("#b5c2b4",i,14,.18,1.4);
         break;
+      }
+      case "faculty":case "chapel":case "roof":{
+        // Hip ends follow the building's long axis, including the narrow chapel.
+        const tall=h>w, ridge=tall?[[8,2.8],[8,10.8]]:[[2.8,6.8],[13.2,6.8]];
+        const [r1,r2]=ridge;
+        const face=(tone,points)=>{
+          c.fillStyle=tone;c.beginPath();c.moveTo(...points[0]);
+          for(const point of points.slice(1))c.lineTo(...point);
+          c.closePath();c.fill();
+        };
+        box("#756455",0,1,16,15);box("#d4b791",.2,12.8,15.6,2.7);
+        box(color,.1,.2,15.8,13.2);
+        const nw=[.1,.2],ne=[15.9,.2],sw=[.1,13.4],se=[15.9,13.4];
+        face("#ffe1a43d",tall?[nw,r1,r2,sw]:[nw,ne,r2,r1]);
+        face("#432a234d",tall?[ne,se,r2,r1]:[sw,r1,r2,se]);
+        face("#6e423833",tall?[sw,r2,se]:[ne,se,r2]);
+        const bays=Math.max(3,Math.round(w/14));
+        for(let i=0;i<bays;i++)box("#515654",(i+.34)*16/bays,14,5/bays,.9);
+        if(o.kind==="chapel"){box("#ebd9b3",6,13.5,4,2.2);box("#66574c",7,14,2,1.7);}
+        break;
+      }
       case "court":
         box("#334b43",0,0,16,16);box(color,1,1,14,14);
         c.strokeStyle="#d0d8b6";c.lineWidth=.22;c.strokeRect(2,2,12,12);box("#d0d8b6",7.9,2,.2,12);break;
-      case "tree":box("#25392e",6,9,4,7);box("#29463a",1,3,14,9);box(color,3,1,11,10);box("#d7de8c3d",4,3,7,3);break;
       case "hedge":box("#293e36",0,0,16,16);box(color,1,1,14,12);box("#a9c88245",2,3,11,3);break;
       case "bush":box(shadow,1,8,14,6);box(color,3,5,10,7);box("#bed49c60",5,5,5,2);break;
       case "flowers":for(const [a,b] of [[2,5],[8,3],[11,9],[5,11]]){box("#739f64",a+1,b+2,1,4);box(color,a,b,3,3);box(white,a+1,b+1,1,1);}break;
-      case "roof":case "classroom":case "library":
+      case "classroom":case "library":
         box(shadow,0,0,16,16);box(color,1,1,14,12);box(light,1,13,14,2);
         for(let a=3;a<15;a+=3)box("#ffffff26",a,2,1,9);
         if(o.kind==="classroom"||o.kind==="library"){box("#384b49",5,10,6,4);box("#89a299",6,10,4,2);}
@@ -373,6 +411,22 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       const tile=tiles.get(x+y*z.width);
       groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
     }
+  }
+  // Connect the existing garden walks around the planted islands north of the bar.
+  if(visible.terreno && id==="giardino" && z.width===96 && z.height===105 &&
+      left<49 && right>13 && top<47 && bottom>17 &&
+      sceneObjects(z).some(o=>o.uid==="bosco-studio" && o.x===34 && o.y===24)){
+    const tiles=editing?terrainMap(z):terrainCache.get(z);
+    c.save();c.beginPath();
+    for(let y=Math.max(top,17);y<Math.min(bottom,47);y++)
+      for(let x=Math.max(left,13);x<Math.min(right,49);x++)
+        if((tiles.get(x+y*z.width)?.kind??z.ground)==="grass")c.rect(x*16,y*16,16,16);
+    c.clip();c.scale(16,16);
+    c.beginPath();c.moveTo(16,40);c.bezierCurveTo(14,35,19,32,22,30);
+    c.bezierCurveTo(26,27,26,19,32,20);c.bezierCurveTo(38,20,39,24,42,24);
+    c.moveTo(22,30);c.bezierCurveTo(28,31,30,28,32,25);
+    c.lineCap="round";c.lineWidth=1.65;c.strokeStyle="#8c9470";c.stroke();
+    c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }
   const foreground=[];
   for(const raw of editing?z.objects:sceneObjects(z)){
