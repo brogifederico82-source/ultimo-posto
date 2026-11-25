@@ -377,6 +377,61 @@ function storyObjective(){
   const step=storySteps.find(([item])=>!has(item));
   return step?local(step[1],step[2]):local("Laurea festeggiata · Esplora le sedi","Graduation celebrated · Explore the campuses");
 }
+
+const seminarPrep={
+  timeline:{label:"Metti in ordine i messaggi",trait:"pragmatismo",log:"Hai costruito una cronologia con gli appunti."},
+  voices:{label:"Rileggi le due versioni",trait:"autocontrollo",log:"Hai lasciato spazio alle due versioni prima di concludere."}
+};
+const seminarResponses={
+  prove:{label:"Chiedo quale messaggio chiuda davvero l’accordo",trait:"razionalita",log:"Hai distinto le prove da ciò che ciascuno stava deducendo."},
+  ascolto:{label:"Riformulo la sua obiezione e propongo due letture",trait:"empatia",log:"Hai accolto l’obiezione e mostrato due letture plausibili."},
+  insisto:{label:"Resto sulla mia tesi e passo oltre",trait:"coraggio",log:"Hai difeso la tua tesi, lasciando irrisolto il messaggio decisivo."}
+};
+const seminarOutcomes={
+  A:{title:"A · Una tesi che regge",why:"La cronologia rende visibile il passaggio tra trattativa e presunto accordo. La domanda puntuale mette alla prova il messaggio decisivo."},
+  B:{title:"B · Due letture in aula",why:"Hai dato spazio all’obiezione. Chi ascolta capisce che la conclusione cambia a seconda di come si legge lo stesso messaggio."},
+  C:{title:"C · Tesi da rivedere",why:"Hai preso posizione con chiarezza. Rimane da spiegare quale prova sostenga la conclusione scelta."}
+};
+function seminarChoice(stage,id,option){
+  state.parenzoAttempt[stage]=id;
+  const effects=state.parenzoEffects??=[];
+  const key=stage+"-"+id;
+  const changed=!effects.includes(key);
+  if(changed){effects.push(key);change(option.trait,3);}
+  record("Parenzo · "+option.log+(changed?" +3 "+traits[option.trait]+".":" Effetto sul tratto già acquisito."));
+}
+function parenzoSeminar(){
+  const attempt=state.parenzoAttempt??={
+    prep:state.seminarRole==="messaggi"?"timeline":state.seminarRole==="versioni"?"voices":null,
+    response:state.seminarArgument==="prove"?"prove":state.seminarArgument==="interpretazioni"?"ascolto":null,
+    outcome:has("Seminario Parenzo")?"legacy":null
+  };
+  const reset=["Riprova il seminario",()=>{
+    state.parenzoAttempt={prep:null,response:null,outcome:null};
+    record("Parenzo · Hai aperto una nuova prova del seminario.");
+  }];
+  if(attempt.outcome){
+    const result=seminarOutcomes[attempt.outcome];
+    const text=result?result.title+". "+result.why+" Preparazione: "+seminarPrep[attempt.prep].log+" Confronto: "+seminarResponses[attempt.response].log:
+      "Il seminario risulta già completato nel tuo diario. Puoi rifare il caso dall’inizio.";
+    return scene("Parenzo · Esito del seminario",text+" La tappa resta completata e Green Mobility è disponibile a Romania.",reset);
+  }
+  if(!attempt.prep)return scene("Parenzo · Preparazione",
+    "Via Parenzo 11. In T02 il docente riapre il caso della bici concordata in chat. Consegna un foglio a testa. «Avete cinque minuti. Da dove iniziate?»",
+    ...Object.entries(seminarPrep).map(([id,option])=>[option.label,()=>seminarChoice("prep",id,option)]));
+  if(!attempt.response)return scene("Parenzo · L’obiezione di Dario",
+    (attempt.prep==="timeline"?"Hai segnato l’ordine dei messaggi. ":"Hai annotato le differenze fra i due racconti. ")+
+    "Dario, uno studente al tavolo, indica il telefono. «Aspetta. Che il prezzo fosse chiaro non vuol dire che si fossero già messi d’accordo.»",
+    ...Object.entries(seminarResponses).map(([id,option])=>[option.label,()=>seminarChoice("response",id,option)]));
+  return scene("Parenzo · Presentazione","Il docente ti passa il pennarello. Dario resta al tavolo ad ascoltare. Hai una frase per la tesi e una per il dubbio.",
+    ["Presenta il caso",()=>{
+      attempt.outcome=attempt.prep==="timeline"&&attempt.response==="prove"?"A":attempt.response==="ascolto"?"B":"C";
+      const result=seminarOutcomes[attempt.outcome];
+      record("Parenzo · "+result.title+". "+result.why);
+      checkpoint("Seminario Parenzo");
+    }],reset);
+}
+
 function nativeScene(id){
   const t=state.traits;
   if(nativeDoors[id])return scene(room(nativeDoors[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(nativeDoors[id])]);
@@ -417,17 +472,7 @@ function nativeScene(id){
       return scene("LOFT · Consegna del progetto",has("Progetto LOFT")?"«Progetto consegnato. La navetta ti aspetta alla piazzola del giardino.»":
         has("Lezione A200")&&has("Colloquio tutor")?"«Registra un minuto di vita a Romania per il tuo progetto di fine triennale.»":"«Prima passa dal tutorato e completa la lezione in Aula Chiesa.»",
         ...(!has("Progetto LOFT")&&(isFree()||has("Lezione A200")&&has("Colloquio tutor"))?[["Consegna il podcast",()=>checkpoint("Progetto LOFT")]]:[]));
-    case "parenzo-seminario":
-      if(has("Seminario Parenzo"))return scene("Parenzo · Seminario di diritto","«Bel lavoro. A Romania puoi chiedere l’abilitazione al car sharing.»");
-      if(!state.seminarRole)return scene("Parenzo · Seminario di diritto","«Due studenti si accordano in chat per vendere una bici. Il giorno dopo uno dice che stava solo trattando. Da dove parti?»",
-        ["Rileggi i messaggi",()=>{state.seminarRole="messaggi";}],
-        ["Ascolta le due versioni",()=>{state.seminarRole="versioni";}]);
-      return scene("Parenzo · Discussione del caso",state.seminarRole==="messaggi"?
-        "Nei messaggi il prezzo è chiaro. L’ultimo «ci sentiamo» lascia aperta una domanda: l’accordo era già concluso?":
-        "Le due versioni coincidono sul prezzo. Divergono su ciò che ciascuno intendeva confermare con l’ultimo messaggio.",
-        ["Distinguo ciò che sappiamo da ciò che deduciamo",()=>{state.seminarArgument="prove";}],
-        ["Confronto le interpretazioni prima di concludere",()=>{state.seminarArgument="interpretazioni";}],
-        ...(state.seminarArgument?[["Presenta il caso al seminario",()=>{checkpoint("Seminario Parenzo");change(state.seminarArgument==="prove"?"razionalita":"empatia",4);}]]:[]));
+    case "parenzo-seminario":return parenzoSeminar();
     case "pola-festa":
       if(has("Festa a Pola"))return scene("Pola · Festa di laurea","Le luci sono accese. Dal cortile qualcuno ti chiede se dopo la festa gli mandi gli appunti.");
       if(!state.graduationSpeech)return scene("Pola · Ultime parole prima della festa","Il cortile si fa silenzioso. Tocca a te raccontare in una frase cosa porti via da questi anni.",
