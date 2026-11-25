@@ -21,6 +21,7 @@ Object.assign(english,{
   "Corridoio del primo piano":"First-floor corridor","Uscita verso il cortile":"Exit to the courtyard","Cinta del campus":"Campus boundary",
   "«Oggi faccio presa e avambracci. Ti siedi? Due round vinti e puoi dire che mi hai battuto.»":
     "“I’m working on my grip today. Take a seat. Win two rounds and you can say you beat me.”",
+  "Hai conquistato il tavolo del giardino.":"You won at the garden table.",
   "The Dome":"The Dome","Bar · Briscola":"Café · Briscola","Ambienti e attività":"Areas and activities",
   "Il barista ti indica l’aula sotto i portici, sul lato di Via Panama, oltre il piazzale delle facoltà.":"The bartender points you to the study room under the portico, on the Via Panama side past the faculty courtyard."
 });
@@ -70,7 +71,7 @@ const options = {
 };
 const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
 const totalSecrets=14;
-const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
+const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Poker",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
 const won=id=>Boolean(state?.wins[id]);
 const saveKey="ultimo-posto-v1";
@@ -474,6 +475,10 @@ function nativeScene(id){
       ...(t.empatia>=65?[["Presta il tuo caricatore",()=>{carry("Presa condivisa");change("empatia",3);}]]:[]));
     case "t04":return scene("Aula T04",has("Presa condivisa")?"Lo studente del giardino ti fa cenno. Ha tenuto una sedia e trovato una ciabatta.":"C’è una sedia occupata da una felpa. Nessun proprietario in vista. Sul banco accanto c’è un posto libero, lontano dalla presa.",
       reserve(has("Presa condivisa")?"T04, con corrente":"Studio in modalità risparmio",has("Presa condivisa")?"Una presa per due. Funziona meglio di certi lavori di gruppo.":"Il portatile segna 4%. Con carta e penna duri senz’altro più di lui."));
+    case "poker":return scene(local("Tavolo da poker · Giardino","Garden poker table"),
+      local("Nina e Benedetta ti fanno posto. Cinque carte a testa e un solo cambio, fino a tre carte.",
+        "Nina and Benedetta make room. Five cards each and one draw of up to three cards."),
+      [local("Siediti e gioca","Sit down and play"),()=>openChallenge("poker")]);
     case "ping":return scene("Terrazza ping pong","Si gioca a sette punti, con almeno due di vantaggio. Se vinci, il bar ti offre una limonata.",
       ["Gioca a ping pong",()=>openChallenge("ping")],["Allenati",()=>openChallenge("ping",true)]);
     case "lettura":return scene("Pergola di lettura",isFree()||won("bris")?

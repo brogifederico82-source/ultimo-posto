@@ -542,6 +542,11 @@ window.addEventListener("keydown",event=>{
     if(minigame.kind==="arm"&&(key===" "||key==="e")&&event.target!==$("challengeExit")&&event.target!==$("challengeReplay")){
       event.preventDefault();if(!event.repeat)armPush();return;
     }
+    if(minigame.kind==="poker"&&/^[1-5]$/.test(key)){
+      event.preventDefault();
+      if(!event.repeat)togglePokerDiscard(minigame,Number(key)-1);
+      return;
+    }
     if(minigame.kind==="cards"&&/^[123]$/.test(key)){
       event.preventDefault();
       if(!event.repeat)playCard(minigame,0,Number(key)-1);
