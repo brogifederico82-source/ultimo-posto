@@ -92,8 +92,18 @@
 <button id="scopaNext" class="primary" hidden>Prossima smazzata</button>
 <div id="scopaChoices" class="actions"></div>
 </div>
-<div id="pokerTable" hidden><div id="pokerRivals" class="cards-table"></div>
-<button id="pokerDraw" class="primary"></button></div>
+<div id="pokerTable" hidden>
+<div id="holdemSeats" class="holdem-seats"></div>
+<div id="holdemBoard" class="holdem-board"></div>
+<p id="holdemHand" class="holdem-hand"></p>
+<ol id="holdemLog" class="holdem-log" aria-live="polite"></ol>
+<div id="holdemActions" class="actions">
+<button id="holdemFold"></button><button id="holdemCall" class="primary"></button>
+<label id="holdemRaiseLabel"><span id="holdemRaiseText"></span> <input id="holdemRaiseTo" type="number" step="1"></label>
+<button id="holdemRaise"></button>
+</div>
+<button id="holdemNext" class="primary" hidden></button>
+</div>
 <div id="cardHand" class="actions hand" aria-label="Le tue carte"></div>
 </div>
 <p id="challengeStatus" class="challenge-result" role="status" tabindex="-1"></p>

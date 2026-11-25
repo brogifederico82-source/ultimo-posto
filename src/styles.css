@@ -271,3 +271,14 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 
 .gate-warning{padding:10px 14px;border:1px solid #d8a260;border-left:4px solid #d8a260;border-radius:8px;background:#382a2d;color:#ffdfaa}
 #guardOutcome{display:block;width:min(100%,580px);margin:0 auto 12px;border:1px solid #765065;border-radius:12px}
+.holdem-seats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; }
+.holdem-seat { min-width: 0; padding: .45rem; border: 1px solid #927c52; border-radius: .35rem; }
+.holdem-seat strong { display: block; margin-bottom: .35rem; }
+.holdem-seat p, .holdem-hand { margin: .35rem 0; }
+.holdem-board { display: flex; justify-content: center; gap: .35rem; margin: .55rem 0; padding: .55rem; background: #21473b; border: 1px solid #9e8053; border-radius: .45rem; }
+.holdem-card { display: inline-grid; place-items: center; min-width: 1.75rem; min-height: 2.25rem; margin-inline-end: .18rem; border-radius: .2rem; background: #f1deb4; color: #263753; font: bold .85rem monospace; }
+.holdem-card.red { color: #8b2839; }
+.holdem-card.covered { background: #142c26; color: #b99860; border: 1px solid #9e8053; }
+.holdem-log { margin: .45rem 0; padding-inline-start: 1.45rem; color: #e3cfae; font-size: .85rem; }
+#holdemRaiseTo { width: 5rem; }
+#challengeShot.shot-ready { outline: 2px solid #ebc779; outline-offset: 2px; }

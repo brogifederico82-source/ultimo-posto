@@ -121,13 +121,18 @@ function danceInput(move){
     endChallenge(g,g.score>=4?"win":"loss");
     $("danceMeter").value=0;
   }
-  else g.deadline=performance.now()+[1450,1300,1180,1080,1000][g.index];
+  else{
+    const duration=[1450,1300,1180,1080,1000][g.index];
+    g.deadline=performance.now()+duration;
+    $("danceMeter").max=duration;
+    $("danceMeter").value=duration;
+  }
   renderDance();
 }
 function tickDance(now){
   const g=minigame;
   if(g.result)return;
-  if(!g.deadline)g.deadline=now+1450;
+  if(!g.deadline){$("danceMeter").max=1450;g.deadline=now+1450;}
   $("danceMeter").value=Math.max(0,g.deadline-now);
   if(now>=g.deadline)danceInput(-1);
 }
@@ -140,15 +145,15 @@ function openChallenge(id,practice=false){
   if(isDance)minigame={id,kind:"dance",index:0,score:0,result:null,hits:[],steps:Array.from({length:5},()=>Math.floor(Math.random()*4)),deadline:0};
   else if(isArm)minigame=startArm();
   else if(isLoft)minigame=startLoftGame(id);
-  else if(isPoker)minigame=startPoker();
+  else if(isPoker)minigame=startHoldem();
   else minigame=isScopa?startScopa():isCards?startBriscola():startArcade(id);
   minigame.practice=practice;
   $("challengeTitle").textContent=tr(challengeNames[id])+(practice?" · Allenamento":"");
   $("challengeRules").textContent=isScopa?local(
     "Gioca con mouse, tocco o tasti 1, 2, 3. Se puoi fare più prese, scegli quella che preferisci.",
     "Play with mouse, touch, or keys 1, 2, 3. If there are several captures, choose the one you want."
-  ):isPoker?local("Seleziona fino a tre scarti con il mouse, il tocco o i tasti da 1 a 5. Dopo il cambio, vince la mano migliore.",
-    "Select up to three discards with a mouse, touch, or keys 1 to 5. After the draw, the best hand wins."):
+  ):isPoker?local("Bui 1/2. Parti con 100 fiches. Usa la migliore combinazione di cinque carte tra le tue due e le cinque comuni.",
+    "Blinds 1/2. Start with 100 chips. Make the best five-card hand from your two cards and the five community cards."):
     isLoft?loftGames[id].rules:tr(arcadeRules[id]);
   if(practice&&id==="ping")$("challengeRules").textContent=local(
     "Allenamento a 3 punti. Trascina o usa le frecce per muovere la racchetta. Premi Spazio per servire o schiacciare.",
@@ -169,6 +174,7 @@ function openChallenge(id,practice=false){
   $("brisTable").hidden=id!=="bris";
   $("scopaTable").hidden=!isScopa;
   $("pokerTable").hidden=!isPoker;
+  $("cardHand").hidden=isPoker;
   if(isScopa){
     $("scopaHelpTitle").textContent=local("Come si gioca a Scopa","How to play Scopa");
     $("scopaHelpCapture").textContent=local(
@@ -183,14 +189,15 @@ function openChallenge(id,practice=false){
   refreshLanguage();
   court.hidden=isCards||isDance;
   $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm;
+  $("challengeShot").classList.remove("shot-ready");
   $("challengeShot").hidden=isCards||isDance||id==="nastri";
   $("challengeShot").textContent=tr(id==="mattoni"?"Lancia":isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
   $("challengeStatus").textContent="";
   if(!$("challenge").open)$("challenge").showModal();
-  if(isPoker)renderPoker(minigame);
+  if(isPoker)advanceHoldem(minigame);
   if(isDance){renderDance();$("dancePad").querySelector("button").focus();}
   else if(isScopa)renderScopa(true);
-  else if(isPoker)$("pokerDraw").focus();
+  else if(isPoker)$("holdemCall").focus();
   else if(isCards)renderBriscola(true);
   else{if(isArm)paintArm(minigame,performance.now());else if(isLoft)paintLoftGame(minigame);else paintCourt(minigame);court.focus();}
 }
@@ -279,7 +286,7 @@ function arcadeAction(){
     return;
   }
   if(g?.kind!=="arcade"||g.result||g.wait>0||g.kick!==0)return;
-  g.kick=g.id==="ping"?.15:.25;
+  g.kick=g.id==="ping"?(g.practice?.23:.18):.25;
 }
 function arcadePoint(g,player){
   if(player)g.you++;else g.them++;
@@ -452,7 +459,7 @@ function foosReady(g){
 }
 function pingReady(g){
   const b=g.ball,time=(bounds.player-b.y)/b.vy;
-  return !g.result&&b.vy>0&&g.wait===0&&time>=0&&time<=.15&&Math.abs(pingIntercept(b,bounds.player)-g.player)<=23;
+  return !g.result&&b.vy>0&&g.wait===0&&time>=0&&time<=(g.practice?.23:.18)&&Math.abs(pingIntercept(b,bounds.player)-g.player)<=23;
 }
 function paintCourt(g){
   const c=courtInk,ping=g.id==="ping";
@@ -502,6 +509,7 @@ function paintCourt(g){
   }
   rect(c,"#fff1bc",g.ball.x-2,g.ball.y-2,4,4);
   if(!ping){c.font="bold 7px monospace";c.fillStyle="#fff0ba";c.textAlign="center";c.fillText(local("DIFESA","DEFENCE"),160,167);}
+  $("challengeShot").classList.toggle("shot-ready",Boolean(ready||g.pingPlayerServe||(ping&&pingReady(g)))&&!g.result);
   const score=tr("Tu")+" "+g.you+" · "+g.them+" "+tr("Avversario");
   let detail="";
   if(!g.result&&g.rally>0)detail=local("Scambio: ","Rally: ")+g.rally;
@@ -568,7 +576,7 @@ function playCard(g,side,index){
     g.turn=1-side;
     g.note=g.turn===0?"Tocca a te.":"L’avversario sceglie…";
     renderBriscola(g.turn===0);
-    if(g.turn===1)g.timer=setTimeout(()=>rivalCard(g),440);
+    if(g.turn===1)g.timer=setTimeout(()=>rivalCard(g),320);
     return;
   }
   const follower=1-g.leader;
@@ -593,7 +601,7 @@ function playCard(g,side,index){
     g.note=taker===0?"Tocca a te.":"L’avversario apre la mano…";
     renderBriscola(taker===0);
     if(taker===1)g.timer=setTimeout(()=>rivalCard(g),400);
-  },630);
+  },820);
 }
 function rivalCard(g){
   if(g!==minigame)return;
@@ -607,7 +615,9 @@ function rivalCard(g){
 }
 function renderBriscola(focus=false){
   const g=minigame;
-  $("challengeScore").textContent=tr("Tu")+" "+g.score[0]+" · "+g.score[1]+" "+tr("Avversario");
+  const score=tr("Tu")+" "+g.score[0]+" · "+g.score[1]+" "+tr("Avversario");
+  $("challengeScore").textContent=g.score[0]<61&&!g.result?
+    score+" · "+(61-g.score[0])+local(" punti per vincere"," points to win"):score;
   $("trump").textContent=g.deck.length?cardName(g.trump):tr(g.trump.suit);
   $("deckCount").textContent=g.deck.length+local(" da pescare · Mano "," left · Trick ")+Math.min(g.tricks+(g.phase==="trick"?0:1),20)+"/20";
   $("playedPlayer").textContent=cardName(g.table[0]);
@@ -796,94 +806,3 @@ function renderScopa(focusHand=false,focusCapture=false){
   if(focusCapture)captures.querySelector("button")?.focus();
   else if(focusHand)hand.querySelector("button:not(:disabled)")?.focus();
 }
-
-const pokerSuits=["♣","♦","♥","♠"];
-const pokerCategories=[
-  ["Carta alta","High card"],["Coppia","One pair"],["Doppia coppia","Two pair"],
-  ["Tris","Three of a kind"],["Scala","Straight"],["Colore","Flush"],["Full","Full house"],
-  ["Poker","Four of a kind"],["Scala colore","Straight flush"]
-];
-function startPoker(){
-  const deck=shuffleCards(pokerSuits.flatMap(suit=>Array.from({length:13},(_,index)=>({suit,rank:index+2}))));
-  return {id:"poker",kind:"poker",deck,hands:Array.from({length:3},()=>deck.splice(0,5)),discards:new Set(),result:null};
-}
-function pokerRank(hand){
-  const ranks=hand.map(card=>card.rank).sort((a,b)=>b-a);
-  const unique=[...new Set(ranks)];
-  const groups=unique.map(rank=>({rank,count:ranks.filter(value=>value===rank).length}))
-    .sort((a,b)=>b.count-a.count||b.rank-a.rank);
-  const flush=hand.every(card=>card.suit===hand[0].suit);
-  const straight=unique.length===5&&(ranks[0]-ranks[4]===4?ranks[0]:ranks.join(",")==="14,5,4,3,2"?5:0);
-  if(flush&&straight)return [8,straight];
-  if(groups[0].count===4)return [7,groups[0].rank,groups[1].rank];
-  if(groups[0].count===3&&groups[1].count===2)return [6,groups[0].rank,groups[1].rank];
-  if(flush)return [5,...ranks];
-  if(straight)return [4,straight];
-  const category=groups[0].count===3?3:groups[1].count===2?2:groups[0].count===2?1:0;
-  return [category,...groups.map(group=>group.rank)];
-}
-function comparePoker(a,b){
-  for(let index=0;index<a.length;index++){
-    if(a[index]!==b[index])return a[index]-b[index];
-  }
-  return 0;
-}
-function pokerRivalDiscards(hand){
-  if(pokerRank(hand)[0]>=4)return [];
-  return hand.map((card,index)=>({card,index})).filter(({card})=>hand.every(other=>other===card||other.rank!==card.rank))
-    .sort((a,b)=>a.card.rank-b.card.rank).slice(0,3).map(({index})=>index);
-}
-function togglePokerDiscard(g,index){
-  if(g.result)return;
-  if(g.discards.has(index))g.discards.delete(index);
-  else if(g.discards.size<3)g.discards.add(index);
-  renderPoker(g,index);
-}
-function drawPoker(){
-  const g=minigame;
-  if(g?.kind!=="poker"||g.result)return;
-  const changes=[[...g.discards],...g.hands.slice(1).map(pokerRivalDiscards)];
-  for(const [seat,indices] of changes.entries())for(const index of indices)g.hands[seat][index]=g.deck.pop();
-  g.ranks=g.hands.map(pokerRank);
-  const comparisons=g.ranks.slice(1).map(rank=>comparePoker(g.ranks[0],rank));
-  endChallenge(g,comparisons.some(value=>value<0)?"loss":comparisons.includes(0)?"tie":"win");
-  renderPoker(g);
-}
-function pokerCardLabel(card){
-  return ({11:"J",12:"Q",13:"K",14:"A"})[card.rank]??String(card.rank);
-}
-function renderPoker(g,focus){
-  const hand=$("cardHand");
-  hand.replaceChildren();
-  const rivals=$("pokerRivals");
-  rivals.replaceChildren();
-  for(const [index,name] of ["Nina","Benedetta"].entries()){
-    const label=document.createElement("p");
-    const seat=index+1;
-    label.textContent=g.result?name+" · "+g.hands[seat].map(card=>pokerCardLabel(card)+card.suit).join(" ")+
-      " · "+local(...pokerCategories[g.ranks[seat][0]]):name+" · "+local("5 carte coperte","5 face-down cards");
-    rivals.append(label);
-  }
-  for(const [index,card] of g.hands[0].entries()){
-    const button=document.createElement("button");
-    button.textContent=(g.result?"":(index+1)+". ")+pokerCardLabel(card);
-    const suit=document.createElement("span");
-    suit.className="card-suit";
-    suit.textContent=card.suit;
-    button.append(suit);
-    button.dataset.suit=card.suit==="♦"?"Denari":card.suit==="♥"?"Coppe":card.suit==="♠"?"Spade":"Bastoni";
-    if(g.result){
-      button.disabled=true;
-    }else{
-      button.setAttribute("aria-pressed",String(g.discards.has(index)));
-      button.onclick=()=>togglePokerDiscard(g,index);
-    }
-    hand.append(button);
-  }
-  $("challengeScore").textContent=local("La tua mano · ","Your hand · ")+local(...pokerCategories[pokerRank(g.hands[0])[0]]);
-  const draw=$("pokerDraw");
-  draw.hidden=Boolean(g.result);
-  draw.textContent=g.discards.size?local("Cambia carte","Draw cards")+" ("+g.discards.size+")":local("Tieni le carte e scopri","Keep cards and reveal");
-  if(focus!==undefined)hand.children[focus].focus();
-}
-$("pokerDraw").onclick=drawPoker;
