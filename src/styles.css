@@ -282,3 +282,11 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 .holdem-log { margin: .45rem 0; padding-inline-start: 1.45rem; color: #e3cfae; font-size: .85rem; }
 #holdemRaiseTo { width: 5rem; }
 #challengeShot.shot-ready { outline: 2px solid #ebc779; outline-offset: 2px; }
+
+.race-horses { display: grid; gap: .55rem; margin: .6rem 0; }
+.race-horses > div { display: grid; grid-template-columns: minmax(9rem, 1fr) minmax(5rem, 2fr); align-items: center; gap: .55rem; }
+.race-horses button[aria-pressed="true"] { border-color: #ebc779; box-shadow: inset 0 -2px #ebc779; }
+.race-track { position: relative; height: 1.8rem; margin-inline: .8rem; border-bottom: 2px dashed #927c52; }
+.race-track::after { content: ""; position: absolute; right: 0; inset-block: 0; border-right: 2px dotted #f1deb4; }
+.race-track span { position: absolute; left: 0; transform: translateX(-50%); z-index: 1; color: #f1deb4; font-size: 1.5rem; line-height: 1.6rem; }
+#raceStake { width: 4rem; }

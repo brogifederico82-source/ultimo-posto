@@ -140,19 +140,22 @@ for(const [i,button] of [...$("dancePad").querySelectorAll("button")].entries())
 function openChallenge(id,practice=false){
   keys.clear();controls.clear();
   const isLoft=Object.hasOwn(loftGames,id);
-  const isScopa=id==="scopa",isPoker=id==="poker",isCards=id==="bris"||isScopa||isPoker,isDance=id==="dance",isArm=id==="arm";
+  const isRace=id==="cavalli",isScopa=id==="scopa",isPoker=id==="poker",isCards=id==="bris"||isScopa||isPoker,isDance=id==="dance",isArm=id==="arm";
   $("dancePad").hidden=!isDance;
   if(isDance)minigame={id,kind:"dance",index:0,score:0,result:null,hits:[],steps:Array.from({length:5},()=>Math.floor(Math.random()*4)),deadline:0};
   else if(isArm)minigame=startArm();
   else if(isLoft)minigame=startLoftGame(id);
   else if(isPoker)minigame=startHoldem();
+  else if(isRace)minigame=startVialeRace();
   else minigame=isScopa?startScopa():isCards?startBriscola():startArcade(id);
   minigame.practice=practice;
   $("challengeTitle").textContent=tr(challengeNames[id])+(practice?" · Allenamento":"");
   $("challengeRules").textContent=isScopa?local(
     "Gioca con mouse, tocco o tasti 1, 2, 3. Se puoi fare più prese, scegli quella che preferisci.",
     "Play with mouse, touch, or keys 1, 2, 3. If there are several captures, choose the one you want."
-  ):isPoker?local("Bui 1/2. Parti con 100 fiches. Usa la migliore combinazione di cinque carte tra le tue due e le cinque comuni.",
+  ):isRace?local("Scegli il vincente. Puoi puntare da 0 a 5 monete del campus. La quota indica il totale restituito in caso di vittoria.",
+    "Pick the winner. Stake 0 to 5 campus coins. The odds are the total payout if your horse wins."):
+    isPoker?local("Bui 1/2. Parti con 100 fiches. Usa la migliore combinazione di cinque carte tra le tue due e le cinque comuni.",
     "Blinds 1/2. Start with 100 chips. Make the best five-card hand from your two cards and the five community cards."):
     isLoft?loftGames[id].rules:tr(arcadeRules[id]);
   if(practice&&id==="ping")$("challengeRules").textContent=local(
@@ -167,6 +170,7 @@ function openChallenge(id,practice=false){
   );
   $("challengeReplay").hidden=true;
   $("cardGame").hidden=!isCards;
+  $("racePanel").hidden=!isRace;
   $("brisLegend").hidden=id!=="bris";
   $("brisLegend").open=id==="bris";
   $("scopaLegend").hidden=!isScopa;
@@ -187,10 +191,10 @@ function openChallenge(id,practice=false){
     );
   }
   refreshLanguage();
-  court.hidden=isCards||isDance;
-  $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm;
+  court.hidden=isCards||isDance||isRace;
+  $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm||isRace;
   $("challengeShot").classList.remove("shot-ready");
-  $("challengeShot").hidden=isCards||isDance||id==="nastri";
+  $("challengeShot").hidden=isCards||isDance||isRace||id==="nastri";
   $("challengeShot").textContent=tr(id==="mattoni"?"Lancia":isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
   $("challengeStatus").textContent="";
   if(!$("challenge").open)$("challenge").showModal();
@@ -198,6 +202,7 @@ function openChallenge(id,practice=false){
   if(isDance){renderDance();$("dancePad").querySelector("button").focus();}
   else if(isScopa)renderScopa(true);
   else if(isPoker)$("holdemCall").focus();
+  else if(isRace)renderVialeRace(minigame);
   else if(isCards)renderBriscola(true);
   else{if(isArm)paintArm(minigame,performance.now());else if(isLoft)paintLoftGame(minigame);else paintCourt(minigame);court.focus();}
 }

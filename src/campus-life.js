@@ -35,6 +35,17 @@ function joinRomaniaEntrance(map){
   );
   return map;
 }
+function addVialeArcade(map){
+  for(const [zone,x,y] of [["ingresso",24,17],["giardino",32,86]]){
+    const area=map.zones[zone];
+    if(!area||x+2>area.width||y>=area.height||(zone==="giardino"&&!area.objects.some(o=>o.uid==="viale-ingresso-start")))continue;
+    const uid=zone+"-sala-giochi";
+    if(area.objects.some(o=>o.uid===uid||o.solid&&o.x<x+2&&o.x+(o.w??1)>x&&o.y<y+1&&o.y+(o.h??1)>y))continue;
+    area.objects.push({uid,kind:"booth",name:"Sala giochi · Viale Romania",x,y,w:2,h:1,
+      color:"#8b527e",solid:true,action:"native",native:"cavalli",gate:"",target:"",route:[],rotation:0,variant:0});
+  }
+  return map;
+}
 function hasIntegratedEntrance(){
   return Boolean(campus.zones.giardino?.objects.some(o=>o.uid==="viale-ingresso-start"));
 }

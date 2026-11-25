@@ -71,7 +71,7 @@ const options = {
 };
 const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
 const totalSecrets=14;
-const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Texas Hold’em",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
+const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Texas Hold’em",cavalli:"Cavalli virtuali",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
 const won=id=>Boolean(state?.wins[id]);
 const saveKey="ultimo-posto-v1";
@@ -486,6 +486,10 @@ function nativeScene(id){
       ...(t.empatia>=65?[["Presta il tuo caricatore",()=>{carry("Presa condivisa");change("empatia",3);}]]:[]));
     case "t04":return scene("Aula T04",has("Presa condivisa")?"Lo studente del giardino ti fa cenno. Ha tenuto una sedia e trovato una ciabatta.":"C’è una sedia occupata da una felpa. Nessun proprietario in vista. Sul banco accanto c’è un posto libero, lontano dalla presa.",
       reserve(has("Presa condivisa")?"T04, con corrente":"Studio in modalità risparmio",has("Presa condivisa")?"Una presa per due. Funziona meglio di certi lavori di gruppo.":"Il portatile segna 4%. Con carta e penna duri senz’altro più di lui."));
+    case "cavalli":return scene(local("Sala giochi · Viale Romania","Arcade · Viale Romania"),
+      local("Sul monitor ci sono quattro cavalli virtuali. Scegline uno e guarda la corsa. Puoi usare le monete del campus oppure correre gratis.",
+        "Four virtual horses are on the screen. Pick one and watch the race. Use campus coins or race for free."),
+      [local("Vai alle corse","Go to the races"),()=>openChallenge("cavalli")]);
     case "poker":return scene(local("Tavolo da poker · Giardino","Garden poker table"),
       local("Nina e Benedetta ti fanno posto. Due carte a testa, cinque comuni e 100 fiches per sederti.",
         "Nina and Benedetta make room. Two cards each, five community cards and 100 chips to sit down."),

@@ -492,6 +492,7 @@ function frame(now){
     if(minigame?.kind==="loft")tickLoftGame(now);
     if(minigame?.kind==="arm")tickArm(now);
     if(minigame?.kind==="dance")tickDance(now);
+    if(minigame?.kind==="cavalli")tickVialeRace(minigame,now);
     if(state.ending?.guard)paintGuardOutcome(now);
     else if(!minigame)draw(now);
   }
