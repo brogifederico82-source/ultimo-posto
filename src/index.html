@@ -135,6 +135,16 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <output id="raceReturn"></output>
 </div>
 </section>
+<section id="virtualPanel" hidden>
+<p id="virtualScore" class="race-signal"></p>
+<div id="virtualMarkets" class="virtual-markets"></div>
+<div class="actions" id="virtualTicket">
+<label><span id="virtualStakeText"></span> <input id="virtualStake" type="number" min="0" max="5" step="1" value="0"></label>
+<button id="virtualStart" class="primary"></button>
+<output id="virtualReturn"></output>
+</div>
+<ol id="virtualGoals" class="virtual-goals"></ol>
+</section>
 <p id="challengeStatus" class="challenge-result" role="status" tabindex="-1"></p>
 <div class="actions challenge-controls">
 <button id="challengeLeft" aria-label="Sposta a sinistra">←</button><button id="challengeRight" aria-label="Sposta a destra">→</button>

@@ -356,3 +356,10 @@ button, select, input { font-family: var(--interface); }
   background: repeating-conic-gradient(#e9f0fa 0% 25%, #101a2e 0% 50%) 0 / 5px 5px;
 }
 .race-track span { text-shadow: 1px 2px #060b15, 0 0 7px var(--runner-color); }
+
+.virtual-markets { display: grid; gap: .35rem; margin: .6rem 0; }
+.virtual-markets > div { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+.virtual-markets strong { min-width: 8rem; }
+.virtual-markets button[aria-pressed="true"] { border-color: #8ad5ff; background: #254b7f; }
+.virtual-goals { padding-inline-start: 1.6rem; max-height: 8rem; overflow: auto; }
+#virtualStake { width: 4rem; }

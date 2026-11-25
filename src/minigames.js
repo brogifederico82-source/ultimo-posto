@@ -141,13 +141,14 @@ for(const [i,button] of [...$("dancePad").querySelectorAll("button")].entries())
 function openChallenge(id,practice=false){
   keys.clear();controls.clear();
   const isLoft=Object.hasOwn(loftGames,id);
-  const isCalcetto=id==="calcetto",isRace=id==="cavalli",isScopa=id==="scopa",isPoker=id==="poker",isCards=id==="bris"||isScopa||isPoker,isDance=id==="dance",isArm=id==="arm";
+  const isVirtual=id==="virtuali",isCalcetto=id==="calcetto",isRace=id==="cavalli",isScopa=id==="scopa",isPoker=id==="poker",isCards=id==="bris"||isScopa||isPoker,isDance=id==="dance",isArm=id==="arm";
   $("dancePad").hidden=!isDance;
   if(isDance)minigame={id,kind:"dance",index:0,score:0,result:null,hits:[],steps:Array.from({length:5},()=>Math.floor(Math.random()*4)),deadline:0};
   else if(isArm)minigame=startArm();
   else if(isLoft)minigame=startLoftGame(id);
   else if(isPoker)minigame=startHoldem();
   else if(isRace)minigame=startVialeRace();
+  else if(isVirtual)minigame=startVirtualFootball();
   else if(isCalcetto)minigame=startCalcetto();
   else minigame=isScopa?startScopa():isCards?startBriscola():startArcade(id);
   minigame.practice=practice;
@@ -157,6 +158,8 @@ function openChallenge(id,practice=false){
     "Play with mouse, touch, or keys 1, 2, 3. If there are several captures, choose the one you want."
   ):isCalcetto?local("←/→ o A/D per muoverti, ↑ o W per saltare, Spazio per tirare. Vince chi arriva a "+(practice?3:5)+" gol o è avanti allo scadere.",
     "Use ←/→ or A/D to move, ↑ or W to jump and Space to shoot. Reach "+(practice?3:5)+" goals or lead when time runs out."):
+    isVirtual?local("Scegli un esito e punta fino a 5 monete del campus. A zero guardi gratis.",
+      "Pick one outcome and stake up to 5 campus coins. Set zero to watch for free."):
     isRace?local("Scegli il vincente. Puoi puntare da 0 a 5 monete del campus. La quota indica il totale restituito in caso di vittoria.",
     "Pick the winner. Stake 0 to 5 campus coins. The odds are the total payout if your horse wins."):
     isPoker?local("Bui 1/2. Parti con 100 fiches. Usa la migliore combinazione di cinque carte tra le tue due e le cinque comuni.",
@@ -176,6 +179,7 @@ function openChallenge(id,practice=false){
   $("challengeReplay").hidden=true;
   $("cardGame").hidden=!isCards;
   $("racePanel").hidden=!isRace;
+  $("virtualPanel").hidden=!isVirtual;
   $("brisLegend").hidden=id!=="bris";
   $("brisLegend").open=id==="bris";
   $("scopaLegend").hidden=!isScopa;
@@ -196,12 +200,12 @@ function openChallenge(id,practice=false){
     );
   }
   refreshLanguage();
-  court.hidden=isCards||isDance||isRace;
-  $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm||isRace;
+  court.hidden=isCards||isDance||isRace||isVirtual;
+  $("challengeLeft").hidden=$("challengeRight").hidden=isCards||isDance||isArm||isRace||isVirtual;
   $("calcettoJump").hidden=!isCalcetto;
   $("calcettoJump").textContent=local("Salta","Jump");
   $("challengeShot").classList.remove("shot-ready");
-  $("challengeShot").hidden=isCards||isDance||isRace||id==="nastri";
+  $("challengeShot").hidden=isCards||isDance||isRace||isVirtual||id==="nastri";
   $("challengeShot").textContent=tr(id==="mattoni"?"Lancia":isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
   $("challengeStatus").textContent="";
   if(!$("challenge").open)$("challenge").showModal();
@@ -210,6 +214,7 @@ function openChallenge(id,practice=false){
   else if(isScopa)renderScopa(true);
   else if(isPoker)$("holdemCall").focus();
   else if(isRace)renderVialeRace(minigame);
+  else if(isVirtual)renderVirtualFootball(minigame);
   else if(isCalcetto){paintCalcetto(minigame);court.focus();}
   else if(isCards)renderBriscola(true);
   else{if(isArm)paintArm(minigame,performance.now());else if(isLoft)paintLoftGame(minigame);else paintCourt(minigame);court.focus();}
