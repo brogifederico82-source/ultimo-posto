@@ -75,3 +75,5 @@ Usa WASD, le frecce o i comandi accanto alla mappa. Premi E oppure clicca il per
 Porte e scale si percorrono con una sola interazione. Le domande precedentemente visibili nella bacheca si trovano ora nel ripasso orale dei docenti in aula. I vialetti e i margini di Viale Romania sono stati ridisegnati sulla base della planimetria già citata.
 
 Dal LOFT, interagisci con il cabinato per giocare a Pixel Mattoni o Salva i nastri. Ping pong e biliardino hanno partite di allenamento più brevi contro un avversario più lento. Puoi muovere la racchetta o le stecche anche trascinando sul campo. La guida Dov’è il «Guagliò!» nella mappa elenca tutti e cinque gli incontri.
+
+Il [LOFT Luiss](https://www.luiss.it/it/ateneo/luiss-life/studentesse-e-studenti-iscritti/digital-skills/loft) è all’ultimo piano. Nel gioco si raggiunge dall’atrio, usando le scale di ogni piano. La navata di Aula Chiesa riprende la funzione originaria dell’edificio; l’assetto dei banchi e della sala polivalente è una ricostruzione giocabile. Per le voci horror si usa una voce italiana disponibile sul dispositivo in attesa di una registrazione originale.

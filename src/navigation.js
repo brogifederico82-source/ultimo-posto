@@ -3,7 +3,7 @@ const campusWaypoints={
   ingresso:()=>has("Via libera")?"ingresso-varco":"ingresso-guardia",
   giardino:()=>{
     if(!has("Colloquio tutor"))return "tutor-entry";
-    if(!has("Lezione A200"))return "giardino-evento";
+    if(!has("Lezione A200"))return "romania-a200-porta";
     if(!has("Progetto LOFT"))return "giardino-terra";
     return has("Seminario Parenzo")?"carsharing-romania":"navetta-sign";
   },

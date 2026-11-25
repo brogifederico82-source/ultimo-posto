@@ -550,6 +550,27 @@ const campusPortraits={
   "parenzo-interno-npc":{capelli:1,tinta:3,pelle:1,occhi:0,volto:2,accessorio:3,taglio:2,abito:4},
   "pola-cortile-npc":{capelli:6,tinta:0,pelle:3,occhi:3,volto:1,accessorio:0,taglio:2,abito:0}
 };
+function characterSeed(uid){
+  let hash=2166136261;
+  for(const ch of uid)hash=Math.imul(hash^ch.codePointAt(0),16777619);
+  return hash>>>0;
+}
+function characterAppearance(o){
+  const seed=characterSeed(o.uid);
+  const role=o.kind;
+  if(role==="guard")return {...guard,taglio:2,dettaglio:3,pantaloni:0};
+  const professor=role==="professor";
+  return {...student,capelli:(seed>>>3)%8,pelle:(seed>>>8)%4,occhi:(seed>>>11)%4,
+    tinta:professor&&seed%3===0?3:(seed>>>18)%5,volto:(seed>>>20)%3,
+    corpo:role==="athlete"?2:(seed>>>24)%3,abito:seed%5,
+    accessorio:role==="sportGlasses"?6:professor&&seed%2===0?3:(seed>>>16)%6,
+    taglio:professor?2:(seed>>>23)%4,pantaloni:(seed>>>26)%4,
+    scarpe:(seed>>>28)%3,zaino:professor?0:(seed>>>26)%4,lenti:o.variant,
+    ...campusPortraits[o.uid]};
+}
+function characterCoat(o){
+  return o.kind==="guard"||Object.hasOwn(campusPortraits,o.uid)?undefined:o.color;
+}
 function paintSpeaker(now){
   const canvas=$("speakerPortrait");
   if(canvas.hidden)return;
@@ -557,12 +578,10 @@ function paintSpeaker(now){
   if(!o)return;
   const c=canvas.getContext("2d");
   const colors=["#6c5d87","#77614d","#476c73","#5e7255"];
-  const seed=Array.from(o.uid).reduce((sum,ch)=>sum+ch.codePointAt(0),0);
+  const seed=characterSeed(o.uid);
   const beat=reducedMotion?0:Math.floor(now/170)%4;
   const moving=o.native==="trend";
-  const portrait=campusPortraits[o.uid];
-  const a=o.kind==="guard"?guard:{...student,capelli:seed%8,pelle:(seed>>>2)%4,occhi:(seed>>>4)%4,
-    tinta:seed%5,volto:seed%3,abito:seed%5,accessorio:seed%6,taglio:o.kind==="professor"?2:seed%4,zaino:0,...portrait};
+  const a=characterAppearance(o);
   const {width,height}=canvas;
   const middle=width/2, baseline=height-17;
   c.fillStyle="#172331";c.fillRect(0,0,width,height);
@@ -571,7 +590,7 @@ function paintSpeaker(now){
   c.fillStyle="#101923";c.beginPath();c.ellipse(middle,baseline+4,64,10,0,0,Math.PI*2);c.fill();
   const gesture=moving?[0,-10,4,10][beat]:o.kind==="professor"&&beat===1?2:0;
   sprite(c,a,middle+gesture,baseline-(moving&&beat%2?6:0),moving?beat%3:0,"down",4.55,
-    o.kind==="guard"||portrait?undefined:o.color);
+    characterCoat(o));
 }
 function renderScene(){
   const scene=getScene();

@@ -616,7 +616,10 @@ function checkCampusSurprise(){
   if(audioOn&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
     surpriseVoice=new SpeechSynthesisUtterance(encounter.voice);
     surpriseVoice.lang="it-IT";
-    surpriseVoice.rate=1.12;
+    const italian=window.speechSynthesis.getVoices().filter(voice=>/^it(-|_)/i.test(voice.lang));
+    const voice=italian.find(candidate=>candidate.localService&&/enhanced|premium|natural/i.test(candidate.name))??italian.find(candidate=>candidate.localService)??italian[0];
+    if(voice)surpriseVoice.voice=voice;
+    surpriseVoice.rate=1.04;
     surpriseVoice.volume=.55;
     window.speechSynthesis.speak(surpriseVoice);
   }
