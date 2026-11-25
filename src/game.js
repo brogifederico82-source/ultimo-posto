@@ -515,13 +515,15 @@ function nativeScene(id){
         state.shuttleTicket?["Mostra il QR e sali",()=>{state.shuttleTicket=false;record("Navetta · Arrivo a Parenzo");travel("parenzo","shuttle");}]:
           ["Prenota Romania → Parenzo",()=>{state.shuttleTicket=true;record("Navetta · Prenotazione confermata, QR disponibile.");}]);
     case "sociologia":
-      return scene("Arianna · Osservazione sul campo",
+      return scene("Arianna · Sociologia della comunicazione",
         has("Taccuino di Goffman")?"«Al prossimo seminario porto la tua nota. Anche la fila al bar ha un retroscena.»":
           "«Sto osservando come cambia il modo di parlare quando passa un professore. Tu dove cercheresti il retroscena?»",
         ["Vicino alla macchinetta del caffè",()=>{carry("Taccuino di Goffman");discover("goffman","Il retroscena della macchinetta");}],
+        ["Perché lo stesso messaggio politico divide il pubblico?",()=>{state.chatTopic={uid:activeScene,prompt:"Perché lo stesso messaggio politico divide il pubblico?",reply:"«Chi ascolta seleziona indizi diversi. Un titolo mette in primo piano il costo, un altro chi ne beneficia. La scelta di quel primo piano orienta la discussione.»"};}],
         ["Davanti al microfono di Radio Luiss",()=>{state.chatTopic={uid:activeScene,prompt:"Davanti al microfono di Radio Luiss.",reply:"«Ottimo esempio di ribalta. Prova a riascoltare quello che dicono quando il microfono si spegne.»"};}]);
     case "radio":
-      return scene("Radio Luiss · Fuori onda","«Stiamo registrando i rumori del campus. Per il momento il tornello è il nostro miglior ospite.»",
+      return scene("Tommaso · Radio Luiss","«Conduco una trasmissione della radio studentesca. Stamattina il tornello ha fatto una prova microfono senza avvisarci.»",
+        ["Che cos’è Luiss Weekend?",()=>{state.chatTopic={uid:activeScene,prompt:"Che cos’è Luiss Weekend?",reply:"«Il podcast settimanale dell’Ufficio stampa, con commenti dei docenti. Su Radio Luiss va in onda il lunedì alle 13:00. La prova che il weekend, se lo monti bene, arriva fino a lunedì.»"};}],
         ["Da dove viene la sigla?",()=>{state.chatTopic={uid:activeScene,prompt:"Da dove viene la sigla?",reply:"«Tre note al sintetizzatore, una porta che sbatte e il barista che dice: chi è il prossimo?»"};}],
         ["Racconta un fatto dal campus",()=>{carry("Pass Radio Luiss");record("Radio Luiss · La leggenda della presa occupata.");state.chatTopic={uid:activeScene,prompt:"Ti racconto della presa occupata.",reply:"«Dai, siediti. Puntata speciale sulle risorse scarse: tre prese, ventidue fuorisede.»"};}]);
     case "carsharing":

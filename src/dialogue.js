@@ -209,6 +209,25 @@ function addConversation(scene,o,profile){
     choices:[...scene.choices,...topics.map(([prompt,reply])=>speechChoice(o,prompt,reply))]};
 }
 
+
+const campusEpilogue={
+  "tutor-viola":"«Hai restituito quel che ti avevano prestato?» Viola sorride. «La sedia, intendo. Gli appunti puoi passarli avanti.»",
+  "prof-storia":"«Ti ricordi quando cercavi la data giusta?» Serra chiude il registro. «A Pola hai trovato anche il tempo giusto per fare una pausa.»",
+  "radio-tommaso":"«Ho tenuto dieci secondi del cortile dopo il brindisi. Si sente l’acqua e niente altro. È il pezzo più difficile da tagliare.»"
+};
+const campusSmallStories={
+  "mensa-ada":["Leggi il cartellino del cucchiaio","Sotto il porta-posate c’è scritto: «Cucchiaio di riserva. In caso di esame, rompere il vetro». Il vetro è un tovagliolo."],
+  "portico-reader":["Controlla il segnaposto","Sul tavolo c’è un biglietto: «Torno tra cinque minuti». Sotto, a matita: «Anno accademico da definire»."],
+  "courtyard-foos":["Guarda sotto il segnapunti","Un foglietto recita: «La stecca che cigola ha diritto a un appello straordinario». Qualcuno ha aggiunto «con riserva»."]
+};
+function campusOptionalScene(sceneData,o){
+  const optional=campusSmallStories[o.uid];
+  if(optional)sceneData.choices.push(speechChoice(o,optional[0],optional[1]));
+  const memory=has("Festa a Pola")?campusEpilogue[o.uid]:null;
+  if(memory)sceneData.choices.push(speechChoice(o,"Ripensa alla festa di Pola",memory));
+  return sceneData;
+}
+
 function getScene(){
   if(state.prologue)return openingScene();
   if(state.ending?.guard)return scene(state.ending.title,state.ending.text,["Riprova dall’ingresso",()=>{
@@ -231,11 +250,11 @@ function getScene(){
   if(gateLocked(o.gate))return scene(o.name,"Per sbloccarlo, vinci a "+challengeNames[o.gate].toLowerCase()+".");
   const note=o.text||"Sei vicino a "+o.name+".";
   if((!o.action||o.action==="dialog")&&kindLayer(o)==="persone"&&!isVehicle(o)){
-    return addConversation(scene(o.name,o.text||"«Hai un minuto? Sono appena uscito da lezione.»"),o,conversationFor(o));
+    return campusOptionalScene(addConversation(scene(o.name,o.text||"«Hai un minuto? Sono appena uscito da lezione.»"),o,conversationFor(o)),o);
   }
   if(o.action==="native"){
     if(Object.hasOwn(teachingRooms,o.native))return teachingScene(o.native);
-    const result=nativeScene(o.native);
+    const result=campusOptionalScene(nativeScene(o.native),o);
     if(o.native==="navetta"||o.native==="autista")return result;
     if(originalMap.zones[state.zone]?.objects.find(item=>item.uid===o.uid)?.name!==o.name)result.title=o.name;
     const profile=(o.native==="radio"?null:conversationFor(o))??(Object.hasOwn(nativeConversations,o.native)?[result.text,...nativeConversations[o.native]]:null);
