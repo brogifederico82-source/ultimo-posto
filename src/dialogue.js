@@ -165,7 +165,7 @@ const conversations={
   "mensa-vittorio":["«Mi ero messo in fila per il pranzo. A metà ho cominciato a ripassare e ormai questa è la mia aula.»",
     ["Com’è il piatto del giorno?","«Compatto. Se lo lasci nel piatto, conserva la forma.»"],
     ["C’è un tavolo nel chiostro?","«Uno in fondo. Prima bisogna riportare due vassoi, poi è tutto tuo.»"]],
-  "walker-0":["«Sono Giulia. Se senti qualcuno chiedere se “l’esame sarà uguale all’anno scorso”, l’ho già chiesto io.»",
+  "walker-0":["«Se senti qualcuno chiedere se “l’esame sarà uguale all’anno scorso”, l’ho già chiesto io.»",
     ["Che cosa vi hanno risposto?","«Che dipende da come interpretiamo “uguale”. Da allora abbiamo un’altra domanda.»"]],
   "walker-1":["«Cerco la presa dietro il ficus. Se non funziona passo al piano B. Ho portato una penna.»",
     ["Com’è il Dome per studiare?","«Bello, se arrivi prima del gruppo con i computer tutti scarichi.»"]],
@@ -512,6 +512,7 @@ function frame(now){
     if(minigame?.kind==="loft")tickLoftGame(now);
     if(minigame?.kind==="arm")tickArm(now);
     if(minigame?.kind==="dance")tickDance(now);
+    if(minigame?.kind==="cavalli")tickVialeRace(minigame,now);
     if(state.ending?.guard)paintGuardOutcome(now);
     else if(!minigame)draw(now);
   }
@@ -596,11 +597,6 @@ window.addEventListener("keydown",event=>{
     if(minigame.kind==="dance"&&danceKeys.includes(key)){event.preventDefault();if(!event.repeat)danceInput(danceKeys.indexOf(key));return;}
     if(minigame.kind==="arm"&&(key===" "||key==="e")&&event.target!==$("challengeExit")&&event.target!==$("challengeReplay")){
       event.preventDefault();if(!event.repeat)armPush();return;
-    }
-    if(minigame.kind==="poker"&&/^[1-5]$/.test(key)){
-      event.preventDefault();
-      if(!event.repeat)togglePokerDiscard(minigame,Number(key)-1);
-      return;
     }
     if(minigame.kind==="cards"&&/^[123]$/.test(key)){
       event.preventDefault();
