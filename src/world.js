@@ -161,6 +161,10 @@ function loadCampus(){
       if(!embedded&&map.zones.giardino?.objects.some(o=>o.uid==="giardino-from-ingresso")){
         for(const id of ["aula-chiesa","polivalente","loft"]){
           const saved=map.zones[id], prior=priorInteriors.zones[id];
+          if(id==="loft"&&saved?.width===25&&saved.height===15&&gardenFingerprint(saved.objects)===3322590601){
+            saved.objects=structuredClone(originalMap.zones.loft.objects);
+            continue;
+          }
           if(saved&&saved.height===prior.height&&saved.width===prior.width&&
             gardenFingerprint(saved.objects)===gardenFingerprint(prior.objects)){
             map.zones[id]=structuredClone(originalMap.zones[id]);

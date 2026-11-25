@@ -23,3 +23,11 @@ Le scale tra atrio e LOFT hanno frecce alte e basse distinguibili dai simboli de
 ## Riferimenti ancora necessari
 
 La planimetria in `src/plan.webp` indica il perimetro, l'ingresso principale, il bar, Aula Chiesa, The Dome e Via Panama. La guida CIAC citata nel README descrive l'itinerario pedonale verso The Dome. La pianta non identifica le uscite dei singoli piani né la disposizione interna del LOFT. Le modifiche grafiche sopra descrivono collegamenti del gioco. Per spostare gli accessi reali con precisione serve una fonte di dettaglio o una decisione sull'adattamento.
+
+## Ciclo 3 · Arredi del LOFT
+
+Sedute alle postazioni coding e laboratorio e davanti allo schermo. Sono arredi di gioco coerenti con le attività documentate nel README. Visionato il confronto prima/dopo. Ripetute le verifiche Playwright e verificata la migrazione dell'impronta `3322590601` con pianta standard e con postazione personalizzata. Tutte le zone restano entro 144 × 144 e 20.000 oggetti.
+
+## Questioni aperte
+
+Una ricostruzione più precisa di ingressi, scalinata e corridoio A200–A203 richiede di scegliere fra una ricostruzione documentata con planimetrie di piano e un adattamento dichiaratamente ludico. I dettagli reali restano in sospeso in attesa di questa scelta. La varietà delle aule e le prestazioni su telefono rimangono da approfondire.

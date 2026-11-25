@@ -48,6 +48,12 @@ function furnishCampusInteriors(map){
     add(loft,"loft-proiezione","board","Sala cinema",19,10,{w:4,action:"dialog",text:"La sala proiezioni è dall’altro lato della vetrata. Qui vicino trovi il cabinato."});
     add(loft,"loft-tappeto","paving","Zona di lavoro",6,6,{w:10,h:4,color:"#77748a"});
   }
+  if(loft?.objects.some(o=>o.uid==="loft-coding")&&!loft.objects.some(o=>o.uid==="loft-coding-chair")){
+    add(loft,"loft-coding-chair","chair","Seduta della postazione coding",12,3,{color:"#486d87",solid:true});
+    add(loft,"loft-lab-chair","chair","Seduta del laboratorio",18,3,{color:"#527e72",solid:true});
+    add(loft,"loft-projection-seat-left","sofa","Seduta per la proiezione",16,12,{w:3,color:"#586688",solid:true});
+    add(loft,"loft-projection-seat-right","sofa","Seduta per la proiezione",20,12,{w:3,color:"#586688",solid:true});
+  }
   return map;
 }
 
