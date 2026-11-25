@@ -2,6 +2,7 @@
 const campusWaypoints={
   ingresso:()=>has("Via libera")?"ingresso-varco":"ingresso-guardia",
   giardino:()=>{
+    if(atViale(state))return has("Via libera")?"viale-ingresso-varco":"viale-ingresso-guardia";
     if(!has("Colloquio tutor"))return "tutor-entry";
     if(!has("Lezione A200"))return "romania-a200-porta";
     if(!has("Progetto LOFT"))return "giardino-terra";

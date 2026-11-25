@@ -3,7 +3,7 @@
 <!-- BUILD_STYLES -->
 </style>
 <main>
-<header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
+<header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><span id="audioFeedback" class="hint" role="status" hidden></span><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
 <section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1>Ultimo<br><em class="gold">posto</em></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
 <section id="creator" hidden>
 <div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
@@ -20,7 +20,7 @@
 <p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
 <button id="play" class="primary">Entra a Viale Romania</button></section>
 </div></div></section>
-<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
+<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong></div><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
 <div class="direction-pad" role="group" aria-label="Movimento">
 <button data-move="up" aria-label="Cammina in alto">↑</button>
 <button data-move="left" aria-label="Cammina a sinistra">←</button>
@@ -151,6 +151,7 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <footer>Satira studentesca · Pianta di gioco stilizzata · WASD o frecce, E per interagire.</footer>
 <details class="journal campus-options">
 <summary>Opzioni</summary>
+<label class="audio-level">Volume musica <input id="musicVolume" type="range" min="0" max="100" value="65"></label>
 <label><input type="checkbox" id="surpriseEnabled" checked> Sorprese horror-comiche</label>
 <p class="hint">Attive di default. Puoi disattivarle qui. La voce segue l’impostazione audio del gioco.</p>
 </details>

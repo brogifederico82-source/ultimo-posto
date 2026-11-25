@@ -4,7 +4,7 @@ import { Script } from 'node:vm';
 const source = new URL('../src/', import.meta.url);
 const output = new URL('../dist/', import.meta.url);
 const loadText = name => readFile(new URL(name, source), 'utf8');
-const scripts = ['game.js', 'classrooms.js', 'interiors.js', 'world.js', 'navigation.js', 'dialogue.js', 'minigames.js', 'loft-arcade.js', 'editor.js'];
+const scripts = ['game.js', 'campus-life.js', 'classrooms.js', 'interiors.js', 'world.js', 'navigation.js', 'dialogue.js', 'minigames.js', 'loft-arcade.js', 'editor.js'];
 
 const [template, css, map, plan, entranceMusic, campusMusic, ...parts] = await Promise.all([
   loadText('index.html'),

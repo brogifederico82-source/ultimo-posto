@@ -211,8 +211,8 @@ function addConversation(scene,o,profile){
 
 function getScene(){
   if(state.prologue)return openingScene();
-  if(state.ending?.traffic)return scene("Game Over",state.ending.text,[state.zone==="giardino"?local("Riprova dal giardino","Retry from the garden"):"Riprova dall’ingresso",()=>{
-    state.ending=null;[state.x,state.y]=reachEntry(state.zone,state.zone==="giardino"?"ingresso":undefined);
+  if(state.ending?.traffic)return scene("Game Over",state.ending.text,[atViale(state)?"Riprova dall’ingresso":local("Riprova dal giardino","Retry from the garden"),()=>{
+    state.ending=null;[state.x,state.y]=reachEntry(state.zone,atViale(state)&&hasIntegratedEntrance()?"viale":state.zone==="giardino"?"ingresso":undefined);
     keys.clear();controls.clear();activeScene=null;
   }]);
   if(state.ending)return scene(state.ending.title,state.ending.text,
@@ -220,7 +220,7 @@ function getScene(){
   if(state.freeMoment)return scene(state.freeMoment.title,state.freeMoment.text);
   const o=currentObject();
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
-  if(!o&&state.zone==="ingresso")return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
+  if(!o&&atViale(state))return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
   if(!o)return scene("Cerca un posto per studiare","Avvicinati a persone, porte e oggetti e premi E. Apri la mappa sotto i comandi per orientarti.");
   if(gateLocked(o.gate))return scene(o.name,"Per sbloccarlo, vinci a "+challengeNames[o.gate].toLowerCase()+".");
   const note=o.text||"Sei vicino a "+o.name+".";
@@ -301,6 +301,7 @@ function draw(now){
       rect(stage,i%2?"#afc68280":"#ecdb9580",px,py,2,1);
     }
   }
+  paintCampusCoins(stage,state.zone,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},time);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
@@ -469,8 +470,9 @@ function frame(now){
     if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
-      if(!blocked(state.zone,x,y,mapClock)){
+      if(!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
         state.x=x;state.y=y;dirty=true;
+        collectCampusCoin();syncBackgroundMusic();
         paintCampusOverview();
         trafficImpact();
         checkCampusSurprise();
@@ -489,20 +491,46 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 let audioContext=null,audioOn=false;
-const entranceMusic=$("entranceMusic"), campusMusic=$("campusMusic");
-let currentMusic=entranceMusic;
-entranceMusic.volume=campusMusic.volume=.35;
+const entranceMusic=$("entranceMusic"),campusMusic=$("campusMusic"),volumeControl=$("musicVolume");
+let currentMusic=entranceMusic,musicStart=null,musicFailed=false;
+function applyMusicVolume(){
+  const value=Number(volumeControl.value)/100;
+  entranceMusic.volume=campusMusic.volume=Number.isFinite(value)?value:.65;
+}
+try{
+  const preferred=localStorage.getItem("ultimo-posto-volume");
+  if(preferred!==null)volumeControl.value=preferred;
+}catch{}
+applyMusicVolume();
+volumeControl.oninput=()=>{
+  applyMusicVolume();
+  if(audioOn&&!musicFailed)audioFeedback(currentMusic.volume===0?"Volume della musica a zero.":"");
+  try{localStorage.setItem("ultimo-posto-volume",volumeControl.value);}catch{}
+};
+function audioFeedback(message=""){
+  $("audioFeedback").textContent=message;
+  $("audioFeedback").hidden=!message;
+}
 function syncBackgroundMusic(){
-  const nextMusic=screen==="game"&&state&&state.zone!=="ingresso"?campusMusic:entranceMusic;
+  const nextMusic=screen==="game"&&state&&!atViale(state)?campusMusic:entranceMusic;
   if(currentMusic!==nextMusic){
-    currentMusic.pause();
-    currentMusic=nextMusic;
+    if(audioOn)currentMusic.pause();
+    currentMusic=nextMusic;musicStart=null;musicFailed=false;
+    if(audioOn)audioFeedback();
   }
-  if(audioOn&&currentMusic.paused){
-    currentMusic.play().catch(error=>{
-      if(error.name!=="AbortError")console.warn("Background music could not play",error);
-    });
-  }
+  if(!audioOn||musicStart||musicFailed||!currentMusic.paused)return;
+  const selected=currentMusic,attempt=selected.play();
+  musicStart=attempt;
+  attempt?.then(()=>{
+    if(musicStart!==attempt||selected!==currentMusic||!audioOn)return;
+    musicStart=null;audioFeedback(selected.volume===0?"Volume della musica a zero.":"");
+  }, error=>{
+    if(musicStart!==attempt||selected!==currentMusic||!audioOn)return;
+    musicStart=null;
+    if(error.name==="AbortError")return;
+    musicFailed=true;
+    audioFeedback("Musica non disponibile. Premi Audio per riprovare.");
+  });
 }
 function enableAudio(){
   const Audio=window.AudioContext||window.webkitAudioContext;
@@ -522,15 +550,15 @@ function chime(notes,spacing=.12,volume=.065){
   }
 }
 $("audio").onclick=()=>{
+  if(audioOn&&musicFailed){musicFailed=false;audioFeedback();syncBackgroundMusic();return;}
   if(audioOn){
-    audioOn=false;
+    audioOn=false;musicStart=null;audioFeedback();
     $("audio").textContent=tr("Audio spento");
     $("audio").setAttribute("aria-pressed","false");
     currentMusic.pause();
     audioContext?.suspend().catch(()=>{});
   }else{
-    enableAudio();
-    syncBackgroundMusic();
+    enableAudio();musicFailed=false;syncBackgroundMusic();
   }
 };
 window.addEventListener("keydown",event=>{

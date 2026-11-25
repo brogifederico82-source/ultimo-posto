@@ -103,6 +103,13 @@ function stored(mode="story"){
     }else if(data.zone==="giardino"&&!data.campusExpanded){data.x=8;data.y=32;}
     if(layout&&(!data.campusLayout||data.campusLayout<layout))data.campusLayout=layout;
     if(data.zone==="giardino"&&data.x===26&&data.y===22&&!data.wins)data.y=24;
+    if(hasIntegratedEntrance()&&data.zone==="ingresso"){
+      data.zone="giardino";
+      data.x=(Number.isFinite(data.x)?data.x:14)+vialeEntrance.x;
+      data.y=(Number.isFinite(data.y)?data.y:17)+vialeEntrance.y;
+      data.campusGateOpen=false;
+    }
+    if(hasIntegratedEntrance()&&data.zone==="giardino"&&typeof data.campusGateOpen!=="boolean")data.campusGateOpen=true;
     [data.x,data.y]=freeTile(data.zone,Number.isFinite(data.x)?data.x:2,Number.isFinite(data.y)?data.y:2);
     return {...data,mode,freeMoment:null,campusExpanded:true,wins:data.wins??{},events:Array.isArray(data.events)?data.events:[],
       completedEvents:Array.isArray(data.completedEvents)?data.completedEvents:[],mission:typeof data.mission==="string"?data.mission:"",missionTarget:typeof data.missionTarget==="string"?data.missionTarget:""};
@@ -283,9 +290,9 @@ function resetGame(){
     "Iniziare una nuova storia sostituirà il salvataggio della storia precedente. Continuare?",
     "Starting a new story will replace your previous story save. Continue?"
   )))return;
-  const zone=mode==="free"&&campus.zones.giardino?"giardino":"ingresso";
-  const [x,y]=reachEntry(zone,"ingresso");
-  state={version:1,mode,name:badgeName(),matricola:draftMatricola,avatar:avatar(),traits:Object.fromEntries(Object.entries(sliders).map(([id,input])=>[id,Number(input.value)])),x,y,prologue:mode==="free"?0:1,streetVisited:true,campusExpanded:true,campusLayout:campusLayoutVersion,look:"down",zone,log:[],secrets:[],pockets:[],ending:null,wins:{},events:[],completedEvents:[],mission:"",missionTarget:""};
+  const zone=(mode==="free"&&campus.zones.giardino)||hasIntegratedEntrance()?"giardino":"ingresso";
+  const [x,y]=reachEntry(zone,mode==="story"&&hasIntegratedEntrance()?"viale":"ingresso");
+  state={version:1,mode,campusGateOpen:mode==="free",name:badgeName(),matricola:draftMatricola,avatar:avatar(),traits:Object.fromEntries(Object.entries(sliders).map(([id,input])=>[id,Number(input.value)])),x,y,prologue:mode==="free"?0:1,streetVisited:true,campusExpanded:true,campusLayout:campusLayoutVersion,look:"down",zone,log:[],secrets:[],pockets:[],ending:null,wins:{},events:[],completedEvents:[],mission:"",missionTarget:""};
   draftMatricola=newMatricola();
   activeScene=null;dirty=false;save();show("game");
 }
@@ -315,6 +322,13 @@ function scene(title,text,...choices){return {title,text,choices};}
 function interact(){
   if(screen!=="game"||state.ending||state.prologue||$("campusSurprise").open)return;
   const spot=nearby();if(!spot)return;
+  if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
+    if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
+    state.campusGateOpen=true;activeScene=null;keys.clear();controls.clear();
+    if(state.x===spot.x&&state.y===spot.y+1&&!blocked(state.zone,spot.x,spot.y))state.y=spot.y;
+    syncBackgroundMusic();save();renderScene();$("interact").focus();
+    return;
+  }
   const destination=doorDestination(spot);
   if(destination){
     keys.clear();controls.clear();
@@ -332,7 +346,7 @@ function doorDestination(spot){
     return Object.hasOwn(campus.zones,destination[0])?destination:null;
   }
   if(spot.action!=="native")return null;
-  if(spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
+  if(spot.uid!=="viale-ingresso-varco"&&spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
   if(spot.kind!=="door"&&spot.kind!=="stairs")return null;
   const destination=nativeDoors[spot.native];
   return destination&&Object.hasOwn(campus.zones,destination)?[destination]:null;
@@ -355,7 +369,7 @@ const storySteps=[
 const romaniaComplete=()=>storySteps.slice(0,4).every(([item])=>has(item));
 function checkpoint(item){
   if(has(item))return;
-  carry(item);record("Percorso · "+item);
+  carry(item);awardCoins(2);record("Percorso · "+item+" · +2 monete");
   chime([60,67,72]);
 }
 function storyObjective(){
@@ -444,11 +458,7 @@ function nativeScene(id){
         ["Completa l’abilitazione",()=>checkpoint("Abilitazione Green Mobility")]);
       return scene("Luiss Green Mobility","Veicolo elettrico disponibile. Riconsegnalo alla stazione di Pola.",
         ["Vai a Viale Pola",()=>{record("Green Mobility · Auto riconsegnata a Pola");travel("pola","car");}]);
-    case "shop":
-      return scene("Luiss Shop","Felpa blu, giubbotto varsity o tote bag. Provali e tieni il capo che preferisci.",
-        ["Indossa la felpa blu",()=>{Object.assign(state.avatar,{abito:4,taglio:1});record("Guardaroba · Felpa blu");}],
-        ["Indossa il giubbotto varsity",()=>{Object.assign(state.avatar,{abito:4,taglio:3});record("Guardaroba · Varsity");}],
-        ["Prendi la tote bag",()=>{state.avatar.zaino=3;record("Guardaroba · Tote bag");}]);
+    case "shop":return shopScene();
     case "storia":
       return scene("Prof.ssa Serra · Storia contemporanea",state.historyAnswer??
         "«Partiamo da una data. In che anno cadde il Muro di Berlino?»",
@@ -615,6 +625,7 @@ function renderScene(){
     $("campusMap").append(item);
   }
   const access=isFree()?[]:Object.keys(unlocks).filter(won).map(id=>unlocks[id]);
+  refreshWallet();
   $("status").textContent=state.name+" · "+(state.matricola?state.matricola+" · ":"")+tr(options.passato[state.avatar.passato])+(access.length?local(" · Accessi: "," · Unlocked: ")+access.map(tr).join(", "):"");
   $("journalTitle").textContent=local("Diario e tasche · ","Journal and inventory · ")+state.secrets.length+"/"+totalSecrets+local(" scoperte"," discoveries");
   $("sceneTitle").textContent=tr(scene.title);

@@ -234,6 +234,7 @@ function endChallenge(g,result){
   if(result==="win"){
     if(!won(g.id)){
       state.wins[g.id]=true;
+      awardCoins(3);
       carry(item);
       if(secret)discover(secret,description);
       record("Vittoria a "+challengeNames[g.id].toLowerCase()+" · "+unlock);

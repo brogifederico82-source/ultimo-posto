@@ -264,3 +264,7 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 #challengeCourt{touch-action:none;cursor:ew-resize}
 
 .surprise-locations li{padding-block:4px}
+
+.wallet-coins{background:#6c5333;color:#ffe3a2;border:1px solid #b38c52;padding:5px 9px;border-radius:10px;font-weight:700}
+.audio-level{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-block:9px}
+#audioFeedback{max-width:170px;color:#ffc997}
