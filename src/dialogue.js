@@ -588,7 +588,7 @@ window.addEventListener("keydown",event=>{
       if(key===" "&&event.target instanceof HTMLButtonElement)return;
       event.preventDefault();
       if(key==="arrowup"||key==="w"){if(!event.repeat)jumpCalcetto(minigame.you);}
-      else if(key===" "){if(!event.repeat)kickCalcetto(minigame.you,minigame.ball,1);}
+      else if(key===" "){if(!event.repeat)kickCalcetto(minigame.you);}
       else keys.add(key);
       return;
     }

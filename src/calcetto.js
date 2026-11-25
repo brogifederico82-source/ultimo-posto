@@ -5,23 +5,34 @@ function startCalcetto(){
   return g;
 }
 function resetCalcetto(g){
-  const player=x=>({x,y:calcettoGround,vx:0,vy:0,kick:0});
+  const player=x=>({x,y:calcettoGround,vx:0,vy:0,kick:0,jumpBuffer:0,shotBuffer:0});
   g.you=player(79);g.rival=player(241);
   g.ball={x:160,y:75,vx:0,vy:0};
+  g.rivalTarget=241;g.rivalRead=0;
 }
 function jumpCalcetto(player){
-  if(!minigame.result&&!minigame.delay&&player.y===calcettoGround)player.vy=-227;
+  if(!minigame.result)player.jumpBuffer=.16;
 }
-function kickCalcetto(player,ball,direction){
-  if(minigame.result||minigame.delay||player.kick>0)return;
-  player.kick=.27;
-  if(Math.abs(ball.x-player.x)>26||ball.y>player.y+3||ball.y<player.y-32)return;
-  ball.vx=direction*(195+Math.abs(player.vx)*.35);
-  ball.vy=player.y<calcettoGround-9?-51:-131;
-  chime([67,76],.04);
+function kickCalcetto(player){
+  if(!minigame.result)player.shotBuffer=.19;
+}
+function calcettoShot(player,ball,direction){
+  if(player.kick>0||player.shotBuffer<=0)return;
+  const dx=(ball.x-player.x)*direction;
+  if(dx< -8||dx>29||ball.y>player.y+3||ball.y<player.y-34)return;
+  player.shotBuffer=0;
+  player.kick=.23;
+  const aerial=player.y<calcettoGround-10;
+  ball.vx=direction*((aerial?252:207)+Math.abs(player.vx)*.24);
+  ball.vy=aerial?Math.max(-70,Math.min(98,ball.vy*.26+28)):-111;
+  chime(aerial?[69,81]:[64,74],.04);
 }
 function stepCalcettoPlayer(player,move,speed,dt){
-  player.vx=approach(player.vx,move*speed,760*dt);
+  if(player.jumpBuffer>0&&player.y===calcettoGround){
+    player.vy=-242;player.jumpBuffer=0;
+  }
+  player.jumpBuffer=Math.max(0,player.jumpBuffer-dt);
+  player.vx=approach(player.vx,move*speed,(move?940:1300)*dt);
   player.x=clamp(player.x+player.vx*dt,16,304);
   player.vy+=620*dt;
   player.y=Math.min(calcettoGround,player.y+player.vy*dt);
@@ -35,18 +46,31 @@ function calcettoContact(player,ball){
   const nx=distance?dx/distance:1,ny=distance?dy/distance:0;
   ball.x=player.x+nx*17;ball.y=player.y-17+ny*17;
   const dot=(ball.vx-player.vx)*nx+(ball.vy-player.vy)*ny;
-  if(dot<0){ball.vx-=1.58*dot*nx;ball.vy-=1.58*dot*ny;}
+  if(dot<0){
+    ball.vx-=1.72*dot*nx;
+    ball.vy-=1.72*dot*ny;
+    if(player.y<calcettoGround-7&&ny<-.35)ball.vy+=player.vy*.32;
+  }
 }
 function stepCalcetto(g,dt){
   if(g.delay>0){g.delay=Math.max(0,g.delay-dt);return;}
+  g.goal=null;
   g.seconds=Math.max(0,g.seconds-dt);
   const [left,right]=[keys.has("arrowleft")||keys.has("a")||controls.has("left"),keys.has("arrowright")||keys.has("d")||controls.has("right")];
   stepCalcettoPlayer(g.you,Number(right)-Number(left),135,dt);
   const b=g.ball,r=g.rival;
-  const target=clamp(b.x+(g.practice?25:12)+b.vx*.12,95,287);
-  if(b.y>r.y-63&&b.y<r.y-24&&Math.abs(b.x-r.x)<26)jumpCalcetto(r);
-  if(Math.abs(b.x-r.x)<23&&b.x<r.x+6&&b.y>r.y-30&&b.y<r.y+1)kickCalcetto(r,b,-1);
-  stepCalcettoPlayer(r,Math.abs(target-r.x)<4?0:Math.sign(target-r.x),g.practice?80:112,dt);
+  g.rivalRead-=dt;
+  if(g.rivalRead<=0){
+    const defending=b.vx>45&&b.x>160;
+    const intercept=b.x+b.vx*(defending?.23:.13);
+    g.rivalTarget=clamp(intercept+(g.practice?30:16),defending?154:89,292);
+    g.rivalRead=g.practice?.22:.12;
+    if(b.vy> -85&&b.y>r.y-65&&b.y<r.y-27&&Math.abs(b.x-r.x)<29)jumpCalcetto(r);
+  }
+  if(b.x<r.x+5&&Math.abs(b.x-r.x)<27&&b.y>r.y-34&&b.y<r.y+1)kickCalcetto(r);
+  stepCalcettoPlayer(r,Math.abs(g.rivalTarget-r.x)<4?0:Math.sign(g.rivalTarget-r.x),g.practice?77:114,dt);
+  calcettoShot(g.you,b,1);calcettoShot(r,b,-1);
+  for(const player of [g.you,r])player.shotBuffer=Math.max(0,player.shotBuffer-dt);
   b.vy=Math.min(300,b.vy+440*dt);
   b.vx=clamp(b.vx,-330,330);
   b.x+=b.vx*dt;b.y+=b.vy*dt;
@@ -55,10 +79,20 @@ function stepCalcetto(g,dt){
   if(b.y>calcettoGround-calcettoRadius){
     b.y=calcettoGround-calcettoRadius;b.vy=-Math.abs(b.vy)*.61;b.vx*=.89;
   }
+  for(const x of [10,310]){
+    if(Math.hypot(b.x-x,b.y-calcettoBar)>=calcettoRadius+2)continue;
+    const nx=(b.x-x)/(Math.hypot(b.x-x,b.y-calcettoBar)||1);
+    const ny=(b.y-calcettoBar)/(Math.hypot(b.x-x,b.y-calcettoBar)||1);
+    const impact=b.vx*nx+b.vy*ny;
+    if(impact>=0)continue;
+    b.vx-=1.82*impact*nx;b.vy-=1.82*impact*ny;
+    b.x=x+nx*(calcettoRadius+2);b.y=calcettoBar+ny*(calcettoRadius+2);
+    chime([56],.04);
+  }
   if(b.x<10||b.x>310){
     if(b.y>calcettoBar+calcettoRadius){
       const side=b.x>310?0:1;
-      g.score[side]++;
+      g.score[side]++;g.goal=side;
       chime(side===0?[67,76,79]:[48,55],.05);
       resetCalcetto(g);
       g.delay=.8;
@@ -103,6 +137,11 @@ function paintCalcetto(g){
   c.beginPath();c.arc(g.ball.x,g.ball.y,calcettoRadius,0,Math.PI*2);
   c.fillStyle="#fff0c2";c.fill();
   rect(c,"#4d5263",g.ball.x-2,g.ball.y-2,4,4);
+  if(g.delay&&g.goal!==null&&g.goal!==undefined){
+    rect(c,"#0c182ddd",86,57,148,38);
+    c.font="bold 18px monospace";c.fillStyle=g.goal===0?"#61d8f4":"#fb8966";
+    c.textAlign="center";c.fillText(g.goal===0?"GOL!":"MATTEO!",160,82);
+  }
   $("challengeScore").textContent=local("Tu ","You ")+g.score[0]+" – "+g.score[1]+" Matteo · "+Math.ceil(g.seconds)+" s";
-  if(!g.result)$("challengeStatus").textContent=g.delay?local("Palla al centro","Kickoff"):local("In gioco","In play");
+  if(!g.result)$("challengeStatus").textContent=g.goal===0?local("Gol tuo!","Your goal!"):g.goal===1?local("Gol di Matteo!","Matteo scores!"):g.delay?local("Palla al centro","Kickoff"):local("In gioco","In play");
 }

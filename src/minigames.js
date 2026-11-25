@@ -224,7 +224,7 @@ function closeChallenge(){
 $("challengeExit").onclick=closeChallenge;
 $("challenge").addEventListener("cancel",event=>{event.preventDefault();closeChallenge();});
 $("challengeReplay").onclick=()=>openChallenge(minigame.id,minigame.practice);
-$("challengeShot").onclick=()=>minigame?.kind==="arm"?armPush():minigame?.kind==="calcetto"?kickCalcetto(minigame.you,minigame.ball,1):arcadeAction();
+$("challengeShot").onclick=()=>minigame?.kind==="arm"?armPush():minigame?.kind==="calcetto"?kickCalcetto(minigame.you):arcadeAction();
 $("calcettoJump").onclick=()=>{if(minigame?.kind==="calcetto")jumpCalcetto(minigame.you);};
 for(const [id,direction] of [["challengeLeft","left"],["challengeRight","right"]]){
   const button=$(id);
