@@ -215,3 +215,8 @@ button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .1
 .campus-reference img{display:block;width:min(100%,660px);height:auto;background:#fff;margin:12px 0}
 .campus-reference a{color:#a8d7f1}
 .campus-reference summary{cursor:pointer;color:var(--gold)}
+
+.degree-course{border-top:1px solid var(--line);padding:9px 0}
+.degree-course>summary{font-weight:700;padding:8px 0}
+.degree-course a{color:#a8d7f1}
+.study-grid h4{font-size:1rem;margin:0}
