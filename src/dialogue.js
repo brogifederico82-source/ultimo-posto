@@ -429,11 +429,17 @@ function paintCampusOverview(){
   if(state.zone!=="giardino")return;
   const waypoint=nextCampusWaypoint();
   if(waypoint)paintCampusWaypoint(ctx,overviewX+(waypoint.x+.5)*overviewScale,overviewY+(waypoint.y+.5)*overviewScale);
+  if($("surpriseHint").open){
+    ctx.beginPath();ctx.arc(overviewX+(surpriseTile.x+.5)*overviewScale,overviewY+(surpriseTile.y+.5)*overviewScale,5,0,Math.PI*2);
+    ctx.fillStyle="#bc85ed";ctx.fill();ctx.lineWidth=1;ctx.strokeStyle="#241635";ctx.stroke();
+  }
   ctx.beginPath();
   ctx.arc(overviewX+(state.x+.5)*overviewScale,overviewY+(state.y+.5)*overviewScale,3.5,0,Math.PI*2);
   ctx.fillStyle="#fffbe9";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle="#202321";ctx.stroke();
 }
-$("campusOverviewPanel").addEventListener("toggle",()=>{if(state)paintCampusOverview();});
+for(const id of ["campusOverviewPanel","surpriseHint"]){
+  $(id).addEventListener("toggle",()=>{if(state)paintCampusOverview();});
+}
 
 function paintCover(){
   const zone=room("giardino");
@@ -578,6 +584,7 @@ for(const button of document.querySelectorAll("[data-move]")){
 }
 $("interact").onclick=interact;
 const surprisePreference="ultimo-posto-sorprese";
+const surpriseTile={x:13,y:39};
 const surpriseEnabled=$("surpriseEnabled");
 try{surpriseEnabled.checked=localStorage.getItem(surprisePreference)==="on";}catch{}
 surpriseEnabled.onchange=()=>{
@@ -591,7 +598,7 @@ $("campusSurprise").addEventListener("close",()=>{
 });
 function checkCampusSurprise(){
   if(!surpriseEnabled.checked||testMode||has("Fantasma del fuoricorso")||state.ending)return;
-  if(state.zone!=="giardino"||state.x!==13||state.y!==39)return;
+  if(state.zone!=="giardino"||state.x!==surpriseTile.x||state.y!==surpriseTile.y)return;
   carry("Fantasma del fuoricorso");
   record("Scoperta · Il fantasma del fuoricorso");
   keys.clear();controls.clear();

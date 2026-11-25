@@ -251,3 +251,12 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
   #game .touch #interact{padding-inline:7px}
   #game .touch [data-move]{min-width:37px}
 }
+
+.direction-pad{display:grid;grid-template-columns:repeat(3,minmax(36px,1fr));gap:4px}
+.direction-pad [data-move="up"]{grid-column:2}
+.direction-pad [data-move="left"]{grid-column:1}
+#game .touch .direction-pad button{min-height:36px;padding-block:4px}
+#game .touch #interact{min-height:46px}
+.game-conversation #speakerPortrait{width:min(100%,460px)}
+#surpriseHint{margin-block:12px}
+#surpriseHint summary{cursor:pointer;color:#dbb3fa}

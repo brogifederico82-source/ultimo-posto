@@ -540,22 +540,18 @@ function paintSpeaker(now){
   const seed=Array.from(o.uid).reduce((sum,ch)=>sum+ch.codePointAt(0),0);
   const beat=reducedMotion?0:Math.floor(now/170)%4;
   const moving=o.native==="trend";
-  const replying=Boolean(state.chatTopic?.uid===o.uid);
   const portrait=campusPortraits[o.uid];
   const a=o.kind==="guard"?guard:{...student,capelli:seed%8,pelle:(seed>>>2)%4,occhi:(seed>>>4)%4,
     tinta:seed%5,volto:seed%3,abito:seed%5,accessorio:seed%6,taglio:o.kind==="professor"?2:seed%4,zaino:0,...portrait};
-  c.fillStyle="#172331";c.fillRect(0,0,384,144);
-  c.fillStyle="#23364a";c.fillRect(0,85,384,59);
-  for(const [x,color] of [[92,"#4f6d84"],[288,colors[seed%4]]]){
-    c.fillStyle="#101923";c.beginPath();c.ellipse(x,122,67,15,0,0,Math.PI*2);c.fill();
-    c.fillStyle=color;c.beginPath();c.ellipse(x,116,65,13,0,0,Math.PI*2);c.fill();
-  }
-  sprite(c,state.avatar,92,116+(replying&&beat===1?1:0),0,"right",3.8);
+  const {width,height}=canvas;
+  const middle=width/2, baseline=height-17;
+  c.fillStyle="#172331";c.fillRect(0,0,width,height);
+  c.fillStyle=colors[seed%4];c.beginPath();c.ellipse(middle,height*.45,76,55,0,0,Math.PI*2);c.fill();
+  c.fillStyle="#23364a";c.fillRect(0,baseline-17,width,34);
+  c.fillStyle="#101923";c.beginPath();c.ellipse(middle,baseline+4,64,10,0,0,Math.PI*2);c.fill();
   const gesture=moving?[0,-10,4,10][beat]:o.kind==="professor"&&beat===1?2:0;
-  sprite(c,a,288+gesture,116-(moving&&beat%2?6:0),moving?beat%3:0,"left",3.8,o.kind==="guard"||portrait?undefined:o.color);
-  c.font="bold 12px monospace";c.textAlign="center";
-  c.fillStyle="#f1eadb";c.fillText(state.name,92,140,165);
-  c.fillStyle="#f0be75";c.fillText(o.name,288,140,165);
+  sprite(c,a,middle+gesture,baseline-(moving&&beat%2?6:0),moving?beat%3:0,"down",4.55,
+    o.kind==="guard"||portrait?undefined:o.color);
 }
 function renderScene(){
   const scene=getScene();

@@ -441,6 +441,10 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     if(!visible[layer]||layer==="terreno")continue;
     const o=positionOf(raw,editing?0:isVehicle(raw)?trafficClock:now,z.width);
     if(o.x+o.w<left||o.y+o.h<top||o.x>right||o.y>bottom)continue;
+    if(o.kind==="zebra"){
+      drawObject(c,o,now,editing);
+      continue;
+    }
     foreground.push({row:o.y+o.h,draw:()=>drawObject(c,o,now,editing)});
   }
   if(player)foreground.push(player);

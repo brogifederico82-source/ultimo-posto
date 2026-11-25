@@ -20,13 +20,25 @@
 <p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
 <button id="play" class="primary">Entra a Viale Romania</button></section>
 </div></div></section>
-<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact" class="primary">Interagisci <kbd>E</kbd></button></div><details id="controlGuide" class="control-guide">
+<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
+<div class="direction-pad" role="group" aria-label="Movimento">
+<button data-move="up" aria-label="Cammina in alto">↑</button>
+<button data-move="left" aria-label="Cammina a sinistra">←</button>
+<button data-move="down" aria-label="Cammina in basso">↓</button>
+<button data-move="right" aria-label="Cammina a destra">→</button>
+</div>
+<button id="interact" class="primary">Interagisci <kbd>E</kbd></button>
+</div><details id="controlGuide" class="control-guide">
 <summary>Guida ai comandi</summary>
 <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa.</p>
 </details>
 <section class="panel scene" aria-live="polite"><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
+<details id="surpriseHint">
+<summary>Dov’è il «Guagliò!»?</summary>
+<p>Attiva le sorprese nelle Opzioni. Dal Giardino delle panchine vai verso ovest e scendi un poco. Il punto è la casella 13, 39. Sul campus è segnato da un punto viola finché tieni aperto questo indizio.</p>
+</details>
 <details class="campus-reference"><summary>Confronta con la planimetria di Viale Romania</summary>
 <p>Riferimento reale per ingresso, Aula Chiesa, bar, edificio principale e Via Panama.</p>
 <img id="campusReference" alt="Planimetria di Viale Romania con ingresso, Aula Chiesa, The Dome e Via Panama">
