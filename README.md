@@ -2,6 +2,8 @@
 
 Gioco narrativo in 2D ambientato in una versione giocabile del campus LUISS di Viale Romania. Include la modalità storia, la modalità libera, minigiochi e un editor del campus.
 
+[Gioca a Ultimo Posto](https://brogifederico82-source.github.io/ultimo-posto/)
+
 ## Avvio
 
 Dalla radice del repository, esegui `node scripts/build.mjs` con Node.js 22. Apri `dist/index.html` nel browser. Il gioco funziona anche offline e salva i progressi nel browser utilizzato.
