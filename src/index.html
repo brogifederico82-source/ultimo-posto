@@ -1,0 +1,95 @@
+<!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Viale Romania · Ultimo posto</title>
+<style>
+<!-- BUILD_STYLES -->
+</style>
+<main>
+<header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
+<section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1>Ultimo<br><em class="gold">posto</em></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions"><button id="start" class="primary">Storia</button><button id="free">Modalità libera</button><button id="resume" hidden>Nuovo protagonista</button><button id="edOpen">Editor</button></div><div class="actions" style="margin-top:12px"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
+<section id="creator" hidden><div class="grid">
+<section class="panel"><h2>Il ritratto</h2><div class="portrait-card"><canvas id="portrait" class="portrait" width="160" height="104" aria-label="Anteprima dell’avatar"></canvas><small id="ticket"></small></div><p class="actions"><button id="shuffle">Mescola il guardaroba</button></p><div id="fields" class="fields"></div></section>
+<section class="panel"><h2>Il carattere</h2><p class="hint">I tratti aprono opzioni diverse. Le scelte possono cambiarli durante la partita.</p><div id="traits" class="traits"></div><p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p><button id="play" class="primary">Entra a Viale Romania</button></section>
+</div></section>
+<section id="game" hidden><div class="frame"><canvas id="stage" width="320" height="192" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><section class="panel scene" aria-live="polite"><h3 id="sceneTitle"></h3><p id="playerLine" hidden></p><p id="sceneText"></p><div class="actions" id="choices"></div></section><div class="touch"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact">Interagisci</button></div><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
+<ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
+<details><summary>Ambienti e attività</summary><ol id="campusMap" class="hint"></ol></details></details><details class="journal"><summary id="journalTitle">Diario di viaggio</summary><ul id="log"></ul></details></section>
+<dialog id="challenge" class="challenge" aria-labelledby="challengeTitle">
+<header><h2 id="challengeTitle"></h2><button id="challengeExit">Esci</button></header>
+<div id="dancePad" hidden><strong id="danceCue" style="font-size:64px;display:block;line-height:1.15;color:#e7ba82;text-align:center" aria-live="polite"></strong><div id="danceSequence" aria-hidden="true"></div><progress id="danceMeter" max="1450" style="width:100%"></progress><div class="actions" style="justify-content:center"><button>←</button><button>↑</button><button>↓</button><button>→</button></div></div><p id="challengeRules" class="hint"></p>
+<details id="brisLegend" class="bris-help" hidden><summary>Come si gioca a briscola</summary>
+<ol><li>Scegli una delle tre carte. Puoi giocare qualsiasi seme. Il seme della carta scoperta è la briscola.</li>
+<li>Una briscola batte qualsiasi altro seme. Tra due briscole vince la più alta. Se nessuno gioca briscola, conta il seme della prima carta.</li>
+<li>Chi fa la presa prende entrambe le carte, pesca per primo e apre la mano successiva. Quando il mazzo finisce si giocano le carte rimaste.</li>
+<li>Si giocano 20 prese. Con almeno 61 punti vinci. A 60 pari è pareggio.</li></ol>
+<table><thead><tr><th>Carta, dalla più forte</th><th>Punti</th></tr></thead><tbody>
+<tr><td>Asso</td><td>11</td></tr><tr><td>Tre</td><td>10</td></tr><tr><td>Re</td><td>4</td></tr>
+<tr><td>Cavallo</td><td>3</td></tr><tr><td>Fante</td><td>2</td></tr><tr><td>7, 6, 5, 4, 2</td><td>0</td></tr>
+</tbody></table></details><p id="challengeScore" class="challenge-score"></p>
+<canvas id="challengeCourt" width="320" height="188" aria-label="Campo di gioco"></canvas>
+<div id="cardGame" hidden>
+<div class="cards-table"><div><span class="hint">Briscola</span><span id="trump" class="card-face"></span><span id="deckCount" class="hint"></span></div>
+<div><span class="hint">Tu</span><span id="playedPlayer" class="card-face"></span></div>
+<div><span class="hint">Avversario</span><span id="playedRival" class="card-face"></span></div></div>
+<div id="cardHand" class="actions hand" aria-label="Le tue carte"></div>
+</div>
+<p id="challengeStatus" class="challenge-result" role="status"></p>
+<div class="actions challenge-controls">
+<button id="challengeLeft" aria-label="Sposta a sinistra">←</button><button id="challengeRight" aria-label="Sposta a destra">→</button>
+<button id="challengeShot">Tira</button><button id="challengeReplay" class="primary" hidden>Rivincita</button>
+</div></dialog>
+<section id="editor" class="map-editor" hidden>
+<header class="editor-head"><div><h2>Editor del campus</h2><small id="edStatus" role="status">Mappa originale</small></div><div class="actions"><button id="edTest" class="primary">Prova il gioco</button><button id="edJson">Esporta JSON</button><button id="edImport">Importa JSON</button><button id="edHtml">Esporta HTML</button><input type="file" id="edFile" accept=".json,application/json" hidden></div></header>
+<div class="editor-bar">
+<label>Ambiente <select id="edZone"></select></label><button id="edNewZone">Nuovo ambiente</button>
+<label>Larghezza <input type="number" id="edWidth" min="8" max="120"></label>
+<label>Altezza <input type="number" id="edHeight" min="8" max="120"></label><button id="edResize">Ridimensiona</button>
+<label><input type="checkbox" id="edGrid" checked> Griglia</label>
+<label>Zoom <input type="range" id="edZoom" min="18" max="400" value="100"><output id="edZoomLabel">100%</output></label>
+<button id="edFit">Inquadra</button>
+</div>
+<div class="editor-layout">
+<aside class="editor-panel" aria-label="Strumenti e catalogo">
+<h3>Strumenti</h3>
+<div class="editor-tools" id="edTools"></div>
+<p id="edToolHint" class="hint"></p>
+<div class="editor-tools"><button id="edUndo">Annulla</button><button id="edRedo">Ripristina azione</button><button id="edCopy">Copia area</button><button id="edPaste">Incolla</button></div>
+<h3>Catalogo</h3>
+<div id="edCatalog"></div>
+</aside>
+<div class="editor-stage">
+<div class="editor-layers" id="edLayers" aria-label="Livelli visibili"></div>
+<canvas id="edCanvas" width="800" height="610" tabindex="0" aria-label="Mappa da modificare"></canvas>
+<div id="edCoords" class="hint">Coordinate della casella</div>
+<details id="edPlanOptions"><summary>Planimetria LUISS</summary>
+<div class="editor-bar"><label><input type="checkbox" id="edPlan"> Sovrapponi la planimetria</label>
+<label>Opacità <input id="edOpacity" type="range" min="5" max="100"></label>
+<label>Scala <input id="edPlanScale" type="range" min="10" max="250"></label>
+<label>X <input id="edPlanX" type="number" min="-3000" max="3000"></label>
+<label>Y <input id="edPlanY" type="number" min="-3000" max="3000"></label>
+<button id="edMovePlan">Sposta planimetria</button><button id="edAlignPlan">Allinea al campus</button></div>
+<p id="mapSources" class="hint">Riferimenti di Viale Romania 32:
+<a href="https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf" target="_blank" rel="noopener">planimetria ECPR</a> ·
+<a href="https://easyconferences.eu/ciac2025/venue/" target="_blank" rel="noopener">percorso CIAC 2025</a> ·
+<a href="https://www.alvisikirimoto.it/it/project/ex-palestra-luiss" target="_blank" rel="noopener">progetto di The Dome</a> ·
+<a href="https://www.google.com/maps/place/LUISS+Guido+Carli/@41.9245095,12.4939844,415m/data=!3m1!1e3!4m14!1m7!3m6!1s0x132f611845b36783:0x12e5e8c0b40f6520!2sLUISS+Guido+Carli!8m2!3d41.9244895!4d12.4939388!16zL20vMGN0a21r!3m5!1s0x132f611845b36783:0x12e5e8c0b40f6520!8m2!3d41.9244895!4d12.4939388!16zL20vMGN0a21r?entry=ttu&amp;g_ep=EgoyMDI2MTEyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">vista satellitare</a> · <a href="https://www.luiss.it/it/ateneo/luiss-life/servizi-e-opportunita/luiss-green-mobility" target="_blank" rel="noopener">navetta LUISS</a>.
+La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i cortili, la mensa e la piazzola della navetta sono adattamenti per il gioco.</p>
+</details>
+</div>
+<aside class="editor-panel" aria-label="Proprietà">
+<h3>Proprietà</h3>
+<p class="hint" id="edSelection">Seleziona un oggetto sulla mappa.</p>
+<div id="edProps"></div>
+<div class="editor-tools" id="edObjectActions" hidden><button id="edRotate">Ruota</button><button id="edDuplicate">Duplica</button><button id="edDelete">Elimina</button></div>
+<details><summary>Impostazioni ambiente</summary><div id="edRoomProps"></div><button id="edRestore">Ripristina mappa originale</button></details>
+</aside>
+</div>
+</section>
+
+<footer>Satira studentesca · Pianta di gioco stilizzata · WASD o frecce, E per interagire.</footer>
+</main>
+<script id="edOriginal" type="application/json"><!-- BUILD_CAMPUS --></script>
+<script id="edEmbedded" type="application/json"></script>
+<img id="edPlanImage" hidden alt="Planimetria originale di Viale Romania" src="data:image/webp;base64,<!-- BUILD_PLAN -->">
+<script>
+<!-- BUILD_GAME -->
+</script></html>
