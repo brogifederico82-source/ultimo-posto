@@ -360,6 +360,8 @@ const campusLandmarks=[
 ];
 let overviewZone,overviewLayer,overviewMarkers=[],overviewScale=1,overviewX=0,overviewY=0;
 function updateCampusOverview(){
+  const reference=$("campusReference");
+  if(!reference.src)reference.src=$("edPlanImage").src;
   const zone=campus.zones.giardino;
   const canvas=$("campusOverview");
   canvas.hidden=!zone;
@@ -556,8 +558,8 @@ $("observer").onclick=()=>preset({curiosita:82,razionalita:85,autocontrollo:68})
 $("mediator").onclick=()=>preset({empatia:85,socialita:75,fiducia:72});
 $("reckless").onclick=()=>preset({coraggio:88,rischio:84,ambizione:72});
 $("shuffle").onclick=()=>{
-  for(const [id,select] of Object.entries(selectors)){
-    if(id!=="passato"&&id!=="meta")select.value=Math.floor(Math.random()*options[id].length);
+  for(const id of wardrobeFields){
+    selectors[id].value=Math.floor(Math.random()*options[id].length);
   }
   preview();
 };

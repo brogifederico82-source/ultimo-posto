@@ -290,7 +290,10 @@ function drawObject(c,o,now=0,editing=false){
     const people={sportGlasses:[0,1,6],heatedStudent:[0,1,0],athlete:[0,3,0],student:[0,2,1],guard:[2,1,0],creator:[3,1,3],bartender:[0,3,0],professor:[3,0,2],cleaner:[1,1,5]};
     const [abito,capelli,accessorio]=people[o.kind];
     const tint=Math.max(0,["student","guard","creator","bartender","professor","cleaner"].indexOf(o.kind)%5);
-    sprite(c,{...student,corpo:o.kind==="athlete"?2:student.corpo,abito,capelli,accessorio,tinta:tint,pelle:(o.variant+1)%4,lenti:o.variant},8,15,o.step??0,o.look??"down",o.kind==="athlete"?1:.8,color);
+    const portrait=campusPortraits[o.uid];
+    const tone=Array.from(o.uid).reduce((sum,ch)=>sum+ch.codePointAt(0),0)%4;
+    sprite(c,{...student,corpo:o.kind==="athlete"?2:student.corpo,abito,capelli,accessorio,tinta:tint,pelle:tone,lenti:o.variant,...portrait},
+      8,15,o.step??0,o.look??"down",o.kind==="athlete"?1:.8,portrait?undefined:color);
     if(o.kind==="heatedStudent"){
       box("#e9e0d4",12,6,2,1);box("#9b8c80",14,6,1,1);
       const cycle=(Math.floor(now/210)+o.x)%17;
@@ -413,18 +416,22 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     }
   }
   // Connect the existing garden walks around the planted islands north of the bar.
-  if(visible.terreno && id==="giardino" && z.width===96 && z.height===105 &&
-      left<49 && right>13 && top<47 && bottom>17 &&
+  if(visible.terreno && id==="giardino" &&
+      left<78 && right>11 && top<74 && bottom>13 &&
       sceneObjects(z).some(o=>o.uid==="bosco-studio" && o.x===34 && o.y===24)){
     const tiles=editing?terrainMap(z):terrainCache.get(z);
     c.save();c.beginPath();
-    for(let y=Math.max(top,17);y<Math.min(bottom,47);y++)
-      for(let x=Math.max(left,13);x<Math.min(right,49);x++)
+    for(let y=Math.max(top,13);y<Math.min(bottom,74);y++)
+      for(let x=Math.max(left,11);x<Math.min(right,78);x++)
         if((tiles.get(x+y*z.width)?.kind??z.ground)==="grass")c.rect(x*16,y*16,16,16);
     c.clip();c.scale(16,16);
     c.beginPath();c.moveTo(16,40);c.bezierCurveTo(14,35,19,32,22,30);
     c.bezierCurveTo(26,27,26,19,32,20);c.bezierCurveTo(38,20,39,24,42,24);
     c.moveTo(22,30);c.bezierCurveTo(28,31,30,28,32,25);
+    c.moveTo(22,73);c.bezierCurveTo(21,62,16,58,16,40);
+    c.moveTo(42,24);c.bezierCurveTo(50,24,58,30,63,34);
+    c.bezierCurveTo(68,38,69,45,72,47);
+    c.moveTo(72,47);c.bezierCurveTo(76,52,77,60,74,64);
     c.lineCap="round";c.lineWidth=1.65;c.strokeStyle="#8c9470";c.stroke();
     c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }

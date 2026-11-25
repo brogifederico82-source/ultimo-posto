@@ -5,13 +5,29 @@
 <main>
 <header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
 <section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1>Ultimo<br><em class="gold">posto</em></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
-<section id="creator" hidden><div class="grid">
-<section class="panel"><h2>Il ritratto</h2><div class="portrait-card"><canvas id="portrait" class="portrait" width="240" height="144" aria-label="Anteprima dell’avatar"></canvas><small id="ticket"></small></div><p class="actions"><button id="shuffle">Mescola il guardaroba</button></p><div id="fields" class="fields"></div></section>
-<section class="panel"><h2>Il carattere</h2><p class="hint">I tratti aprono opzioni diverse. Le scelte possono cambiarli durante la partita.</p><div id="traits" class="traits"></div><p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p><button id="play" class="primary">Entra a Viale Romania</button></section>
-</div></section>
+<section id="creator" hidden>
+<div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
+<div class="grid creator-grid">
+<section class="panel creator-id"><h2>Badge studente</h2>
+<div class="portrait-card"><canvas id="portrait" class="portrait" width="240" height="144" aria-label="Anteprima dell’avatar"></canvas>
+<div class="badge-details"><strong id="ticket"></strong><span id="ticketNumber"></span></div></div>
+<div id="identityFields" class="fields"></div><p><button id="suggestName">Suggerisci un nome</button></p>
+</section>
+<div class="creator-settings">
+<section class="panel"><h2>Aspetto</h2><div id="fields" class="fields"></div></section>
+<section class="panel"><h2>Guardaroba</h2><div id="wardrobeFields" class="fields"></div><p><button id="shuffle">Mescola il guardaroba</button></p></section>
+<section class="panel"><h2>Carattere</h2><p class="hint">I tratti cambiano le risposte disponibili durante la storia.</p><div id="traits" class="traits"></div>
+<p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
+<button id="play" class="primary">Entra a Viale Romania</button></section>
+</div></div></section>
 <section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><section class="panel scene" aria-live="polite"><canvas id="speakerPortrait" width="192" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><div class="touch"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact">Interagisci</button></div><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
+<details class="campus-reference"><summary>Confronta con la planimetria di Viale Romania</summary>
+<p>Riferimento reale per ingresso, Aula Chiesa, bar, edificio principale e Via Panama.</p>
+<img id="campusReference" alt="Planimetria di Viale Romania con ingresso, Aula Chiesa, The Dome e Via Panama">
+<p><a href="https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf" target="_blank" rel="noopener">Planimetria ECPR</a> · <a href="https://earth.google.com/web/@41.9245095,12.4939844,70a,520d,35y,0h,0t,0r" target="_blank" rel="noopener">Vista Google Earth</a></p>
+</details>
 <details><summary>Ambienti e attività</summary><ol id="campusMap" class="hint"></ol></details></details><details class="journal"><summary id="journalTitle">Diario di viaggio</summary><ul id="log"></ul></details></section>
 <dialog id="challenge" class="challenge" aria-labelledby="challengeTitle">
 <header><h2 id="challengeTitle"></h2><button id="challengeExit">Esci</button></header>

@@ -48,9 +48,10 @@ function chooseLanguage(value){
 }
 const traits = {coraggio:"Coraggio",empatia:"Empatia",ambizione:"Ambizione",razionalita:"Razionalità",socialita:"Socialità",autocontrollo:"Autocontrollo",rischio:"Propensione al rischio",fiducia:"Fiducia negli altri",curiosita:"Curiosità",pragmatismo:"Pragmatismo"};
 const options = {
+  profilo:["Studentessa","Studente","Senza etichetta"],
   corpo:["Slanciata","Minuta","Robusta"],
   volto:["Ovale","Tondo","Squadrato"],
-  capelli:["Onda","Riga","Ricci","Rasati"],
+  capelli:["Onda","Riga","Ricci","Rasati","Caschetto","Coda alta","Lunghi","Chignon"],
   occhi:["Nocciola","Verde","Azzurro","Ambra"],
   pelle:["Avorio","Miele","Castagna","Ebano"],
   abito:["Ruggine","Salvia","Indaco","Mostarda","Blu Luiss"],
@@ -67,7 +68,7 @@ const options = {
   passato:["Matricola","Pendolare","Fuorisede","Veterano degli appelli"],
   meta:["Passare l’esame","Salvare la media","Trovare una presa","Evitare il gruppo WhatsApp"]
 };
-const labels={dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
+const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
 const totalSecrets=14;
 const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
@@ -136,18 +137,37 @@ function show(next){
   if(next==="game") renderScene();
   if(next!=="editor")refreshLanguage();
 }
+const studentNames=[
+  ["Ada","Bianca","Giulia","Marta","Viola"],
+  ["Andrea","Elia","Luca","Matteo","Samuele"],
+  ["Ari","Eli","Noa","Sasha","Vale"]
+];
+let draftMatricola=newMatricola();
+let suggestedName=Math.floor(Math.random()*5);
+function newMatricola(){
+  return "SP-"+String(100000+Math.floor(Math.random()*900000));
+}
 const nameInput=document.createElement("input");
-nameInput.type="text";nameInput.maxLength=24;nameInput.value="Neri";
+nameInput.type="text";nameInput.maxLength=24;nameInput.autocomplete="off";nameInput.placeholder="Scrivi un nome";
 const nameLabel=document.createElement("label");
-nameInput.addEventListener("input",preview);nameLabel.append("Nome",nameInput);$("fields").append(nameLabel);
+nameInput.addEventListener("input",preview);nameLabel.append("Nome sul badge",nameInput);$("identityFields").append(nameLabel);
 const selectors={};
+const wardrobeFields=new Set(["taglio","abito","motivo","pantaloni","scarpe","zaino","accessorio","dettaglio"]);
 for(const [id,values] of Object.entries(options)){
   const label=document.createElement("label");
   const select=document.createElement("select");
   values.forEach((value,i)=>select.add(new Option(value,i)));
-  label.append(labels[id],select);$("fields").append(label);
+  label.append(labels[id],select);
+  $(id==="profilo"?"identityFields":wardrobeFields.has(id)?"wardrobeFields":"fields").append(label);
   selectors[id]=select;select.addEventListener("change",preview);
 }
+function badgeName(){
+  const choices=studentNames[Number(selectors.profilo.value)]??studentNames[2];
+  return nameInput.value.trim()||choices[suggestedName];
+}
+$("suggestName").onclick=()=>{
+  suggestedName=(suggestedName+1)%5;nameInput.value="";preview();
+};
 const sliders={}, meters={};
 for(const [id,labelText] of Object.entries(traits)){
   const label=document.createElement("label"), heading=document.createElement("span");
@@ -206,6 +226,12 @@ function sprite(c,a,x,y,step=0,look="down",size=1,coatOverride){
   rect(c,ink,-headWidth/2-1,top+1,headWidth+2,10);
   rect(c,ink,-headWidth/2+(a.volto===2?0:1),top,headWidth-(a.volto===2?0:2),12);
   rect(c,look==="up"&&a.capelli!==3?hair:skin,-headWidth/2,top+2,headWidth,8);
+  if(a.capelli===4||a.capelli===6){
+    const length=a.capelli===6?12:8;
+    rect(c,hair,-headWidth/2-1,top+2,2,length);
+    rect(c,hair,headWidth/2-1,top+2,2,length);
+  }
+  if(a.capelli===5||a.capelli===7)rect(c,hair,2,top-3,a.capelli===5?4:5,a.capelli===5?6:3);
   if(a.capelli!==3){
     rect(c,hair,-headWidth/2,top+1,headWidth,3);
     rect(c,hair,a.capelli===1?1:-headWidth/2,top+(a.capelli===2?-1:0),5,5);
@@ -241,11 +267,12 @@ function sprite(c,a,x,y,step=0,look="down",size=1,coatOverride){
 }
 function preview(){
   const c=$("portrait").getContext("2d"), a=avatar();
-  rect(c,"#172737",0,0,240,144);
-  for(let i=0;i<240;i+=12)rect(c,"#21384a",i,0,6,144);
-  rect(c,"#101f2e",65,127,110,4);
-  sprite(c,a,120,125,0,"down",4.5);
-  $("ticket").textContent=(nameInput.value.trim()||"Neri")+" · "+tr(options.passato[a.passato]);
+  rect(c,"#142337",0,0,240,144);
+  c.fillStyle="#29405a";c.beginPath();c.ellipse(120,69,63,55,0,0,Math.PI*2);c.fill();
+  rect(c,"#101b2a",74,128,92,3);
+  sprite(c,a,120,126,0,"down",4.7);
+  $("ticket").textContent=badgeName();
+  $("ticketNumber").textContent=local("Matricola di gioco ","Game student ID ")+draftMatricola;
 }
 function resetGame(){
   testMode=false;
@@ -256,7 +283,8 @@ function resetGame(){
   )))return;
   const zone=mode==="free"&&campus.zones.giardino?"giardino":"ingresso";
   const [x,y]=reachEntry(zone,"ingresso");
-  state={version:1,mode,name:nameInput.value.trim()||"Neri",avatar:avatar(),traits:Object.fromEntries(Object.entries(sliders).map(([id,input])=>[id,Number(input.value)])),x,y,prologue:mode==="free"?0:1,streetVisited:true,campusExpanded:true,campusLayout:campusLayoutVersion,look:"down",zone,log:[],secrets:[],pockets:[],ending:null,wins:{},events:[],completedEvents:[],mission:"",missionTarget:""};
+  state={version:1,mode,name:badgeName(),matricola:draftMatricola,avatar:avatar(),traits:Object.fromEntries(Object.entries(sliders).map(([id,input])=>[id,Number(input.value)])),x,y,prologue:mode==="free"?0:1,streetVisited:true,campusExpanded:true,campusLayout:campusLayoutVersion,look:"down",zone,log:[],secrets:[],pockets:[],ending:null,wins:{},events:[],completedEvents:[],mission:"",missionTarget:""};
+  draftMatricola=newMatricola();
   activeScene=null;dirty=false;save();show("game");
 }
 function record(message){state.log.push(message);}
@@ -493,6 +521,15 @@ function showCaption(text, animate){
   }
   captionFrame=requestAnimationFrame(type);
 }
+const campusPortraits={
+  "prof-storia":{capelli:4,tinta:2,pelle:0,occhi:1,volto:0,accessorio:3,taglio:2,abito:4},
+  "tutor-viola":{capelli:7,tinta:1,pelle:2,occhi:0,volto:1,accessorio:5,taglio:1,abito:1},
+  "giardiniera-nora":{capelli:5,tinta:0,pelle:1,occhi:2,volto:0,accessorio:1,taglio:1,abito:1},
+  "radio-tommaso":{capelli:1,tinta:2,pelle:0,occhi:2,volto:2,accessorio:0,taglio:3,abito:3},
+  gymbro:{capelli:3,pelle:2,corpo:2,volto:2,occhi:0,accessorio:0,taglio:1,abito:0},
+  "parenzo-interno-npc":{capelli:1,tinta:3,pelle:1,occhi:0,volto:2,accessorio:3,taglio:2,abito:4},
+  "pola-cortile-npc":{capelli:6,tinta:0,pelle:3,occhi:3,volto:1,accessorio:0,taglio:2,abito:0}
+};
 function paintSpeaker(now){
   const canvas=$("speakerPortrait");
   if(canvas.hidden)return;
@@ -504,8 +541,9 @@ function paintSpeaker(now){
   const beat=reducedMotion?0:Math.floor(now/170)%4;
   const moving=o.native==="trend";
   const replying=Boolean(state.chatTopic?.uid===o.uid);
-  const a=o.kind==="guard"?guard:{...student,capelli:seed%4,pelle:seed%4,occhi:seed%4,tinta:seed%5,volto:seed%3,
-    abito:seed%4,accessorio:seed%6,taglio:o.kind==="professor"?2:seed%4,zaino:0};
+  const portrait=campusPortraits[o.uid];
+  const a=o.kind==="guard"?guard:{...student,capelli:seed%8,pelle:(seed>>>2)%4,occhi:(seed>>>4)%4,
+    tinta:seed%5,volto:seed%3,abito:seed%5,accessorio:seed%6,taglio:o.kind==="professor"?2:seed%4,zaino:0,...portrait};
   c.fillStyle="#172331";c.fillRect(0,0,384,144);
   c.fillStyle="#23364a";c.fillRect(0,85,384,59);
   for(const [x,color] of [[92,"#4f6d84"],[288,colors[seed%4]]]){
@@ -514,7 +552,7 @@ function paintSpeaker(now){
   }
   sprite(c,state.avatar,92,116+(replying&&beat===1?1:0),0,"right",3.8);
   const gesture=moving?[0,-10,4,10][beat]:o.kind==="professor"&&beat===1?2:0;
-  sprite(c,a,288+gesture,116-(moving&&beat%2?6:0),moving?beat%3:0,"left",3.8,o.kind==="guard"?undefined:o.color);
+  sprite(c,a,288+gesture,116-(moving&&beat%2?6:0),moving?beat%3:0,"left",3.8,o.kind==="guard"||portrait?undefined:o.color);
   c.font="bold 12px monospace";c.textAlign="center";
   c.fillStyle="#f1eadb";c.fillText(state.name,92,140,165);
   c.fillStyle="#f0be75";c.fillText(o.name,288,140,165);
@@ -531,7 +569,7 @@ function renderScene(){
     $("campusMap").append(item);
   }
   const access=isFree()?[]:Object.keys(unlocks).filter(won).map(id=>unlocks[id]);
-  $("status").textContent=state.name+" · "+tr(options.passato[state.avatar.passato])+(access.length?local(" · Accessi: "," · Unlocked: ")+access.map(tr).join(", "):"");
+  $("status").textContent=state.name+" · "+(state.matricola?state.matricola+" · ":"")+tr(options.passato[state.avatar.passato])+(access.length?local(" · Accessi: "," · Unlocked: ")+access.map(tr).join(", "):"");
   $("journalTitle").textContent=local("Diario e tasche · ","Journal and inventory · ")+state.secrets.length+"/"+totalSecrets+local(" scoperte"," discoveries");
   $("sceneTitle").textContent=tr(scene.title);
   const speaker=currentObject();
