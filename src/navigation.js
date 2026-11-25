@@ -19,6 +19,7 @@ const campusWaypoints={
   quinto:()=>"quinto-up",
   loft:()=>has("Progetto LOFT")?"loft-down":"loft-placard",
   parenzo:()=>has("Seminario Parenzo")?"parenzo-back":"parenzo-inside",
+  "parenzo-corridoio":()=>has("Seminario Parenzo")?"parenzo-corridoio-uscita":"parenzo-porta-seminario",
   "parenzo-interno":()=>has("Seminario Parenzo")?"parenzo-interno-exit":"parenzo-interno-npc",
   pola:()=>"pola-inside",
   "pola-cortile":()=>"pola-cortile-npc"

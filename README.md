@@ -62,3 +62,10 @@ In modalità storia, il rombo dorato indica la prossima interazione nella zona c
 La mappa distingue The Dome 1 e The Dome 2, con il padiglione 2 a ovest dell’edificio principale. L’Aula Polivalente è ora un ambiente separato. I collegamenti si ispirano alla [planimetria ECPR](https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf). Sagome, distanze e interni sono ancora adattati alla griglia di gioco.
 
 La mappa in gioco mostra anche la planimetria di riferimento e il collegamento alla [vista Google Earth](https://earth.google.com/web/@41.9245095,12.4939844,70a,520d,35y,0h,0t,0r). I vialetti curvi ricollegano il margine ovest, il verde e l’accesso sul lato di Via Panama.
+
+
+## Aule e lezioni giocabili
+
+Da Romania, entra nell’atrio e sali al secondo piano. Il corridoio collega A200 e A203 alle porte delle lezioni di Microeconomia, Matematica finanziaria, Statistica, Economia aziendale, AI, Scienze Politiche/PPE e Macroeconomia. A Parenzo, il corridoio del primo piano dà accesso a T02 per il seminario e ad A4 e A5 per Global Law e Giurisprudenza. Entra, avvicinati alla cattedra e premi E. I quiz si salvano per aula e il risultato finisce nel diario.
+
+I numeri delle aule e i piani riprendono la [planimetria ECPR](https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf) e le [sale studio Luiss](https://www.luiss.it/it/ateneo/luiss-life/hub-e-sedi/sale-studio-e-lettura). L’assegnazione delle lezioni a quelle porte e i docenti sono di finzione. Gli esercizi si ispirano alle schede di [Microeconomia](https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/263/0/l25psbase/2026/microeconomia) e [Matematica finanziaria](https://www.luiss.it/it/ateneo/governance/faculty/cattedre-online/44/c/l25eebase/2026/matematica-finanziaria) e coprono temi introduttivi delle altre discipline.

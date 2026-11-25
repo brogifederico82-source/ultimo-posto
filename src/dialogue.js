@@ -228,6 +228,7 @@ function getScene(){
     return addConversation(scene(o.name,o.text||"«Hai un minuto? Sono appena uscito da lezione.»"),o,conversationFor(o));
   }
   if(o.action==="native"){
+    if(Object.hasOwn(teachingRooms,o.native))return teachingScene(o.native);
     const result=nativeScene(o.native);
     if(o.native==="navetta"||o.native==="autista")return result;
     if(originalMap.zones[state.zone]?.objects.find(item=>item.uid===o.uid)?.name!==o.name)result.title=o.name;
@@ -239,7 +240,8 @@ function getScene(){
   }
   if(o.action==="portal"){
     const [zone,entry]=o.target.split("#");
-    return scene(o.name,note,...(Object.hasOwn(campus.zones,zone)?[["Vai",()=>travel(zone,entry)]]:[]));
+    const label=Object.hasOwn(teachingRooms,zone)?"Entra nell’aula":"Vai";
+    return scene(o.name,note,...(Object.hasOwn(campus.zones,zone)?[[label,()=>travel(zone,entry)]]:[]));
   }
   if(o.action==="minigame")return scene(o.name,note,...(Object.hasOwn(challengeNames,o.target)?
     [["Gioca a "+challengeNames[o.target].toLowerCase(),()=>openChallenge(o.target)]]:[]));
@@ -271,7 +273,7 @@ function autoEncounter(o){
 function draw(now){
   const z=room(state.zone),x=state.x*16,y=state.y*16;
   const time=reducedMotion?0:now;
-  const zoom=["aula-chiesa","dome","tutorato"].includes(state.zone)?1.25:1;
+  const zoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
   const viewWidth=320/zoom,viewHeight=192/zoom;
   const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
   const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
@@ -288,6 +290,7 @@ function draw(now){
     }
   }
   stage.restore();
+  paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
   if(waypoint&&!activeScene){
     const px=((waypoint.x+waypoint.w/2)*16-cameraX)*zoom;
