@@ -686,12 +686,18 @@ function checkCampusSurprise(){
   $("surpriseLine").textContent=encounter.line;
   $("campusSurprise").showModal();
   if(audioOn&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
-    surpriseVoice=new SpeechSynthesisUtterance(encounter.voice);
-    surpriseVoice.lang="it-IT";
-    const italian=window.speechSynthesis.getVoices().filter(voice=>/^it(-|_)/i.test(voice.lang));
-    const voice=italian.find(candidate=>candidate.localService&&/enhanced|premium|natural/i.test(candidate.name))??italian.find(candidate=>candidate.localService)??italian[0];
+    const spoken=encounter.id==="Fantasma del fuoricorso"?"Uagliò! Ma che staje facenno ccà?":
+      encounter.voice.replace(/^Guagliò/i,"Uagliò");
+    surpriseVoice=new SpeechSynthesisUtterance(spoken);
+    const voices=window.speechSynthesis.getVoices();
+    const neapolitan=voices.find(voice=>/^nap(?:[-_]|$)/i.test(voice.lang)||/napoletan|neapolitan|napoli/i.test(voice.name));
+    const italian=voices.filter(voice=>/^it(?:[-_]|$)/i.test(voice.lang));
+    const voice=neapolitan??italian.find(candidate=>candidate.localService&&/enhanced|premium|natural/i.test(candidate.name))??
+      italian.find(candidate=>candidate.localService)??italian[0];
+    surpriseVoice.lang=voice?.lang??"it-IT";
     if(voice)surpriseVoice.voice=voice;
-    surpriseVoice.rate=1.04;
+    surpriseVoice.rate=.98;
+    surpriseVoice.pitch=.94;
     surpriseVoice.volume=.55;
     window.speechSynthesis.speak(surpriseVoice);
   }
