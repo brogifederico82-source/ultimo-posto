@@ -20,7 +20,11 @@
 <p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
 <button id="play" class="primary">Entra a Viale Romania</button></section>
 </div></div></section>
-<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><section class="panel scene" aria-live="polite"><canvas id="speakerPortrait" width="192" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><div class="touch"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact">Interagisci</button></div><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><strong id="objective"></strong><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus"><button data-move="left" aria-label="Cammina a sinistra">←</button><button data-move="right" aria-label="Cammina a destra">→</button><button data-move="up" aria-label="Cammina in alto">↑</button><button data-move="down" aria-label="Cammina in basso">↓</button><button id="interact" class="primary">Interagisci <kbd>E</kbd></button></div><details id="controlGuide" class="control-guide">
+<summary>Guida ai comandi</summary>
+<p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa.</p>
+</details>
+<section class="panel scene" aria-live="polite"><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
 <details class="campus-reference"><summary>Confronta con la planimetria di Viale Romania</summary>
@@ -29,6 +33,12 @@
 <p><a href="https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf" target="_blank" rel="noopener">Planimetria ECPR</a> · <a href="https://earth.google.com/web/@41.9245095,12.4939844,70a,520d,35y,0h,0t,0r" target="_blank" rel="noopener">Vista Google Earth</a></p>
 </details>
 <details><summary>Ambienti e attività</summary><ol id="campusMap" class="hint"></ol></details></details><details class="journal"><summary id="journalTitle">Diario di viaggio</summary><ul id="log"></ul></details></section>
+<dialog id="campusSurprise" class="campus-surprise" aria-labelledby="surpriseTitle">
+<div class="surprise-face" aria-hidden="true"></div>
+<h2 id="surpriseTitle">GUAGLIÒ!</h2>
+<p>Da Napoli, il fantasma del fuoricorso. Gli rimane un esame dal 1998.</p>
+<button id="surpriseClose" class="primary">Torna al campus</button>
+</dialog>
 <dialog id="challenge" class="challenge" aria-labelledby="challengeTitle">
 <header><h2 id="challengeTitle"></h2><button id="challengeExit">Esci</button></header>
 <div id="dancePad" hidden><strong id="danceCue" style="font-size:64px;display:block;line-height:1.15;color:#e7ba82;text-align:center" aria-live="polite"></strong><div id="danceSequence" aria-hidden="true"></div><progress id="danceMeter" max="1450" style="width:100%"></progress><div class="actions" style="justify-content:center"><button>←</button><button>↑</button><button>↓</button><button>→</button></div></div><p id="challengeRules" class="hint"></p>
@@ -114,6 +124,11 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 </section>
 
 <footer>Satira studentesca · Pianta di gioco stilizzata · WASD o frecce, E per interagire.</footer>
+<details class="journal campus-options">
+<summary>Opzioni</summary>
+<label><input type="checkbox" id="surpriseEnabled"> Sorprese horror-comiche</label>
+<p class="hint">Una scena improvvisa e un richiamo vocale facoltativo. La voce segue l’impostazione audio del gioco.</p>
+</details>
 <details class="journal study-board" id="studyBoard">
 <summary>Lezioni e quiz · Luiss</summary>
 <p>Scegli un corso di laurea e apri una domanda per ripassare. I quiz sono esercizi originali del gioco.</p>

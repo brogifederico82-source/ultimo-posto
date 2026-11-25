@@ -270,6 +270,18 @@ function autoEncounter(o){
   if(o.native==="trend"&&o.action==="native")openChallenge("dance");
   return true;
 }
+let stageInteraction=null;
+$("stage").onclick=event=>{
+  if(screen!=="game"||activeScene||minigame||!stageInteraction)return;
+  const nearest=nearby();
+  if(nearest?.uid!==stageInteraction.uid)return;
+  const canvas=$("stage"), bounds=canvas.getBoundingClientRect();
+  const scale=Math.min(bounds.width/320,bounds.height/192);
+  if(!scale)return;
+  const x=(event.clientX-bounds.left-(bounds.width-320*scale)/2)/scale;
+  const y=(event.clientY-bounds.top-(bounds.height-192*scale)/2)/scale;
+  if(stageInteraction.boxes.some(([left,top,right,bottom])=>x>=left&&x<=right&&y>=top&&y<=bottom))interact();
+};
 function draw(now){
   const z=room(state.zone),x=state.x*16,y=state.y*16;
   const time=reducedMotion?0:now;
@@ -298,7 +310,8 @@ function draw(now){
     paintCampusWaypoint(stage,clamp(px,9,311),clamp(py,9,183));
   }
   const nearest=nearby();
-  if(nearest&&!activeScene&&!state.ending){
+  stageInteraction=null;
+  if(nearest&&!activeScene&&!state.ending&&!state.prologue){
     const label="E · "+tr(nearest.label);
     stage.font="bold 8px monospace";stage.textAlign="center";
     const width=Math.min(302,stage.measureText(label).width+9);
@@ -306,6 +319,11 @@ function draw(now){
     const sy=clamp((nearest.y*16-cameraY)*zoom-13,3,178);
     rect(stage,"#221f2d",sx-width/2,sy,width,11);
     stage.fillStyle="#ffd499";stage.fillText(label,sx,sy+8,width-6);
+    const left=(nearest.x*16-cameraX)*zoom, top=(nearest.y*16-cameraY)*zoom;
+    const right=left+nearest.w*16*zoom, bottom=top+nearest.h*16*zoom;
+    stageInteraction={uid:nearest.uid,boxes:[
+      [sx-width/2-4,sy-4,sx+width/2+4,sy+15],[left-7,top-13,right+7,bottom+6]
+    ]};
   }
   if(z.width>20||z.height>12){
     const scale=Math.min(79/z.width,52/z.height);
@@ -438,18 +456,19 @@ function frame(now){
   lastTrafficFrame=now;
   if(screen==="editor")drawEditor(now);
   if(screen==="game"){
-    if(!state.ending&&!minigame&&!activeScene&&!state.prologue)trafficClock+=delta;
+    if(!state.ending&&!minigame&&!activeScene&&!state.prologue&&!$("campusSurprise").open)trafficClock+=delta;
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
     const move=moves.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
-    if(move && !state.prologue && !minigame && !activeScene && !state.ending && now-lastWalk>=95){
+    if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
       if(!blocked(state.zone,x,y,mapClock)){
         state.x=x;state.y=y;dirty=true;
         paintCampusOverview();
         trafficImpact();
-        const encounter=state.ending?null:nearby();
+        checkCampusSurprise();
+        const encounter=state.ending||$("campusSurprise").open?null:nearby();
         if(encounter)autoEncounter(encounter);
       }
       lastWalk=now;
@@ -497,7 +516,7 @@ $("audio").onclick=()=>{
   else{enableAudio();playCampusMusic();}
 };
 window.addEventListener("keydown",event=>{
-  if(screen!=="game"||event.ctrlKey||event.altKey||event.metaKey)return;
+  if(screen!=="game"||$("campusSurprise").open||event.ctrlKey||event.altKey||event.metaKey)return;
   const key=event.key.toLowerCase();
   if(minigame){
     if(key==="escape"){event.preventDefault();closeChallenge();return;}
@@ -520,6 +539,18 @@ window.addEventListener("keydown",event=>{
     return;
   }
   if(key==="e"&&!event.repeat&&finishCaption()){event.preventDefault();return;}
+  const choices=$("choices").querySelectorAll("button");
+  if(choices.length&&/^[1-9]$/.test(key)&&!event.repeat){
+    const choice=choices[Number(key)-1];
+    if(choice){event.preventDefault();choice.click();return;}
+  }
+  if(choices.length&&(activeScene||state.prologue||state.ending)&&["arrowup","arrowdown"].includes(key)){
+    event.preventDefault();
+    const current=Array.from(choices).indexOf(document.activeElement);
+    const next=current<0?(key==="arrowup"?choices.length-1:0):(current+(key==="arrowup"?-1:1)+choices.length)%choices.length;
+    choices[next].focus();
+    return;
+  }
   if(["arrowleft","arrowright","arrowup","arrowdown","a","d","w","s","e","escape"].includes(key))event.preventDefault();
   keys.add(key);
   if(key==="e"&&!event.repeat&&!activeScene)interact();
@@ -546,6 +577,34 @@ for(const button of document.querySelectorAll("[data-move]")){
   button.onblur=()=>controls.delete(direction);
 }
 $("interact").onclick=interact;
+const surprisePreference="ultimo-posto-sorprese";
+const surpriseEnabled=$("surpriseEnabled");
+try{surpriseEnabled.checked=localStorage.getItem(surprisePreference)==="on";}catch{}
+surpriseEnabled.onchange=()=>{
+  try{localStorage.setItem(surprisePreference,surpriseEnabled.checked?"on":"off");}catch{}
+};
+$("surpriseClose").onclick=()=>$("campusSurprise").close();
+let surpriseVoice;
+$("campusSurprise").addEventListener("close",()=>{
+  if(surpriseVoice){window.speechSynthesis.cancel();surpriseVoice=null;}
+  $("interact").focus();
+});
+function checkCampusSurprise(){
+  if(!surpriseEnabled.checked||testMode||has("Fantasma del fuoricorso")||state.ending)return;
+  if(state.zone!=="giardino"||state.x!==13||state.y!==39)return;
+  carry("Fantasma del fuoricorso");
+  record("Scoperta · Il fantasma del fuoricorso");
+  keys.clear();controls.clear();
+  $("campusSurprise").showModal();
+  if(audioOn&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
+    surpriseVoice=new SpeechSynthesisUtterance("Guagliò!");
+    surpriseVoice.lang="it-IT";
+    surpriseVoice.rate=1.12;
+    surpriseVoice.volume=.55;
+    window.speechSynthesis.speak(surpriseVoice);
+  }
+  save();
+}
 $("homeButton").onclick=()=>{if(screen==="game")save();show("home");};
 function openMode(mode){
   selectedMode=mode;testMode=false;

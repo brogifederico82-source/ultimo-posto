@@ -310,7 +310,7 @@ function carry(item){
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
 function interact(){
-  if(screen!=="game"||state.ending||state.prologue)return;
+  if(screen!=="game"||state.ending||state.prologue||$("campusSurprise").open)return;
   const spot=nearby();if(!spot)return;
   state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);renderScene();
   if(!$("speakerPortrait").hidden)$("sceneTitle").focus();
@@ -582,7 +582,13 @@ function renderScene(){
   $("playerLine").textContent=scene.playerLine?state.name+" · «"+tr(scene.playerLine)+"»":"";
   $("choices").replaceChildren();
   for(const [label,action] of scene.choices){
-    const button=document.createElement("button");button.textContent=tr(label);
+    const button=document.createElement("button");
+    button.textContent=tr(label);
+    const index=$("choices").children.length+1;
+    if(index<=9){
+      button.dataset.shortcut=String(index);
+      button.setAttribute("aria-keyshortcuts",String(index));
+    }
     button.onclick=()=>{state.chatTopic=null;action();if(screen==="game"){save();renderScene();if(!minigame)($("speakerPortrait").hidden?$("interact"):$("sceneTitle")).focus();}};
     $("choices").append(button);
   }

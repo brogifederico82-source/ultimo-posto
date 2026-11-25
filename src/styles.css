@@ -220,3 +220,34 @@ button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .1
 .degree-course>summary{font-weight:700;padding:8px 0}
 .degree-course a{color:#a8d7f1}
 .study-grid h4{font-size:1rem;margin:0}
+
+#game .frame{border-radius:18px}
+#stage{cursor:pointer}
+#game .touch{position:sticky;top:6px;z-index:2;align-items:center;padding:8px;
+  border:1px solid var(--line);border-radius:13px;background:#172333f5}
+#game .touch [data-move]{padding-inline:9px}
+#game .touch #interact{margin-left:auto}
+.control-guide{margin:10px 0 14px;color:var(--muted,#bec9db);font-size:.9rem}
+.control-guide summary{cursor:pointer;color:var(--gold);width:fit-content}
+kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;padding:2px 4px}
+#choices button[data-shortcut]::before{content:attr(data-shortcut);display:inline-block;margin-right:.55em;
+  padding:1px 4px;border:1px solid currentColor;border-radius:4px;color:var(--gold);font:700 .75em monospace}
+#choices button{border-radius:10px;text-align:left}
+.game-conversation .control-guide{margin-inline:auto;max-width:780px}
+#speakerPortrait{border-radius:14px}
+.campus-surprise{width:min(560px,calc(100% - 28px));text-align:center;padding:clamp(18px,6vw,48px);
+  color:#fff0cc;background:radial-gradient(ellipse at 50% 18%,#40558b,#172744 44%,#101b30);
+  border:2px solid #efbe79;border-radius:24px}
+.campus-surprise::backdrop{background:#0b1020ed}
+.campus-surprise h2{color:#ffdc95;font-size:clamp(2.8rem,11vw,6.5rem);letter-spacing:.06em;margin:0}
+.surprise-face{position:relative;width:76px;height:82px;margin:0 auto 10px;
+  border-radius:60% 60% 15% 15%;background:#c9ddf2;box-shadow:0 0 24px #83bafa75}
+.surprise-face::before{content:"";position:absolute;width:11px;height:15px;left:20px;top:26px;
+  background:#172744;border-radius:50%;box-shadow:25px 0 #172744}
+.surprise-face::after{content:"";position:absolute;width:20px;height:15px;left:28px;top:51px;
+  background:#172744;border-radius:50%}
+@media(max-width:470px){
+  #game .touch{gap:5px}
+  #game .touch #interact{padding-inline:7px}
+  #game .touch [data-move]{min-width:37px}
+}
