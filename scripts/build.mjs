@@ -6,15 +6,13 @@ const output = new URL('../dist/', import.meta.url);
 const loadText = name => readFile(new URL(name, source), 'utf8');
 const scripts = ['game.js', 'classrooms.js', 'interiors.js', 'world.js', 'navigation.js', 'dialogue.js', 'minigames.js', 'loft-arcade.js', 'editor.js'];
 
-const [template, css, map, plan, music, ...parts] = await Promise.all([
+const [template, css, map, plan, entranceMusic, campusMusic, ...parts] = await Promise.all([
   loadText('index.html'),
   loadText('styles.css'),
   loadText('campus.json'),
   readFile(new URL('plan.webp', source)),
-  readFile(new URL('sunny-underground.mp3', source)).catch(error => {
-    if (error.code !== 'ENOENT') throw error;
-    return null;
-  }),
+  readFile(new URL('sunny-underground.mp3', source)),
+  readFile(new URL('arcade-sunset.mp3', source)),
   ...scripts.map(loadText),
 ]);
 
@@ -25,8 +23,8 @@ const sections = {
   STYLES: css.trim(),
   CAMPUS: JSON.stringify(JSON.parse(map)).replaceAll('<', '\\u003c'),
   PLAN: plan.toString('base64'),
-  MUSIC: music ? 'data:audio/mpeg;base64,' + music.toString('base64') :
-    'https://raw.githubusercontent.com/brogifederico82-source/ultimo-posto/5d56147c6b2ef0baa117ccab6998664e7cb0f6d3/src/sunny-underground.mp3',
+  ENTRANCE_MUSIC: entranceMusic.toString('base64'),
+  CAMPUS_MUSIC: campusMusic.toString('base64'),
   GAME: game.trim(),
 };
 let html = template;

@@ -136,6 +136,7 @@ function show(next){
   if(next==="editor") enterEditor();
   if(next==="game") renderScene();
   if(next!=="editor")refreshLanguage();
+  syncBackgroundMusic();
 }
 const studentNames=[
   ["Ada","Bianca","Giulia","Marta","Viola"],
@@ -299,6 +300,7 @@ function travel(zone,entry){
   if(!Object.hasOwn(campus.zones,zone))return;
   [state.x,state.y]=reachEntry(zone,entry??state.zone);
   state.zone=zone;state.look="down";state.chatTopic=null;state.freeMoment=null;activeScene=null;
+  syncBackgroundMusic();
 }
 function discover(id,description){
   if(state.secrets.includes(id))return;
