@@ -231,7 +231,7 @@ function campusOptionalScene(sceneData,o){
 function getScene(){
   if(state.prologue)return openingScene();
   if(state.ending?.guard)return scene(state.ending.title,state.ending.text,["Riprova dall’ingresso",()=>{
-    state.ending=null;state.guardWarned=false;
+    state.ending=null;state.guardWarned=false;state.gateConfrontation=0;
     [state.x,state.y]=reachEntry(state.zone,"viale");
     keys.clear();controls.clear();activeScene=null;syncBackgroundMusic();
   }]);
@@ -496,7 +496,7 @@ function frame(now){
     if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
-      if(!crossRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
+      if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
         state.x=x;state.y=y;dirty=true;
         collectCampusCoin();syncBackgroundMusic();
         paintCampusOverview();

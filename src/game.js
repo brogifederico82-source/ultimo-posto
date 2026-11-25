@@ -329,7 +329,9 @@ function interact(){
     syncBackgroundMusic();save();renderScene();$("interact").focus();
     return;
   }
-  if(spot.uid==="viale-ingresso-varco")warnAtGate();
+  if(spot.uid==="viale-ingresso-varco"&&!has("Via libera")&&!isFree()){
+    state.gateConfrontation=1;warnAtGate();
+  }
   const destination=doorDestination(spot);
   if(destination){
     keys.clear();controls.clear();
@@ -352,6 +354,43 @@ function doorDestination(spot){
   const destination=nativeDoors[spot.native];
   return destination&&Object.hasOwn(campus.zones,destination)?[destination]:null;
 }
+
+function gateConfrontation(){
+  const armed=!$("unarmedGuard").checked;
+  const stop=["Fermati e torna dalla guardia",()=>{
+    state.gateConfrontation=0;state.guardWarned=false;activeScene=null;
+  }];
+  if(state.gateConfrontation===2)return scene("Tornello · Ultimo avvertimento",
+    "La guardia taglia il passaggio e porta la mano al fianco. «Indietro. Adesso.» Il brusio del viale sembra spegnersi.",
+    stop,
+    ["Oltrepassa la linea",()=>{
+      const x=vialeEntrance.x+15,y=vialeEntrance.gateY;
+      state.gateConfrontation=0;warnAtGate();
+      if(crossRestrictedLine(x,y)&&state.ending?.guard){
+        state.ending.text=(armed
+          ?"La guardia ha sparato. Sul pavimento resta una chiazza scura."
+          :"La guardia ti ha immobilizzato. Un filo di sangue ti scende dal labbro.")+
+          " Dovevi fermarti alla linea gialla, tornare dalla guardia e mostrare il badge.";
+      }
+    }]);
+  return scene("Tornello · Fermati alla linea",
+    "La guardia alza una mano. «Fermo. Mostrami il badge prima di passare.» Le sbarre restano immobili.",
+    stop,
+    ["Arretra di un passo",()=>{
+      state.gateConfrontation=0;state.guardWarned=false;activeScene=null;
+      if(!blocked(state.zone,state.x,state.y+1))state.y++;
+    }],
+    ["Insisti per passare",()=>{state.gateConfrontation=2;record("Tornello · Hai insistito dopo il primo avvertimento.");}]);
+}
+function stopAtRestrictedLine(x,y){
+  if(testMode||isFree()||state.campusGateOpen||has("Via libera")||!atViale(state)||!hasIntegratedEntrance())return false;
+  if(x!==vialeEntrance.x+15||y!==vialeEntrance.gateY||state.y!==y+1)return false;
+  state.gateConfrontation=1;
+  warnAtGate();activeScene="viale-ingresso-varco";keys.clear();controls.clear();
+  renderScene();$("sceneTitle").focus();
+  return true;
+}
+
 function badge(reason){
   carry("Via libera");record(reason);
 }
@@ -547,6 +586,7 @@ function nativeScene(id){
     case "bacheca":return scene("Bacheca del campus","Tra un seminario sul futuro e un volantino per ripetizioni di micro c’è una nota sui posti al Dome.",
       ["Leggi il retro",()=>{carry("Nota del Dome");discover("bacheca","Il retro della locandina");}]);
     case "varco":
+      if(activeScene==="viale-ingresso-varco"&&!has("Via libera")&&!isFree())return gateConfrontation();
       return scene("Tornello",has("Via libera")||isFree()?"Badge riconosciuto. Il tornello è aperto.":"Presenta il badge alla guardia, a sinistra del tornello.",
         ...((isFree()||has("Via libera"))?[["Entra nel campus",()=>travel("giardino")]]:[]));
     case "dome":
