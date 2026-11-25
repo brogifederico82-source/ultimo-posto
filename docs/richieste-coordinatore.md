@@ -40,3 +40,7 @@ Il tornello riusa il Game Over con ripartenza già presente e resta escluso in m
 | Ripresa a metà del seminario | Passato in simulazione. Tratti, log, vittorie, oggetti e fase intatti. |
 | Esplorazione dopo l’epilogo e modalità libera | Passato in simulazione. Ritorno a Radio e trasporti disponibili in libera. |
 | Tornello armato e disarmato, riprova, selezione voce napoletana | Passato in simulazione, con motore vocale simulato. Riproduzione reale e resa visiva da provare. |
+
+## Ritocco dell’ingresso
+
+La foto dell’ingresso mostra due pilastri chiari e un accesso carrabile aperto verso il viale interno. Nel gioco il tratto pieno diventa un’inferriata bassa con due pilastri ai lati del tornello. L’assetto del tornello è adattato al gioco. Il passaggio e le condizioni del badge restano quelli esistenti. [Foto dell’ingresso](https://retc.luiss.it/files/2016/05/Entrance.jpg) · [Percorso CIAC](https://easyconferences.eu/ciac2025/venue/)

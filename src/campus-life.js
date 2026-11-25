@@ -21,6 +21,7 @@ function joinRomaniaEntrance(map){
     return o.action||o.kind==="entrance"||o.x<x||o.x>=x+width||o.y<y+4||o.y>=y+20;
   });
   for(const obj of street.objects){
+    if(obj.kind==="wall")continue;
     const clone={...obj,uid:"viale-"+obj.uid,x:obj.x+x,y:obj.y+y,route:obj.route?.map(([px,py])=>[px+x,py+y])};
     if(obj.uid==="ingresso-start")clone.target="viale";
     if(obj.uid==="ingresso-varco")clone.solid=true;
@@ -29,10 +30,21 @@ function joinRomaniaEntrance(map){
     }
     garden.objects.push(clone);
   }
-  garden.objects.push(
-    {uid:"viale-tornello-sinistra",kind:"wall",name:"Recinzione dell’ingresso",x,y:y+6,w:15,h:1,solid:true},
-    {uid:"viale-tornello-destra",kind:"wall",name:"Recinzione dell’ingresso",x:x+16,y:y+6,w:14,h:1,solid:true}
-  );
+  const gateX=x+15;
+  for(const [start,end] of [[x,gateX-2],[gateX+3,x+width]]){
+    for(let side=start;side<end;side+=3){
+      garden.objects.push({uid:"viale-inferriata-"+side,kind:"rope",name:"Inferriata bassa",
+        x:side,y:y+6,w:Math.min(3,end-side),h:1,color:"#65736a",solid:true});
+    }
+  }
+  for(const [side,px] of [["sx",gateX-2],["dx",gateX+2]]){
+    garden.objects.push({uid:"viale-pilastro-"+side,kind:"pillar",name:"Pilastro in pietra",
+      x:px,y:y+5,w:1,h:2,color:"#e7dbc1",solid:true});
+  }
+  for(const px of [gateX-1,gateX+1]){
+    garden.objects.push({uid:"viale-inferriata-"+px,kind:"rope",name:"Inferriata bassa",
+      x:px,y:y+6,w:1,h:1,color:"#65736a",solid:true});
+  }
   return map;
 }
 function hasIntegratedEntrance(){
