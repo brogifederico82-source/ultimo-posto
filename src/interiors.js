@@ -51,24 +51,25 @@ function furnishCampusInteriors(map){
   return map;
 }
 
-function installTd2(map){
-  const corridor=map.zones.terra;
-  if(!corridor||corridor.width<=10||corridor.height<=4||corridor.objects.some(o=>o.uid==="terra-td2"))return map;
-  if(!map.zones.td2&&Object.keys(map.zones).length>=maxCampusZones)return map;
-  const fixture=(uid,kind,name,x,y,extra={})=>({
-    uid,kind,name,x,y,w:1,h:1,rotation:0,variant:0,color:"#758685",solid:false,
-    action:"",native:"",text:"",target:"",gate:"",missionTarget:"",auto:false,behavior:"idle",speed:1.7,route:[],...extra
-  });
-  corridor.objects.push(fixture("terra-td2","door","TD2 · Entra in aula",10,4,{action:"portal",target:"td2#terra"}));
-  map.zones.td2??={name:"TD2 · Aula studio",width:16,height:11,ground:"floor",
-    plan:{show:false,opacity:45,scale:57},objects:[
-      fixture("td2-entry","entrance","Arrivo dal piano terra",7,8,{target:"terra"}),
-      fixture("td2-exit","door","Torna al piano terra",7,10,{action:"portal",target:"terra#td2"}),
-      fixture("td2-board","board","Lavagna del TD2",5,1,{w:6,solid:true}),
-      fixture("td2-desk-left","desk","Banchi",2,4,{w:4,solid:true}),
-      fixture("td2-desk-right","desk","Banchi",10,4,{w:4,solid:true}),
-      fixture("td2-student","student","Matteo · Calcetto",8,5,{color:"#3f84a8",solid:true,action:"native",native:"calcetto"})
-    ]};
-  corridor.objects.push(fixture("terra-td2-arrival","entrance","Uscita TD2",10,5,{target:"td2"}));
+function improveDome2Entrance(map){
+  if(map.zones.td2?.objects.some(o=>o.uid==="td2-student"&&o.native==="calcetto")){
+    delete map.zones.td2;
+    const corridor=map.zones.terra;
+    if(corridor)corridor.objects=corridor.objects.filter(o=>o.uid!=="terra-td2"&&o.uid!=="terra-td2-arrival");
+  }
+  const garden=map.zones.giardino;
+  const door=garden?.objects.find(o=>o.uid==="dome2-door");
+  if(!door||door.x!==20||door.y!==64||garden.width<26||garden.height<74)return map;
+  const add=(uid,kind,name,x,y,extra={})=>{
+    if(garden.objects.some(o=>o.uid===uid))return;
+    garden.objects.push({uid,kind,name,x,y,w:1,h:1,rotation:0,variant:0,color:"#758685",
+      solid:false,action:"",native:"",text:"",target:"",gate:"",missionTarget:"",auto:false,
+      behavior:"idle",speed:1.7,route:[],...extra});
+  };
+  add("dome2-forecourt","paving","Piazzetta The Dome 2",20,65,{w:5,h:2,color:"#b9ac95"});
+  add("dome2-walk-edge","paving","Bordo del vialetto",21,67,{w:3,h:6,color:"#a89d8d"});
+  add("dome2-walk-center","paving","Vialetto The Dome 2",22,67,{w:1,h:7,color:"#c7bba4"});
+  add("dome2-calcetto","student","Matteo · Calcetto",22,65,
+    {color:"#3f84a8",solid:true,action:"native",native:"calcetto"});
   return map;
 }

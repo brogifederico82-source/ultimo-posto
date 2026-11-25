@@ -10,7 +10,7 @@ const arcadeRules={
   bris:"Scegli una carta con il mouse o con i tasti 1, 2 e 3. La briscola batte gli altri semi. Nel seme di apertura e in quello di briscola l’ordine è Asso, Tre, Re, Cavallo, Fante, 7, 6, 5, 4, 2. Vince chi supera 60 punti."
 };
 const prizes={
-  calcetto:["Gettone TD2","Hai battuto Matteo a calcetto."],
+  calcetto:["Gettone Calcetto","Hai battuto Matteo a calcetto."],
   mattoni:["Gettone Pixel Mattoni","Hai ripulito il tabellone del LOFT."],
   nastri:["Gettone Salva i nastri","Le cassette sono tutte in salvo."],
   poker:["Carta del giardino","Hai conquistato il tavolo del giardino."],

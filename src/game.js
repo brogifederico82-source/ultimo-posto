@@ -71,7 +71,7 @@ const options = {
 };
 const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
 const totalSecrets=14;
-const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Texas Hold’em",cavalli:"Cavalli virtuali",calcetto:"Calcetto TD2",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
+const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Texas Hold’em",cavalli:"Cavalli virtuali",calcetto:"Calcetto · The Dome 2",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
 const won=id=>Boolean(state?.wins[id]);
 const saveKey="ultimo-posto-v1";
@@ -85,6 +85,11 @@ function stored(mode="story"){
   try{
     const data=JSON.parse(localStorage.getItem(saveProfileKey(mode)));
     if(data?.version!==1 || !data.avatar || !data.traits || !Array.isArray(data.log))return null;
+    if(data.zone==="td2"&&!Object.hasOwn(campus.zones,"td2")&&room("giardino").objects.some(o=>o.uid==="dome2-calcetto")){
+      data.zone="giardino";
+      [data.x,data.y]=reachEntry("giardino","dome2");
+      data.campusGateOpen=true;
+    }
     if(!Object.hasOwn(campus.zones,data.zone))data.zone="ingresso";
     if(data.zone==="ingresso"&&!data.streetVisited&&room("ingresso").width===30){
       [data.x,data.y]=reachEntry("ingresso");data.streetVisited=true;
@@ -486,7 +491,7 @@ function nativeScene(id){
       ...(t.empatia>=65?[["Presta il tuo caricatore",()=>{carry("Presa condivisa");change("empatia",3);}]]:[]));
     case "t04":return scene("Aula T04",has("Presa condivisa")?"Lo studente del giardino ti fa cenno. Ha tenuto una sedia e trovato una ciabatta.":"C’è una sedia occupata da una felpa. Nessun proprietario in vista. Sul banco accanto c’è un posto libero, lontano dalla presa.",
       reserve(has("Presa condivisa")?"T04, con corrente":"Studio in modalità risparmio",has("Presa condivisa")?"Una presa per due. Funziona meglio di certi lavori di gruppo.":"Il portatile segna 4%. Con carta e penna duri senz’altro più di lui."));
-    case "calcetto":return scene("Matteo · TD2",local(
+    case "calcetto":return scene("Matteo · The Dome 2",local(
       "«Ti va un uno contro uno? Cinque gol e la partita è tua. Se preferisci, facciamo prima due tiri.»",
       "“Up for a one-on-one? First to five goals. We can warm up first if you like.”"),
       [local("Gioca a calcetto","Play football"),()=>openChallenge("calcetto")],
