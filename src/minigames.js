@@ -168,6 +168,7 @@ function openChallenge(id,practice=false){
     "Puoi anche trascinare sul campo con il mouse o col dito.",
     "You can also drag on the court with a mouse or your finger."
   );
+  $("challengeReplay").textContent=tr("Rivincita");
   $("challengeReplay").hidden=true;
   $("cardGame").hidden=!isCards;
   $("racePanel").hidden=!isRace;

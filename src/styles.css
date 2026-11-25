@@ -65,8 +65,8 @@ body:has(#editor:not([hidden])) main{max-width:1700px}
   --gold: #ffc47e;
   --line: #50647a;
   --muted: #bec9db;
-  --display: "DM Serif Text", Georgia, serif;
-  --interface: "DM Sans", system-ui, sans-serif;
+  --display: "Arial Black", "Trebuchet MS", system-ui, sans-serif;
+  --interface: "Trebuchet MS", system-ui, sans-serif;
 }
 body {
   min-height: 100dvh;
@@ -283,10 +283,51 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 #holdemRaiseTo { width: 5rem; }
 #challengeShot.shot-ready { outline: 2px solid #ebc779; outline-offset: 2px; }
 
-.race-horses { display: grid; gap: .55rem; margin: .6rem 0; }
-.race-horses > div { display: grid; grid-template-columns: minmax(9rem, 1fr) minmax(5rem, 2fr); align-items: center; gap: .55rem; }
-.race-horses button[aria-pressed="true"] { border-color: #ebc779; box-shadow: inset 0 -2px #ebc779; }
-.race-track { position: relative; height: 1.8rem; margin-inline: .8rem; border-bottom: 2px dashed #927c52; }
-.race-track::after { content: ""; position: absolute; right: 0; inset-block: 0; border-right: 2px dotted #f1deb4; }
-.race-track span { position: absolute; left: 0; transform: translateX(-50%); z-index: 1; color: #f1deb4; font-size: 1.5rem; line-height: 1.6rem; }
+/* Arcade title and race scoreboard */
+.hero .arcade-title {
+  width: fit-content;
+  margin: .2em 0 .26em .1em;
+  font-size: clamp(3.15rem, 9.5vw, 7rem);
+  font-weight: 1000;
+  line-height: .79;
+  text-transform: uppercase;
+  letter-spacing: -.08em;
+  transform: skewX(-9deg);
+  color: #61d8ff;
+  -webkit-text-stroke: 1px #e8f8ff;
+  text-shadow: 0 3px #1558c4, 0 6px #123184, 0 9px #101d55, 3px 12px 16px #020817;
+}
+.hero .arcade-title span:last-child { color: #a5eaff; }
+.brand, .zone, .challenge-score { font-family: var(--display); font-weight: 800; letter-spacing: .025em; }
+
+.race-signal {
+  margin: .4rem 0 .65rem; padding: .35rem .6rem; text-align: center;
+  background: #102741; border: 1px solid #4578ae; color: #a5eaff;
+  font-family: var(--display); font-weight: 850; text-transform: uppercase;
+}
+.race-signal[data-phase="1"], .race-signal[data-phase="2"], .race-signal[data-phase="3"] { color: #ffbc79; }
+.race-signal[data-phase="race"], .race-signal[data-phase="finish"] { color: #bcf69a; }
+.race-horses { display: grid; gap: .45rem; margin: .6rem 0; }
+.race-horses > div {
+  display: grid; grid-template-columns: minmax(8rem, 1.1fr) minmax(3.5rem, 1.4fr) 1.5rem;
+  align-items: center; gap: .4rem; padding: .3rem; border: 1px solid #38536e; background: #122336;
+}
+.race-horses > div.race-leading { border-color: var(--runner-color); }
+.race-horses button { display: grid; grid-template-columns: 1.25rem 1fr; text-align: left; gap: 0 .4rem; padding: .35rem; font-size: .84rem; }
+.race-horses button[aria-pressed="true"] { border-color: var(--runner-color); box-shadow: inset 0 -2px var(--runner-color); }
+.race-horses button:disabled { opacity: .85; }
+.race-horses small { grid-column: 2; color: #c8deee; }
+.race-number { grid-row: span 2; color: var(--runner-color); font-weight: 900; }
+.race-track {
+  position: relative; height: 1.7rem; margin-inline: .55rem;
+  background: repeating-linear-gradient(90deg, #21426355 0 1px, transparent 1px 25%), #0b1728;
+  border-block: 1px solid #38536e;
+}
+.race-track::after { content: ""; position: absolute; right: 0; inset-block: 0; border-right: 3px dotted #e8f8ff; }
+.race-track span { position: absolute; left: 0; transform: translateX(-50%); z-index: 1; color: var(--runner-color); font-size: 1.5rem; line-height: 1.6rem; }
+.race-place { color: var(--runner-color); font-weight: 850; }
 #raceStake { width: 4rem; }
+#raceReturn { align-self: center; color: #a5eaff; font-size: .85rem; }
+@media (max-width: 420px) {
+  .race-horses > div { grid-template-columns: minmax(7rem, 1fr) minmax(2rem, 1fr) 1.1rem; gap: .25rem; }
+}
