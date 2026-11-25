@@ -203,15 +203,29 @@ function saveCampus(){
 }
 function room(id){return campus.zones[id]??campus.zones.ingresso;}
 function kindLayer(o){return assets[o.kind][2];}
-function sceneObjects(zone){
-  let objects=foregroundCache.get(zone);
-  if(!objects){
-    objects=zone.objects.filter(o=>kindLayer(o)!=="terreno"||o.solid||o.action);
-    foregroundCache.set(zone,objects);
+function zoneObjects(zone){
+  let index=foregroundCache.get(zone);
+  if(index)return index;
+  index={objects:[],solid:[],interactions:[],actions:[],vehicles:[],entries:[],byId:new Map(),landmarks:new Map()};
+  for(const o of zone.objects){
+    index.byId.set(o.uid,o);
+    const layer=kindLayer(o);
+    if(layer==="terreno"&&!o.solid&&!o.action)continue;
+    index.objects.push(o);
+    if(o.solid)index.solid.push(o);
+    if(o.action){
+      index.actions.push(o);
+      if(o.native&&!index.landmarks.has(o.native))index.landmarks.set(o.native,o);
+    }
+    if(o.action||(layer==="persone"&&!isVehicle(o)))index.interactions.push(o);
+    if(o.kind==="entrance")index.entries.push(o);
+    if(isVehicle(o)&&o.behavior!=="idle")index.vehicles.push(o);
   }
-  return objects;
+  foregroundCache.set(zone,index);
+  return index;
 }
-function entriesIn(id){return room(id).objects.filter(o=>o.kind==="entrance");}
+function sceneObjects(zone){return zoneObjects(zone).objects;}
+function entriesIn(id){return zoneObjects(room(id)).entries;}
 function terrainMap(zone){
   const tiles=new Map();
   for(const o of zone.objects){
@@ -262,7 +276,7 @@ function insideObject(o,x,y){return x>=o.x-.002&&x<o.x+o.w&&y>=o.y-.002&&y<o.y+o
 function blocked(id,x,y,now=0){
   const zone=room(id);
   if(x<0||y<0||x>=zone.width||y>=zone.height)return true;
-  return sceneObjects(zone).some(o=>o.solid&&
+  return zoneObjects(zone).solid.some(o=>
     (o.uid!=="viale-ingresso-varco"||(!state?.campusGateOpen&&!isFree()))&&
     (!o.gate||gateLocked(o.gate))&&insideObject(positionOf(o,now),x+.5,y+.5));
 }
@@ -279,11 +293,10 @@ function reachEntry(id,preferred){
   const entry=entries.find(e=>e.uid===preferred||e.target===preferred)??entries[0];
   return freeTile(id,entry?.x??2,entry?.y??2);
 }
-function currentObject(){return room(state.zone).objects.find(o=>o.uid===activeScene);}
+function currentObject(){return zoneObjects(room(state.zone)).byId.get(activeScene);}
 function nearbyIn(id,x,y,now=0){
   let best,dist=.95;
-  for(const item of sceneObjects(room(id))){
-    if(!item.action&&(kindLayer(item)!=="persone"||isVehicle(item)))continue;
+  for(const item of zoneObjects(room(id)).interactions){
     const o=positionOf(item,now);
     const xDist=Math.max(o.x-(x+.5),0,(x+.5)-(o.x+o.w));
     const yDist=Math.max(o.y-(y+.5),0,(y+.5)-(o.y+o.h));
@@ -510,12 +523,12 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
     }
   }
-  if(visible.terreno&&id==="giardino"&&!editing&&z.width===144&&
-      z.objects.some(o=>o.uid==="entry-from-panama"&&o.x===72&&o.y===47))paintRomaniaEdges(c);
+  const panama=editing?null:zoneObjects(z).byId.get("entry-from-panama");
+  if(visible.terreno&&id==="giardino"&&z.width===144&&panama?.x===72&&panama.y===47)paintRomaniaEdges(c);
   // Connect the existing garden walks around the planted islands north of the bar.
-  if(visible.terreno && id==="giardino" &&
-      left<78 && right>11 && top<74 && bottom>13 &&
-      sceneObjects(z).some(o=>o.uid==="bosco-studio" && o.x===34 && o.y===24)){
+  const bosco=editing?z.objects.find(o=>o.uid==="bosco-studio"):zoneObjects(z).byId.get("bosco-studio");
+  if(visible.terreno && id==="giardino" && left<78 && right>11 && top<74 && bottom>13 &&
+      bosco?.x===34 && bosco.y===24){
     const tiles=editing?terrainMap(z):terrainCache.get(z);
     c.save();c.beginPath();
     for(let y=Math.max(top,13);y<Math.min(bottom,74);y++)
@@ -556,8 +569,7 @@ let mapClock=0,trafficClock=0,lastTrafficFrame=0;
 function trafficImpact(){
   if(isFree()||state.ending||minigame||activeScene||state.prologue)return;
   const zone=room(state.zone);
-  const hit=sceneObjects(zone).find(o=>{
-    if(!isVehicle(o)||o.behavior==="idle")return false;
+  const hit=zoneObjects(zone).vehicles.find(o=>{
     const at=positionOf(o,trafficClock,zone.width);
     return !at.parked&&insideObject(at,state.x+.5,state.y+.5);
   });

@@ -308,7 +308,9 @@ $("stage").onclick=event=>{
   if(stageInteraction.boxes.some(([left,top,right,bottom])=>x>=left&&x<=right&&y>=top&&y<=bottom))interact();
 };
 function draw(now){
-  const z=room(state.zone),x=state.x*16,y=state.y*16;
+  const z=room(state.zone);
+  const [drawX,drawY]=walkPosition(now);
+  const x=Math.round(drawX*16),y=Math.round(drawY*16);
   const time=reducedMotion?0:now;
   const zoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
   const viewWidth=320/zoom,viewHeight=192/zoom;
@@ -318,7 +320,7 @@ function draw(now){
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
   worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},layers,false,
-    {row:state.y+.86,draw:()=>sprite(stage,state.avatar,x+8,y+14,now-lastWalk<160?Math.floor(now/75)%3:0,state.look)});
+    {row:drawY+.86,draw:()=>sprite(stage,state.avatar,x+8,y+14,walkStep&&now-walkStep.start<135?Math.floor(now/75)%3:0,state.look)});
   if(z.ground==="grass"&&!reducedMotion){
     for(let i=0;i<18;i++){
       const px=(i*131+Math.floor(now/120))%(z.width*16);
@@ -356,20 +358,19 @@ function draw(now){
     const scale=Math.min(79/z.width,52/z.height);
     const mx=x=>235+x*scale,my=y=>8+y*scale;
     stage.drawImage(minimapBase(z,scale),231,4);
-    for(const o of sceneObjects(z)){
-      if(isVehicle(o)&&o.behavior!=="idle"){
-        const vehicle=positionOf(o,trafficClock,z.width);
-        rect(stage,"#ff976a",mx(vehicle.x+.5),my(vehicle.y+.5),2,2);
-      }
-      if(o.action)rect(stage,gateLocked(o.gate)?"#ad7868":"#e2b875",mx(o.x),my(o.y),2,2);
+    const {vehicles,actions,landmarks}=zoneObjects(z);
+    for(const o of vehicles){
+      const vehicle=positionOf(o,trafficClock,z.width);
+      rect(stage,"#ff976a",mx(vehicle.x+.5),my(vehicle.y+.5),2,2);
     }
+    for(const o of actions)rect(stage,gateLocked(o.gate)?"#ad7868":"#e2b875",mx(o.x),my(o.y),2,2);
     stage.font="bold 6px monospace";stage.textAlign="center";stage.fillStyle="#fff1b8";
     for(const [id,label] of [["dome","D"],["caffe","B"],["terra","E"],["uscita","R"]]){
-      const point=sceneObjects(z).find(o=>o.native===id&&o.action);
+      const point=landmarks.get(id);
       if(point)stage.fillText(label,mx(point.x)+1,my(point.y)-2);
     }
     if(waypoint)paintCampusWaypoint(stage,mx(waypoint.x+.5),my(waypoint.y+.5));
-    rect(stage,"#f5f7d9",mx(state.x),my(state.y),3,3);
+    rect(stage,"#f5f7d9",mx(drawX),my(drawY),3,3);
   }
 }
 function minimapBase(zone,scale){
@@ -476,7 +477,18 @@ function paintCover(){
   worldView(cover,"giardino",0,{x:0,y:0,w:zone.width*16,h:zone.height*16},{...layers,persone:false});
   cover.restore();
 }
-let lastWalk=-1000;
+const walkInterval=95;
+let lastWalk=-1000,walkStep=null;
+function walkPosition(now){
+  const {x,y}=state;
+  if(!walkStep||walkStep.state!==state||walkStep.zone!==state.zone||walkStep.toX!==x||walkStep.toY!==y){
+    walkStep=null;
+    return [x,y];
+  }
+  if(reducedMotion||state.ending||activeScene||minigame||$("campusSurprise").open)return [x,y];
+  const progress=clamp((now-walkStep.start)/walkInterval,0,1);
+  return [walkStep.x+(x-walkStep.x)*progress,walkStep.y+(y-walkStep.y)*progress];
+}
 const moves=[
   {control:"left",keys:["a","arrowleft"],dx:-1,dy:0},
   {control:"right",keys:["d","arrowright"],dx:1,dy:0},
@@ -493,10 +505,11 @@ function frame(now){
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
     const move=moves.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
-    if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
+    if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=walkInterval){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
       if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
+        walkStep={state,zone:state.zone,x:state.x,y:state.y,toX:x,toY:y,start:now};
         state.x=x;state.y=y;dirty=true;
         collectCampusCoin();syncBackgroundMusic();
         paintCampusOverview();

@@ -59,7 +59,8 @@ function addVialeArcade(map){
   return map;
 }
 function hasIntegratedEntrance(){
-  return Boolean(campus.zones.giardino?.objects.some(o=>o.uid==="viale-ingresso-start"));
+  const garden=campus.zones.giardino;
+  return Boolean(garden&&zoneObjects(garden).byId.has("viale-ingresso-start"));
 }
 function atViale(s){
   if(!s)return false;
