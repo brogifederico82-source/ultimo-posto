@@ -341,7 +341,7 @@ function interact(){
 }
 const nativeDoors={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
 function doorDestination(spot){
-  if(gateLocked(spot.gate))return null;
+  if(gateLocked(spot.gate)||(spot.uid==="pola-inside"&&!polaAuthorized()))return null;
   if(spot.action==="portal"){
     const destination=spot.target.split("#");
     return Object.hasOwn(campus.zones,destination[0])?destination:null;
@@ -432,6 +432,40 @@ function parenzoSeminar(){
     }],reset);
 }
 
+
+const partyChoices={
+  chairs:{label:"Sistema le sedie vicino alla fontana",speech:"persone",line:"Hai tenuto una sedia per chi arriva tardi. Viola avrebbe approvato."},
+  tape:{label:"Prepara la registrazione del LOFT",speech:"progetto",line:"Hai sistemato il registratore. Tommaso ti ricorda di lasciare un secondo di silenzio."},
+  card:{label:"Lascia un foglio per un messaggio a chi arriva",speech:"matricole",line:"Sul primo foglio hai scritto dove trovare una presa e una persona a cui chiedere."},
+  invite:{label:"Raggiungi chi è rimasto in disparte",speech:"persone",line:"Hai riportato al tavolo chi esitava a entrare. Il brindisi aspetta tutti."}
+};
+const graduationSpeeches={
+  persone:"«A Romania cercavo un posto libero. Ho trovato persone che spostavano lo zaino senza che dovessi chiederlo. Oggi lascio una sedia libera anch’io.»",
+  progetto:"«Nel mio primo podcast si sentiva più il tornello di me. Alla fine ho imparato ad ascoltare: anche mezzo secondo di silenzio può far parlare qualcun altro.»",
+  matricole:"«A chi comincia: chiedete dove sono le prese, ma chiedete anche come sta chi vi siede accanto. Il primo consiglio salva una slide. Il secondo, a volte, un semestre.»"
+};
+function polaAuthorized(){
+  return isFree()||(has("Seminario Parenzo")&&has("Abilitazione Green Mobility"));
+}
+function polaParty(){
+  if(!polaAuthorized())return scene("Pola · Accesso",
+    "La festa è nel cortile riservato agli invitati. Completa il seminario e l’abilitazione Green Mobility per arrivare con la tua tessera.");
+  if(has("Festa a Pola"))return scene("Pola · Dopo il brindisi",
+    "Dalla fontana arriva il rumore dell’acqua. La villa è chiusa. Viola è al tutorato, la professoressa Serra in Aula Chiesa e Tommaso a Radio Luiss. Puoi tornare a trovarli.",
+    ["Torna a esplorare",()=>{activeScene=null;state.chatTopic=null;}]);
+  if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
+    "Mostri la tessera all’accesso della festa. La villa resta chiusa. In giardino, Chiara ti indica la fontana e una scatola di sedie pieghevoli. «Mi dai una mano prima del discorso?»",
+    ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
+      state.graduationSpeech=choice.speech;state.polaPreparation=id;record("Pola · "+choice.line);
+    }]));
+  const preparation=partyChoices[state.polaPreparation]?.line??"Chiara abbassa la musica e ti passa il microfono.";
+  return scene("Pola · Il discorso",preparation+" "+graduationSpeeches[state.graduationSpeech],
+    ["Brinda con gli altri",()=>{
+      checkpoint("Festa a Pola");record("Pola · Hai fatto il discorso e lasciato il microfono sul tavolo.");
+    }],
+    ["Torna ai preparativi",()=>{state.graduationSpeech=null;state.polaPreparation=null;}]);
+}
+
 function nativeScene(id){
   const t=state.traits;
   if(nativeDoors[id])return scene(room(nativeDoors[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(nativeDoors[id])]);
@@ -473,15 +507,7 @@ function nativeScene(id){
         has("Lezione A200")&&has("Colloquio tutor")?"«Registra un minuto di vita a Romania per il tuo progetto di fine triennale.»":"«Prima passa dal tutorato e completa la lezione in Aula Chiesa.»",
         ...(!has("Progetto LOFT")&&(isFree()||has("Lezione A200")&&has("Colloquio tutor"))?[["Consegna il podcast",()=>checkpoint("Progetto LOFT")]]:[]));
     case "parenzo-seminario":return parenzoSeminar();
-    case "pola-festa":
-      if(has("Festa a Pola"))return scene("Pola · Festa di laurea","Le luci sono accese. Dal cortile qualcuno ti chiede se dopo la festa gli mandi gli appunti.");
-      if(!state.graduationSpeech)return scene("Pola · Ultime parole prima della festa","Il cortile si fa silenzioso. Tocca a te raccontare in una frase cosa porti via da questi anni.",
-        ["Ringrazio chi mi ha fatto posto",()=>{state.graduationSpeech="persone";record("Laurea · Hai ringraziato chi ti ha fatto posto.");}],
-        ["Racconto il progetto che mi ha cambiato",()=>{state.graduationSpeech="progetto";record("Laurea · Hai raccontato il tuo progetto.");}]);
-      return scene("Pola · Il brindisi",state.graduationSpeech==="persone"?
-        "Dal fondo qualcuno solleva una sedia: «Stavolta un posto per te c’è». La musica riparte.":
-        "Parte la sigla del podcast. Gli amici riconoscono il tornello al primo rumore e scoppiano a ridere.",
-        ["Brinda con gli altri",()=>checkpoint("Festa a Pola")]);
+    case "pola-festa":return polaParty();
     case "navetta":
       if(!isFree()&&!romaniaComplete())return scene("Navetta Luiss · Parenzo","La navetta sarà disponibile dopo le attività di Romania. Segui gli obiettivi nel diario.");
       return scene("Navetta Luiss · Parenzo",state.shuttleTicket?
@@ -500,9 +526,9 @@ function nativeScene(id){
         ["Racconta un fatto dal campus",()=>{carry("Pass Radio Luiss");record("Radio Luiss · La leggenda della presa occupata.");state.chatTopic={uid:activeScene,prompt:"Ti racconto della presa occupata.",reply:"«Dai, siediti. Puntata speciale sulle risorse scarse: tre prese, ventidue fuorisede.»"};}]);
     case "carsharing":
       if(!isFree()&&!has("Seminario Parenzo"))return scene("Luiss Green Mobility","Partecipa al seminario di Parenzo prima di richiedere l’abilitazione.");
-      if(!isFree()&&!has("Abilitazione Green Mobility"))return scene("Luiss Green Mobility","Prima corsa? Controlla la batteria e riconsegna l’auto alla stazione di Pola.",
+      if(!isFree()&&!has("Abilitazione Green Mobility"))return scene("Luiss Green Mobility","Il servizio è riservato alla comunità Luiss con patente valida. Nel gioco l’abilitazione simula il controllo della patente e la prenotazione dall’app Green Mobility.",
         ["Completa l’abilitazione",()=>checkpoint("Abilitazione Green Mobility")]);
-      return scene("Luiss Green Mobility","Veicolo elettrico disponibile. Riconsegnalo alla stazione di Pola.",
+      return scene("Luiss Green Mobility","Renault 5 elettrica disponibile. Arrivi all’area di sosta di Pola e mostri la tessera per la festa nel cortile.",
         ["Vai a Viale Pola",()=>{record("Green Mobility · Auto riconsegnata a Pola");travel("pola","car");}]);
     case "shop":return shopScene();
     case "storia":

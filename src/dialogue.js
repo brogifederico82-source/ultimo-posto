@@ -227,6 +227,7 @@ function getScene(){
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
   if(!o&&atViale(state))return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
   if(!o)return scene("Cerca un posto per studiare","Avvicinati a persone, porte e oggetti e premi E. Apri la mappa sotto i comandi per orientarti.");
+  if(o.uid==="pola-inside"&&!polaAuthorized())return polaParty();
   if(gateLocked(o.gate))return scene(o.name,"Per sbloccarlo, vinci a "+challengeNames[o.gate].toLowerCase()+".");
   const note=o.text||"Sei vicino a "+o.name+".";
   if((!o.action||o.action==="dialog")&&kindLayer(o)==="persone"&&!isVehicle(o)){
