@@ -541,8 +541,8 @@ $("edNewZone").onclick=()=>{
 };
 $("edResize").onclick=()=>{
   const width=Number($("edWidth").value),height=Number($("edHeight").value);
-  if(!Number.isInteger(width)||!Number.isInteger(height)||width<8||height<8||width>120||height>120){
-    updateEditorStatus("Usa dimensioni intere tra 8 e 120 caselle.");return;
+  if(!Number.isInteger(width)||!Number.isInteger(height)||width<8||height<8||width>144||height>144){
+    updateEditorStatus("Usa dimensioni intere tra 8 e 144 caselle.");return;
   }
   const z=editRoom();
   if(z.objects.some(o=>o.x+o.w>width||o.y+o.h>height)||z.objects.some(o=>o.route.some(([x,y])=>x>=width||y>=height))){
