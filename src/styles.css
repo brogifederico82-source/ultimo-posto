@@ -57,6 +57,115 @@ body:has(#editor:not([hidden])) main{max-width:1700px}
 #danceSequence .done{color:#abd2a3}
 #danceSequence .miss{color:#f09886}
 
+/* Campus guide palette and screen layout */
+:root {
+  --night: #111925;
+  --panel: #1c2938;
+  --cream: #fff2da;
+  --gold: #ffc47e;
+  --line: #50647a;
+  --muted: #bec9db;
+  --display: "DM Serif Text", Georgia, serif;
+  --interface: "DM Sans", system-ui, sans-serif;
+}
+body {
+  min-height: 100dvh;
+  background: radial-gradient(ellipse at 75% 0%, #2a4054, transparent 52rem), var(--night);
+  font-family: var(--interface);
+}
+main { padding-inline: clamp(12px, 4vw, 42px); }
+main > header { border-color: #8294ae55; }
+.brand { font-size: clamp(.8rem, 2vw, 1rem); }
+.soundbar { flex-wrap: wrap; justify-content: flex-end; }
+h1, h2, h3 { font-family: var(--display); }
+h1 em { color: var(--gold); }
+.hint, footer { color: var(--muted); }
+
+.hero {
+  min-height: clamp(420px, 59vw, 600px);
+  border: 1px solid #8193a868;
+  border-radius: 22px;
+  box-shadow: 0 22px 65px #03091297;
+}
+.hero canvas {
+  inset: 0;
+  object-position: 65% center;
+  filter: saturate(1.2) contrast(1.08);
+}
+.hero-copy {
+  background: linear-gradient(90deg, #111925 2%, #111925df 34%, #11192532 76%, transparent);
+}
+.hero h1 { margin-block: .13em .08em; text-shadow: 0 5px 24px #10121d; }
+.hero p { font-size: clamp(1rem, 2vw, 1.15rem); color: #f5e8d4; }
+.hero .actions { margin-top: 12px; }
+
+button, select, input[type=text] { border-radius: 8px; background: #223347; }
+button:hover:not(:disabled) { background: #304760; }
+button:active:not(:disabled) { translate: 0 1px; }
+button.primary, button.primary:hover:not(:disabled) { color: #2b1d14; }
+button.primary { background: var(--gold); }
+button.primary:hover:not(:disabled) { background: #ffdbab; }
+.panel, dialog.challenge {
+  background: linear-gradient(150deg, #25374a, var(--panel) 65%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 10px 28px #050b143f;
+}
+.portrait {
+  border-radius: 9px;
+  background: radial-gradient(ellipse at 50% 65%, #506d77, #182a3b 75%);
+}
+.frame {
+  overflow: hidden;
+  border: 1px solid #8299ad;
+  border-radius: 14px;
+  box-shadow: 0 12px 34px #050b1470;
+}
+.frame canvas, .challenge canvas { background: #0e1622; }
+.hud {
+  align-items: center;
+  background: #172333;
+  border: 1px solid #50647a;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.zone {
+  border-radius: 5px;
+  padding: .35em .55em;
+  background: #ffca8222;
+  color: #ffcf96;
+  letter-spacing: .06em;
+}
+.scene { border-left: 3px solid var(--gold); }
+.scene h3 { font-size: clamp(1.25rem, 3vw, 1.65rem); }
+.journal {
+  border: 1px solid #50647a;
+  border-radius: 9px;
+  background: #172333;
+  padding: 10px 14px;
+}
+.journal summary { cursor: pointer; }
+.editor-panel, .editor-stage {
+  border-radius: 10px;
+  background: #1b2938;
+  border-color: var(--line);
+}
+.cards-table { border-radius: 9px; background: #23483f; }
+.cards-table > div { border-radius: 7px; padding: 8px; background: #122d27; }
+.hand button:hover:not(:disabled) { background: #ffefd0; color: #293630; }
+@media (max-width: 600px) {
+  .hero { align-items: end; min-height: 490px; border-radius: 14px; }
+  .hero canvas { object-position: 66% top; }
+  .hero-copy {
+    align-content: end;
+    padding: 104px 18px 22px;
+    background: linear-gradient(0deg, #111925 12%, #111925eb 65%, transparent);
+  }
+  .hero .actions { gap: 7px; }
+  .hero button { padding: 9px 11px; }
+  .frame { border-radius: 8px; }
+}
+
 .home-tools,.home-language{margin-top:12px}
 .home-tools button,.home-language button{font-size:.875rem}
 .home-language button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
@@ -66,12 +175,7 @@ body:has(#editor:not([hidden])) main{max-width:1700px}
 }
 
 .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-:root{--night:#101923;--panel:#1c2b3b;--cream:#f1eadb;--gold:#f0be75;--line:#667987}
-body{background:radial-gradient(ellipse at top,#223349,var(--night) 60%)}
-button,select,input[type=text]{background:#293a4b;border-radius:6px}
 button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .15s,border-color .15s}
-button:hover{background:#3d5062}
-.primary,.primary:hover{background:var(--gold);color:#201a13}
 .scene{display:flow-root;background:#192736}
 .scene h3{font-family:monospace;color:var(--gold)}
 #sceneText{color:#fff;min-height:2.8em;line-height:1.5}
