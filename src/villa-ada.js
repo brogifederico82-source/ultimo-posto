@@ -5,18 +5,8 @@
 // ---------------------------------------------------------------------------
 // Mappa: popola la zona Villa Ada e il giardino (nessun cambio a campus.json)
 // ---------------------------------------------------------------------------
-// Nella mappa ufficiale solo il padiglione a sud (vicino a Viale Romania) è The Dome 2. La struttura più a nord
-// è il campo sportivo: se una mappa salvata l'aveva rinominata «Prese d'aria · The Dome 2», la ripristiniamo.
-function repairWestCourt(garden){
-  const court=garden.objects.find(o=>o.uid==="sport-court");
-  if(court&&court.kind==="roof"&&/^Prese d/.test(court.name))Object.assign(court,{kind:"court",name:"Campo sportivo",color:"#557b68",solid:false});
-  const note=garden.objects.find(o=>o.uid==="dome2-vent-sign");
-  if(note&&/^Prese d/.test(note.name))Object.assign(note,{name:"Campo sportivo",
-    text:"Il campo sportivo del campus. The Dome 2 è il padiglione più a sud, vicino a Viale Romania: il passaggio è dal piazzale in fondo."});
-}
 function installVillaAda(map){
   const garden=map.zones.giardino,villa=map.zones["villa-ada"];
-  if(garden)repairWestCourt(garden);
   if(!garden||!villa)return map;
   if(villa.objects.some(o=>o.uid==="villa-ada-ingresso"))return map;
   // Ampliamo la zona creata per il sentiero: il parco diventa un bosco vero da attraversare.

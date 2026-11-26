@@ -74,10 +74,11 @@ function refineRomania(map){
   if(!garden.objects.some(o=>o.uid==="ada-gate")){
     for(const o of garden.objects){
       if((o.uid.startsWith("orto-")||o.uid==="giardiniera-nora")&&o.y<16)o.y+=12;
+      if(o.uid==="sport-court"&&o.x===9&&o.y===52)Object.assign(o,{kind:"roof",name:"Prese d’aria · The Dome 2",color:"#737f79",solid:true});
     }
     garden.objects.push(add("ada-gate","door","Sentiero per Villa Ada",79,47,{action:"portal",target:"villa-ada#panama"}));
     garden.objects.push(add("ada-return-point","entrance","Rientro da Villa Ada",78,47,{target:"villa-ada"}));
-    garden.objects.push(add("dome2-vent-sign","sign","Campo sportivo",14,59,{action:"dialog",text:"Il campo sportivo del campus. The Dome 2 è il padiglione più a sud, vicino a Viale Romania: il passaggio è dal piazzale in fondo."}));
+    garden.objects.push(add("dome2-vent-sign","sign","Prese d’aria · The Dome 2",14,59,{action:"dialog",text:"Griglie di aerazione. Il passaggio al Dome 2 è dal piazzale più a sud."}));
   }
   if(!map.zones["villa-ada"]&&Object.keys(map.zones).length<maxCampusZones){
     map.zones["villa-ada"]={name:"Villa Ada · Sentiero nel parco",width:26,height:16,ground:"grass",objects:[
