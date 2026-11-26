@@ -192,7 +192,7 @@ document.addEventListener("click",event=>{
   if(button.id==="audio")return;
   resumeEffects();
   if(button.closest("[data-move],.challenge-controls,.hand,#scopaChoices,#holdemActions")||button.id==="interact")return;
-  sound(button.closest("#choices")?"choice":button.matches("summary,#homeButton,#edOpen")?"menu":"click","interface");
+  sound(uiClickSound(button),"interface");
 },true);
 
 // iOS can interrupt Web Audio when Safari goes into the background.

@@ -737,7 +737,7 @@ function frame(now){
         if(cigarette)updateSmokingUI();
         const area=room(state.zone);
         const surface=terrainCache.get(area)?.get(x+y*area.width)?.kind??area.ground;
-        sound(surface==="grass"?"grass":surface==="floor"?"floor":"pavement","map");
+        sound(footstepSound(surface),"map");
         collectCampusCoin();syncBackgroundMusic();
         updateStoryWaypointHint();
         paintCampusOverview();
