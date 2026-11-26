@@ -711,44 +711,85 @@ function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
     }
   }
 }
-// Draw each wall cell flush with its neighbours. Editor objects and collision
-// footprints stay intact, including the openings for doors and paths.
-const perimeterCellsCache=new WeakMap();
+// Trace continuous stonework from the original wall cells, leaving the mapped
+// gates and collision footprints in place.
+const perimeterCache=new WeakMap();
 function isPerimeterWall(o){
   return o.kind==="wall"&&o.rotation===0&&[o.x,o.y,o.w,o.h].every(Number.isInteger)&&
     (o.uid.startsWith("cinta-")||o.uid.startsWith("viale-tornello-")||
      /^viale-romania-25[12]$/.test(o.uid));
 }
-function perimeterCells(objects,width){
-  const cached=perimeterCellsCache.get(objects);
-  if(cached)return cached;
+function perimeterArtwork(objects,width,editing){
+  if(!editing&&perimeterCache.has(objects))return perimeterCache.get(objects);
   const cells=new Set();
   for(const o of objects){
     if(!isPerimeterWall(o))continue;
     for(let y=o.y;y<o.y+o.h;y++)for(let x=o.x;x<o.x+o.w;x++)cells.add(x+y*width);
   }
-  perimeterCellsCache.set(objects,cells);
-  return cells;
-}
-function paintPerimeterWall(c,o,cells,width){
-  for(let y=o.y;y<o.y+o.h;y++)for(let x=o.x;x<o.x+o.w;x++){
-    const px=x*16,py=y*16,i=x+y*width;
-    const west=x>0&&cells.has(i-1),east=x+1<width&&cells.has(i+1);
-    const north=cells.has(i-width),south=cells.has(i+width);
-    rect(c,"#9b907b",px,py,16,16);
-    for(const dy of [2,8,14]){
-      rect(c,"#b2a48b",px,py+dy,16,2);
-      const joint=(y*3+dy)%11+2;
-      if(dy<14)rect(c,"#817864",px+joint,py+dy+2,1,3);
-    }
-    if(!north)rect(c,"#d8ccb0",px,py,16,2);
-    if(!west)rect(c,"#c4b89c",px,py,2,16);
-    if(!east)rect(c,"#756e60",px+14,py,2,16);
-    if(!south){
-      rect(c,"#716858",px,py+12,16,2);
-      rect(c,"#3c4645",px,py+14,16,2);
-    }
+  const outline=new Path2D(),footprint=new Path2D(),piers=[],edges=new Map();
+  const stride=width+1;
+  const edge=(a,b)=>{
+    if(!edges.has(a))edges.set(a,new Set());
+    edges.get(a).add(b);
+  };
+  for(const cell of cells){
+    const x=cell%width,y=Math.floor(cell/width),v=x+y*stride;
+    const n=cells.has(cell-width),s=cells.has(cell+width);
+    const w=x>0&&cells.has(cell-1),e=x+1<width&&cells.has(cell+1);
+    if(!n)edge(v,v+1);
+    if(!e)edge(v+1,v+stride+1);
+    if(!s)edge(v+stride+1,v+stride);
+    if(!w)edge(v+stride,v);
+    footprint.rect(x*16,y*16,16,16);
+    if(((n&&s&&!e&&(x+y)%8===0)||(w&&e&&!s&&(x+y)%8===0)))piers.push([x*16,y*16]);
   }
+  const directions=[1,stride,-1,-stride];
+  while(edges.size){
+    const start=edges.keys().next().value,loop=[start];
+    let from=start,to=edges.get(start).values().next().value;
+    for(;;){
+      const outgoing=edges.get(from);
+      outgoing.delete(to);
+      if(!outgoing.size)edges.delete(from);
+      if(to===start)break;
+      const direction=directions.indexOf(to-from),next=edges.get(to);
+      loop.push(to);from=to;
+      to=[1,0,3,2].map(turn=>from+directions[(direction+turn)%4]).find(v=>next?.has(v));
+      if(to===undefined)break;
+    }
+    const corners=loop.filter((v,i)=>v-loop[(i+loop.length-1)%loop.length]!==loop[(i+1)%loop.length]-v);
+    const point=v=>[v%stride*16,Math.floor(v/stride)*16];
+    corners.forEach((v,i)=>{
+      const [x,y]=point(v),[px,py]=point(corners[(i+corners.length-1)%corners.length]);
+      const [nx,ny]=point(corners[(i+1)%corners.length]);
+      const enter=[x+Math.sign(px-x)*6,y+Math.sign(py-y)*6];
+      const leave=[x+Math.sign(nx-x)*6,y+Math.sign(ny-y)*6];
+      if(i===0)outline.moveTo(...enter);else outline.lineTo(...enter);
+      outline.quadraticCurveTo(x,y,...leave);
+    });
+    outline.closePath();
+  }
+  const artwork={outline,footprint,piers};
+  if(!editing)perimeterCache.set(objects,artwork);
+  return artwork;
+}
+function paintPerimeter(c,{outline,footprint,piers},left,top,right,bottom){
+  c.save();
+  c.clip(footprint);
+  c.fillStyle="#958873";c.fill(outline);
+  c.clip(outline);
+  c.lineJoin="round";
+  c.lineWidth=7;c.strokeStyle="#726b5c";c.stroke(outline);
+  c.translate(-1,-1);
+  c.lineWidth=3;c.strokeStyle="#cbbc9d";c.stroke(outline);
+  c.translate(1,1);
+  for(const [x,y] of piers){
+    if(x<left*16||x>=right*16||y<top*16||y>=bottom*16)continue;
+    rect(c,"#746858",x+3,y+3,11,11);
+    rect(c,"#baaa8e",x+3,y+3,10,9);
+    rect(c,"#d0c09e",x+4,y+3,8,2);
+  }
+  c.restore();
 }
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
@@ -796,7 +837,8 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   }
   const foreground=[];
   const objects=editing?z.objects:sceneObjects(z);
-  const connected=id==="giardino"&&visible.edifici?perimeterCells(editing?[...objects]:objects,z.width):null;
+  const connected=id==="giardino"&&visible.edifici;
+  if(connected)paintPerimeter(c,perimeterArtwork(objects,z.width,editing),left,top,right,bottom);
   for(const raw of objects){
     const layer=kindLayer(raw);
     if(!visible[layer]||layer==="terreno")continue;
@@ -806,10 +848,8 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       drawObject(c,o,now,editing);
       continue;
     }
-    const draw=connected&&isPerimeterWall(o)
-      ?()=>paintPerimeterWall(c,o,connected,z.width)
-      :()=>drawObject(c,o,now,editing);
-    foreground.push({row:o.y+o.h,draw});
+    if(connected&&isPerimeterWall(o))continue;
+    foreground.push({row:o.y+o.h,draw:()=>drawObject(c,o,now,editing)});
   }
   if(player)foreground.push(player);
   foreground.sort((a,b)=>a.row-b.row).forEach(o=>o.draw());

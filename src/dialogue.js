@@ -327,8 +327,12 @@ function draw(now){
     const label="E · "+tr(nearest.label);
     stage.font="bold 8px monospace";stage.textAlign="center";
     const width=Math.min(302,stage.measureText(label).width+9);
-    const sx=clamp(((nearest.x+nearest.w/2)*16-cameraX)*zoom,width/2,320-width/2);
-    const sy=clamp((nearest.y*16-cameraY)*zoom-13,3,178);
+    let sx=clamp(((nearest.x+nearest.w/2)*16-cameraX)*zoom,width/2,320-width/2);
+    let sy=clamp((nearest.y*16-cameraY)*zoom-13,3,178);
+    if((z.width>20||z.height>12)&&sy<64&&sy+11>4&&sx+width/2>227){
+      if(width<=227)sx=227-width/2;
+      else sy=65;
+    }
     rect(stage,"#221f2d",sx-width/2,sy,width,11);
     stage.fillStyle="#ffd499";stage.fillText(label,sx,sy+8,width-6);
     const left=(nearest.x*16-cameraX)*zoom, top=(nearest.y*16-cameraY)*zoom;
