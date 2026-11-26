@@ -1,10 +1,9 @@
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { writeFile, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { deflateSync, crc32 } from 'node:zlib';
 
-export async function packageGame(output, html) {
+export async function packageGame(output, version) {
   const makeIcon = (size) => {
     const chunk = (name, data) => {
       const header = Buffer.alloc(8);
@@ -43,28 +42,51 @@ export async function packageGame(output, html) {
     scope: './', start_url: './', display: 'standalone', background_color: '#182725',
     theme_color: '#182725', icons
   }, null, 2);
-  const version = createHash('sha256').update(html).update(manifest).digest('hex').slice(0, 16);
   const worker = `
-const cacheName = "ultimo-posto-v1-${version}";
+const version = "${version}";
+const cachePrefix = "ultimo-posto-v1-";
+const cacheName = cachePrefix + version;
 const app = new URL("./index.html", self.registration.scope).href;
-const assets = [app, ...["manifest.webmanifest", "icon-192.png", "icon-512.png"].map(
+const resources = ["manifest.webmanifest", "icon-192.png", "icon-512.png"].map(
   asset => new URL(asset, self.registration.scope).href
-)];
+);
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(assets))
-    .then(() => self.skipWaiting()));
+  event.waitUntil((async () => {
+    const response = await fetch(app + "?release=" + version, { cache: "reload" });
+    if (!response.ok || !(await response.clone().text()).includes(
+      '<meta name="game-release" content="' + version + '">'
+    )) throw new Error("La build online non corrisponde a questa versione");
+    const cache = await caches.open(cacheName);
+    const requests = resources.map(url => new Request(url, { cache: "reload" }));
+    await cache.addAll(requests);
+    await cache.put(app, response);
+    await self.skipWaiting();
+  })());
 });
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(
-    key => key.startsWith("ultimo-posto-v1-") && key !== cacheName
-  ).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key.startsWith(cachePrefix) && key !== cacheName)
+      .map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener("message", event => {
+  if (event.data === "GAME_RELEASE") event.ports[0]?.postMessage(version);
 });
 self.addEventListener("fetch", event => {
   const { request } = event;
   if (request.method !== "GET" || !request.url.startsWith(self.registration.scope)) return;
   if (request.mode === "navigate" && [self.registration.scope, app].includes(request.url.split("?")[0])) {
-    event.respondWith(fetch(request).catch(() => caches.open(cacheName).then(cache => cache.match(app))));
-  } else if (assets.includes(request.url)) {
+    const cached = caches.open(cacheName).then(cache => cache.match(app));
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request, { signal: AbortSignal.timeout(2200), cache: "no-cache" });
+        if (response.ok) return response;
+      } catch {}
+      return await cached || Response.error();
+    })());
+  } else if (resources.includes(request.url)) {
     event.respondWith(caches.open(cacheName).then(cache => cache.match(request))
       .then(cached => cached || fetch(request)));
   }
@@ -80,7 +102,8 @@ Apri la versione online:
 https://brogifederico82-source.github.io/ultimo-posto/
 Tocca «Installa il gioco», o usa il menu del tuo browser.
 Su iPhone: Safari, Condividi, Aggiungi alla schermata Home, Apri come app web.
-Avvia una volta con connessione e attendi che la pagina sia caricata.
+Avvia una volta con connessione e attendi «Pronto offline».
+Le versioni nuove si scaricano quando riapri il gioco online.
 
 I salvataggi sono conservati dal browser che usi per giocare.
 `;

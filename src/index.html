@@ -1,4 +1,5 @@
 <!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Viale Romania · Ultimo posto</title>
+<meta name="game-release" content="<!-- BUILD_RELEASE -->">
 <meta name="theme-color" content="#182725"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 <!-- BUILD_STYLES -->
@@ -23,7 +24,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <use href="#ultimo-posto-lettering" class="wordmark-edge"/>
 <use href="#ultimo-posto-lettering" class="wordmark-blue"/>
 <use href="#ultimo-posto-lettering" class="wordmark-line"/>
-</svg></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button><button id="installGame" type="button" hidden>Installa il gioco</button><a id="downloadGame" href="./Ultimo-Posto.zip" download hidden>Scarica il pacchetto</a></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
+</svg></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button><button id="installGame" type="button" hidden>Installa il gioco</button><a id="downloadGame" href="./Ultimo-Posto.zip" download hidden>Scarica il pacchetto</a></div><p id="offlineStatus" class="hint" role="status" hidden></p><button id="refreshGame" type="button" hidden>Aggiorna il gioco</button><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
 <section id="creator" hidden>
 <div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
 <div class="grid creator-grid">
@@ -227,8 +228,7 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <img id="edPlanImage" hidden alt="Planimetria originale di Viale Romania" src="data:image/webp;base64,<!-- BUILD_PLAN -->">
 <script>
 <!-- BUILD_GAME -->
-</script></html>
-
+</script>
 <script>
 if (location.protocol === "https:" || location.hostname === "localhost") {
   const install = document.getElementById("installGame");
@@ -250,6 +250,58 @@ if (location.protocol === "https:" || location.hostname === "localhost") {
     }
     alert("Su iPhone, apri in Safari e scegli Condividi → Aggiungi alla schermata Home → Apri come app web. Su Android e computer, cerca Installa app o Aggiungi alla schermata Home nel menu del browser.");
   };
-  navigator.serviceWorker?.register("./sw.js").catch(error => console.warn("Offline non disponibile", error));
+  const status = document.getElementById("offlineStatus");
+  const refresh = document.getElementById("refreshGame");
+  const release = document.querySelector('meta[name="game-release"]').content;
+  const service = navigator.serviceWorker;
+  status.hidden = false;
+  status.textContent = navigator.onLine ? "Preparazione offline…" : "Avvio offline…";
+  refresh.onclick = () => location.reload();
+
+  function showRelease() {
+    if (!service?.controller) return;
+    const message = new MessageChannel();
+    const timeout = setTimeout(() => {
+      message.port1.close();
+      if (status.textContent.endsWith("…")) status.textContent = "Verifica offline in corso. Riapri online per completarla.";
+    }, 2500);
+    message.port1.onmessage = ({ data: activeRelease }) => {
+      clearTimeout(timeout);
+      message.port1.close();
+      refresh.hidden = activeRelease === release || !navigator.onLine;
+      status.textContent = refresh.hidden ? "Pronto offline" : "Aggiornamento pronto. Puoi continuare a giocare.";
+    };
+    service.controller.postMessage("GAME_RELEASE", [message.port2]);
+  }
+
+  if (service) {
+    service.addEventListener("controllerchange", showRelease);
+    service.register("./sw.js", { updateViaCache: "none" }).then(registration => {
+      showRelease();
+      function watchInstall() {
+        const worker = registration.installing;
+        worker?.addEventListener("statechange", () => {
+          if (worker.state === "redundant" && !service.controller)
+            status.textContent = "Preparazione offline non riuscita. Riapri il gioco online per riprovare.";
+        });
+      }
+      registration.addEventListener("updatefound", watchInstall);
+      watchInstall();
+      let checked = 0;
+      function checkUpdate() {
+        if (!navigator.onLine || Date.now() - checked < 60000) return;
+        checked = Date.now();
+        registration.update().catch(() => {});
+      }
+      window.addEventListener("online", () => { checked = 0; checkUpdate(); showRelease(); });
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) checkUpdate(); });
+      checkUpdate();
+    }).catch(() => {
+      if (service.controller) showRelease();
+      else status.textContent = "Preparazione offline non riuscita. Riapri il gioco online per riprovare.";
+    });
+  } else status.textContent = "Questo browser non supporta il salvataggio offline dell’app.";
+
 }
 </script>
+</html>

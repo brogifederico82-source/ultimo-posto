@@ -1,6 +1,7 @@
 import { packageGame } from "./package.mjs";
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
+import { createHash } from 'node:crypto';
 
 const source = new URL('../src/', import.meta.url);
 const output = new URL('../dist/', import.meta.url);
@@ -50,7 +51,11 @@ for (const [name, contents] of Object.entries(sections)) {
   html = html.replace(marker, () => contents);
 }
 
+const release = createHash('sha256').update(html).update(
+  await readFile(new URL('./package.mjs', import.meta.url))
+).digest('hex').slice(0, 16);
+html = html.replace('<!-- BUILD_RELEASE -->', release);
 await mkdir(output, { recursive: true });
 await writeFile(new URL('index.html', output), html);
-await packageGame(output, html);
+await packageGame(output, release);
 console.log('Built dist/index.html');
