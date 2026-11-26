@@ -592,9 +592,9 @@ function drawObject(c,o,now=0,editing=false){
   }else if(spec[2]==="persone"){
     const appearance=characterAppearance(o);
     const size=o.kind==="athlete"?1.05:.89;
-    sprite(c,appearance,o.native==="trend"?0:8,15,o.step??0,editing?o.look??"down":ambienteSguardo(o,now),size,characterCoat(o));
+    sprite(c,appearance,o.native==="trend"?-3:8,15,o.step??0,editing?o.look??"down":ambienteSguardo(o,now),size,characterCoat(o));
     if(o.native==="trend"){
-      sprite(c,{...appearance,capelli:5,tinta:2,abito:3},17,15,(Math.floor(now/170)+1)%3,"down",.89);
+      sprite(c,{...appearance,capelli:5,tinta:2,abito:3},21,15,(Math.floor(now/170)+1)%3,"down",.89);
     }
     if(o.kind==="heatedStudent"){
       box("#e9e0d4",12,6,2,1);box("#9b8c80",14,6,1,1);
