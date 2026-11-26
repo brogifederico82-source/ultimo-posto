@@ -208,6 +208,7 @@ function ambPop(c,p,now){
 
 var ambView={x:0,y:0,w:0,h:0};
 function ambienteMondo(c,id,vx,vy,vw,vh,now,tx,ty){
+  if(typeof transizioneZonaVista==="function")transizioneZonaVista(id);
   if(reducedMotion)return;
   const a=amb||(amb=ambMake()),z=room(id),view=ambView;
   view.x=vx;view.y=vy;view.w=vw;view.h=vh;
@@ -323,6 +324,7 @@ function ambienteSchermo(c,now){
     a.btn=ready;
     document.getElementById("interact")?.classList.toggle("amb-ready",ready);
   }
+  if(typeof transizione==="function")return; // la dissolvenza di zona e' ora in transizioni.js
   const t=(now-a.fade)/360;
   if(t<0||t>=1)return;
   c.globalAlpha=Math.pow(1-t,2)*.9;

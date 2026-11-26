@@ -216,7 +216,10 @@ function openChallenge(id,practice=false){
   $("challengeShot").hidden=isCards||isDance||isRace||isVirtual||id==="nastri";
   $("challengeShot").textContent=tr(id==="mattoni"?"Lancia":isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
   $("challengeStatus").textContent="";
-  if(!$("challenge").open)$("challenge").showModal();
+  if(!$("challenge").open){
+    $("challenge").showModal();
+    if(typeof transizione==="function")transizione("battaglia",null,{subito:true});
+  }
   if(isCards)sound("deal");
   if(isPoker)advanceHoldem(minigame);
   if(isDance){renderDance();$("dancePad").querySelector("button").focus();}
@@ -242,6 +245,7 @@ function closeChallenge(){
   clearTimeout(minigame.timer);
   minigame=null;keys.clear();controls.clear();
   $("challenge").close();
+  if(typeof transizione==="function"&&screen==="game")transizione("battaglia",null,{subito:true});
   if(screen==="game"){renderScene();$("choices").querySelector("button")?.focus();}
 }
 $("challengeExit").onclick=closeChallenge;

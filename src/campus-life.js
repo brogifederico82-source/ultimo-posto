@@ -582,6 +582,7 @@ function awardCoins(amount){
   if(testMode)return;
   wallet().coins+=amount;
   refreshWallet();
+  if(amount>1&&typeof toastOggetto==="function")toastOggetto("Monete","Hai guadagnato "+amount+" monete!",{suono:false});
 }
 function collectCampusCoin(){
   if(testMode)return;
