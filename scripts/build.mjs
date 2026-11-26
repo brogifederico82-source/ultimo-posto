@@ -8,13 +8,14 @@ const output = new URL('../dist/', import.meta.url);
 const loadText = name => readFile(new URL(name, source), 'utf8');
 const scripts = ['game.js', 'campus-life.js', 'classrooms.js', 'interiors.js', 'pola.js', 'vivid.js', 'world.js', 'navigation.js', 'audio.js', 'sfx.js', 'dialogue.js', 'ambiente.js', 'realismo.js', 'insegne.js', 'online.js', 'schermo.js', 'transizioni.js', 'villa-ada.js', 'idee.js', 'lore.js', 'minigames.js', 'holdem.js', 'viale-races.js', 'virtual-football.js', 'calcetto.js', 'loft-arcade.js', 'smoking.js', 'segreti.js', 'schermate.js', 'zaino.js', 'editor.js'];
 
-const [template, css, map, plan, entranceMusic, campusMusic, ...parts] = await Promise.all([
+const [template, css, map, plan, entranceMusic, campusMusic, quietPlace, stillness, reverie, ...parts] = await Promise.all([
   loadText('index.html'),
   loadText('styles.css'),
   loadText('campus.json'),
   readFile(new URL('plan.webp', source)),
   readFile(new URL('sunny-underground.mp3', source)),
   readFile(new URL('arcade-sunset.mp3', source)),
+  ...['last-quiet-place','last-stop-stillness','last-stop-reverie'].map(name=>readFile(new URL('music/'+name+'.ogg',source))),
   ...scripts.map(loadText),
 ]);
 
@@ -39,6 +40,9 @@ const sections = {
   PLAN: plan.toString('base64'),
   ENTRANCE_MUSIC: entranceMusic.toString('base64'),
   CAMPUS_MUSIC: campusMusic.toString('base64'),
+  QUIET_PLACE: quietPlace.toString("base64"),
+  STILLNESS: stillness.toString("base64"),
+  REVERIE: reverie.toString("base64"),
   GAME: game.trim(),
 };
 let html = template;

@@ -239,13 +239,23 @@ function spriteTone(hex,amount){
 function createSpriteFrame(a,step,look,coatOverride){
   const canvas=document.createElement("canvas");
   const {width,height,anchorX,anchorY}=spriteCanvas;
-  canvas.width=width;canvas.height=height;
+  canvas.width=width*3;canvas.height=height*3;
   const c=canvas.getContext("2d");
-  c.translate(anchorX,anchorY);
-  const block=(color,x,y,w,h)=>rect(c,color,x,y,w,h);
+  c.scale(3,3);c.translate(anchorX,anchorY);
+  const block=(color,x,y,w,h)=>{
+    c.fillStyle=color;c.beginPath();c.roundRect(x,y,w,h,Math.min(w,h)*.35);c.fill();
+  };
   const contour=(color,points)=>{
-    c.fillStyle=color;c.beginPath();c.moveTo(...points[0]);
-    for(const point of points.slice(1))c.lineTo(...point);
+    const ys=points.map(p=>p[1]),top=Math.min(...ys),bottom=Math.max(...ys);
+    const shade=c.createLinearGradient(0,top,3,bottom);
+    shade.addColorStop(0,spriteTone(color,12));shade.addColorStop(.58,color);shade.addColorStop(1,spriteTone(color,-11));
+    c.fillStyle=shade;c.beginPath();
+    const last=points.at(-1),first=points[0];
+    c.moveTo((last[0]+first[0])/2,(last[1]+first[1])/2);
+    for(let i=0;i<points.length;i++){
+      const [x,y]=points[i],[nx,ny]=points[(i+1)%points.length];
+      c.quadraticCurveTo(x,y,(x+nx)/2,(y+ny)/2);
+    }
     c.closePath();c.fill();
   };
   const facing=look==="left"||look==="right",behind=look==="up";
@@ -368,7 +378,8 @@ function createSpriteFrame(a,step,look,coatOverride){
         [cx+part+2,top+4],[cx+part-2,top+6],[cx-face+2,top+9],[cx-face,top+6]]);
     }
     for(const [dx,dy,length] of [[-6,3,4],[-2,2,5],[3,3,3]]){
-      block(hairLight,cx+dx,top+dy,length,1);
+      c.strokeStyle=hairLight;c.lineWidth=.65;c.lineCap="round";c.beginPath();
+      c.moveTo(cx+dx,top+dy+1);c.quadraticCurveTo(cx+dx+1,top+dy-.6,cx+dx+length,top+dy);c.stroke();
       if(a.capelli===2)block(hairShade,cx+dx+1,top+dy+2,2,1);
     }
   }else block(skinLight,cx-4,top+4,7,2);
@@ -426,7 +437,7 @@ function sprite(c,a,x,y,step=0,look="down",size=1,coatOverride){
   }
   const {width,height,anchorX,anchorY}=spriteCanvas;
   const scale=size/2;
-  c.save();c.imageSmoothingEnabled=false;
+  c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";
   c.drawImage(frame,Math.round(x)-anchorX*scale,Math.round(y)-anchorY*scale,width*scale,height*scale);
   c.restore();
 }

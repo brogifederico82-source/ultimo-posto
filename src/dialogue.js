@@ -588,7 +588,8 @@ function draw(now){
   const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
   vividGrade(state.zone);
   realismoGiocatore.x=drawX;realismoGiocatore.y=drawY;
-  stage.setTransform(2,0,0,2,0,0);
+  const density=stage.canvas.width/320;
+  stage.setTransform(density,0,0,density,0,0);
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
   worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},layers,false,
@@ -894,9 +895,24 @@ function nearbyTrafficSound(now){
   if(close){lastTrafficSound=now;sound("traffic","map");}
 }
 const entranceMusic=$("entranceMusic"),campusMusic=$("campusMusic");
+const musicPlaylists={
+  entrance:[entranceMusic,$("stillness")],
+  campus:[campusMusic,$("reverie")],
+  study:[$("quietPlace")]
+};
+const musicPosition={entrance:0,campus:0,study:0};
+let musicArea="entrance";
+for(const tracks of Object.values(musicPlaylists))for(const track of tracks){
+  track.loop=tracks.length===1;
+  track.addEventListener("ended",()=>{
+    if(track!==currentMusic)return;
+    musicPosition[musicArea]=(musicPosition[musicArea]+1)%tracks.length;
+    syncBackgroundMusic();
+  });
+}
 let currentMusic=entranceMusic,musicStart=null,musicFailed=false,musicStatus="";
 function applyMusicVolume(){
-  entranceMusic.volume=campusMusic.volume=channelLevel("master")*channelLevel("music");
+  for(const tracks of Object.values(musicPlaylists))for(const track of tracks)track.volume=channelLevel("master")*channelLevel("music");
 }
 applyMusicVolume();
 function renderMusicFeedback(){
@@ -918,7 +934,11 @@ function pauseMusic(){
   if(!currentMusic.paused)currentMusic.pause();
 }
 function syncBackgroundMusic(){
-  const nextMusic=screen==="game"&&state&&!atViale(state)?campusMusic:entranceMusic;
+  musicArea="entrance";
+  if(screen==="game"&&state&&!atViale(state)){
+    musicArea=["dome","tutorato","terzo"].includes(state.zone)?"study":"campus";
+  }
+  const nextMusic=musicPlaylists[musicArea][musicPosition[musicArea]];
   if(currentMusic!==nextMusic){
     pauseMusic();
     currentMusic=nextMusic;

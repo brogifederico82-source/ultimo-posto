@@ -692,7 +692,11 @@ function drawObject(c,o,now=0,editing=false){
         crown("#304c3d",8,7,7.6,pine?4.6:6.4);
         crown(color,6.5,5.8,6.1,pine?3.8:5.2);
         crown(color,11,6.4,4.3,3.6);
-        crown("#b1b87544",5.2,4.2,3.5,2);
+        for(let i=0;i<17;i++){
+          const angle=i*2.4+o.x,radius=Math.sqrt(i/17);
+          const lx=7.7+Math.cos(angle)*radius*5.8,ly=5.8+Math.sin(angle)*radius*(pine?2.8:4);
+          crown(i%3?"#a6b57338":"#243f353a",lx,ly,1.6+(i%3)*.25,1.1);
+        }
         break;
       }
       case "cypress":
@@ -787,7 +791,11 @@ function drawObject(c,o,now=0,editing=false){
         c.restore();
         break;
       }
-      case "wall":box(shadow,0,0,16,16);box(color,0,2,16,10);box(light,0,2,16,2);box("#141d213a",0,9,16,1);break;
+      case "wall":
+        box(shadow,0,1,16,15);box(color,0,0,16,14);
+        c.save();c.scale(16/w,16/h);c.globalAlpha=.70;
+        c.fillStyle=masonryPattern(c,.17);c.fillRect(0,h*.13,w,h*.69);c.restore();
+        box("#efe4ca",0,1,16,1.3);box("#665d4f",0,13.6,16,1.3);break;
       case "door":case "turnstile":
         box(shadow,2,2,12,13);
         if(o.gate&&!gateLocked(o.gate)&&!editing)box(color,2,2,3,12);
@@ -968,12 +976,44 @@ function boundaryStrokes(zone){
   boundaryCache.set(zone,lines);
   return lines;
 }
+// A repeatable travertine surface anchored in world coordinates.
+let masonryTile;
+const masonryPatterns=new WeakMap();
+function masonryPattern(c,scale){
+  let patterns=masonryPatterns.get(c);
+  if(!patterns){patterns=new Map();masonryPatterns.set(c,patterns);}
+  if(patterns.has(scale))return patterns.get(scale);
+  if(!masonryTile){
+    masonryTile=document.createElement("canvas");
+    masonryTile.width=128;masonryTile.height=64;
+    const ink=masonryTile.getContext("2d");
+    ink.fillStyle="#938778";ink.fillRect(0,0,128,64);
+    let seed=749;
+    const random=()=>((seed=Math.imul(seed,1664525)+1013904223>>>0)/4294967296);
+    for(let row=0;row<4;row++){
+      for(let col=-1;col<4;col++){
+        const x=col*32+(row%2)*16,y=row*16;
+        const tone=Math.floor(176+random()*19);
+        ink.fillStyle="rgb("+tone+","+(tone-12)+","+(tone-30)+")";
+        ink.fillRect(x+.8,y+.9,31.2,15);
+        ink.fillStyle="#fff1cc60";ink.fillRect(x+1,y+1,30,.9);
+      }
+    }
+    for(let i=0;i<1100;i++){
+      ink.fillStyle=i%4?"#70574324":"#ffefd955";
+      ink.fillRect(random()*128,random()*64,random()*3+.4,.5+random());
+    }
+  }
+  const pattern=c.createPattern(masonryTile,"repeat");
+  pattern.setTransform(new DOMMatrix().scale(scale));
+  patterns.set(scale,pattern);return pattern;
+}
 function paintCampusBoundary(c,zone,left,top,right,bottom){
   const lines=boundaryStrokes(zone).filter(([[x,y],[xx,yy]])=>
     Math.max(x,xx)>=left-1&&Math.min(x,xx)<=right+1&&Math.max(y,yy)>=top-1&&Math.min(y,yy)<=bottom+1);
   if(!lines.length)return;
   c.save();c.scale(16,16);c.lineCap="round";c.lineJoin="round";
-  for(const [width,color,offset] of [[.92,"#333b38",.24],[.83,"#9a826c",.09],[.59,"#c3aa8b",-.10],[.18,"#e0caa7",-.27]]){
+  for(const [width,color,offset] of [[.94,"#252a2755",.30],[.84,"#887c68",.12],[.74,masonryPattern(c,1/88),.06],[.32,"#887762",-.22],[.27,"#d7c9af",-.26],[.065,"#f0e2cc",-.37]]){
     c.beginPath();
     for(const [[x,y],[xx,yy]] of lines){c.moveTo(x,y+offset);c.lineTo(xx+.001,yy+offset);}
     c.lineWidth=width;c.strokeStyle=color;c.stroke();
