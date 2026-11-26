@@ -559,11 +559,13 @@ function widenCampusWalks(garden){
   for(const [uid,x,y] of [
     ["romania-seduta-dome",53,54],["romania-seduta-atrio",44,78],
     ["acqua-romania-vialetto",18,45],["campus-tree-31",28,67],
-    ["campus-tree-14",27,34]
+    ["campus-tree-14",27,34],["campus-tree-27",38,68],["campus-tree-28",39,28]
   ]){
     const item=garden.objects.find(o=>o.uid===uid);
     if(item)Object.assign(item,{x,y});
   }
+  // Two oversized street pines from the former entrance occupied the shop footprint.
+  garden.objects=garden.objects.filter(o=>o.uid!=="viale-romania-258"&&o.uid!=="viale-romania-259");
   // Plant along the lawns, leaving the paved approaches to the café and the Dome clear.
   for(const [id,x,y] of [
     [0,12,49],[1,34,40],[4,10,46],[5,34,43],[6,32,44],[7,36,47],[8,48,30],
