@@ -219,6 +219,7 @@ function saveCampus(){
   overviewZone=null;
   terrainCache=new WeakMap();
   minimapCache=new WeakMap();
+  wallRuns=new WeakMap();
   foregroundCache=new WeakMap();
   try{localStorage.setItem(mapStorageKey,JSON.stringify(campus));return true;}
   catch{return false;}
@@ -653,6 +654,22 @@ function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
     }
   }
 }
+let wallRuns=new WeakMap();
+function continuousWalls(zone){
+  if(wallRuns.has(zone))return wallRuns.get(zone);
+  const walls=sceneObjects(zone).filter(o=>o.kind==="wall"&&!o.rotation&&!o.action)
+    .sort((a,b)=>a.y-b.y||a.x-b.x);
+  const runs=[];
+  for(const wall of walls){
+    const previous=runs.at(-1);
+    if(previous&&previous.y===wall.y&&previous.h===wall.h&&previous.x+previous.w===wall.x&&
+      previous.color===wall.color&&previous.variant===wall.variant)previous.w+=wall.w;
+    else runs.push({...wall});
+  }
+  const objects=[...sceneObjects(zone).filter(o=>o.kind!=="wall"||o.rotation||o.action),...runs];
+  wallRuns.set(zone,objects);
+  return objects;
+}
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
   const margin=2,left=Math.max(0,Math.floor(view.x/16)-margin),top=Math.max(0,Math.floor(view.y/16)-margin);
@@ -698,7 +715,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }
   const foreground=[];
-  for(const raw of editing?z.objects:sceneObjects(z)){
+  for(const raw of editing?z.objects:continuousWalls(z)){
     const layer=kindLayer(raw);
     if(!visible[layer]||layer==="terreno")continue;
     const o=positionOf(raw,editing?0:isVehicle(raw)?trafficClock:now,z.width);

@@ -509,7 +509,9 @@ function minimapBase(zone){
   }
   const panama=zoneObjects(zone).byId.get("entry-from-panama");
   if(zone===campus.zones.giardino&&zone.width===144&&panama?.x===72&&panama.y===47){
-    c.save();c.scale(1/16,1/16);paintRomaniaEdges(c);c.restore();
+    c.save();c.scale(1/16,1/16);paintRomaniaEdges(c);
+    if(hasIntegratedEntrance())paintVialeRoad(c,0,zone.width);
+    c.restore();
   }
   for(const o of zoneObjects(zone).solid){
     if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);
@@ -666,6 +668,7 @@ function frame(now){
   if(screen==="editor")drawEditor(now);
   if(screen==="game"){
     if(exploringCampus())trafficClock+=delta;
+    if(polaThrowAt!==null&&now-polaThrowAt<=1400)paintPolaCeremony(now);
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
     nearbyTrafficSound(now);

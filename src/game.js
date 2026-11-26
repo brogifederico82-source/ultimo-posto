@@ -519,7 +519,13 @@ function polaParty(){
   if(!polaAuthorized())return scene("Pola · Accesso",
     "La festa è nel cortile riservato agli invitati. Completa il seminario e l’abilitazione Green Mobility per arrivare con la tua tessera.");
   if(has("Festa a Pola"))return scene("Pola · Dopo il brindisi",
-    "Dalla fontana arriva il rumore dell’acqua. La villa è chiusa. Viola è al tutorato, la professoressa Serra in Aula Chiesa e Tommaso a Radio Luiss. Puoi tornare a trovarli.");
+    "Gli invitati applaudono davanti al Tinello Alberoni. La villa resta chiusa. Viola, Serra e Tommaso ti aspettano ancora a Romania.",
+    [local(state.polaCapThrown?"Rilancia il tocco":"Lancia il tocco",state.polaCapThrown?"Throw the cap again":"Throw your graduation cap"),()=>{
+      if(!state.polaCapThrown)record("Pola · Hai lanciato il tocco tra gli applausi.");
+      state.polaCapThrown=true;
+      polaThrowAt=performance.now();
+      chime([60,64,67,76],.085);
+    }]);
   if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
     "Mostri la tessera all’accesso della festa. La villa resta chiusa. In giardino, Chiara ti indica la fontana e una scatola di sedie pieghevoli. «Mi dai una mano prima del discorso?»",
     ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
@@ -768,6 +774,39 @@ function paintSpeaker(now){
   sprite(c,a,middle+gesture,baseline-(moving&&beat%2?6:0),moving?beat%3:0,"down",4.55,
     characterCoat(o));
 }
+let polaThrowAt=null;
+function paintPolaCeremony(now){
+  const panel=$("polaCeremony");
+  if(panel.hidden)return;
+  const c=panel.getContext("2d");
+  rect(c,"#243b46",0,0,480,224);
+  rect(c,"#385849",0,52,480,172);
+  c.fillStyle="#aa9d84";c.beginPath();c.ellipse(240,155,224,72,0,0,Math.PI*2);c.fill();
+  c.fillStyle="#647f82";c.beginPath();c.ellipse(240,76,103,21,0,0,Math.PI*2);c.fill();
+  c.fillStyle="#7ca8ac";c.beginPath();c.ellipse(240,72,94,14,0,0,Math.PI*2);c.fill();
+  for(const [x,y,w,h] of [[214,51,48,13],[233,35,16,20],[169,49,17,17],[294,49,17,17]])rect(c,"#d8ccb2",x,y,w,h);
+  for(const x of [22,56,424,458]){
+    c.fillStyle="#203b39";c.beginPath();c.ellipse(x,59,24,40,0,0,Math.PI*2);c.fill();
+  }
+  rect(c,"#64404b",159,100,162,34);
+  rect(c,"#a76a6b",159,100,162,4);
+  const launched=polaThrowAt!==null;
+  const t=launched?(reducedMotion?1:clamp((now-polaThrowAt)/1350,0,1)):0;
+  for(let row=0;row<2;row++)for(let i=0;i<8;i++){
+    const x=53+i*52+(row?10:0),y=168+row*30;
+    rect(c,"#655047",x-10,y-5,20,9);
+    sprite(c,{...student,capelli:i%4,pelle:(i+row)%4,abito:(i+row)%5},x,y,launched&&!reducedMotion&&t<1?Math.floor(now/110)%3:0,"up",1.5);
+  }
+  sprite(c,state.avatar,240,127,0,"down",2.1);
+  const capX=240+86*t,capY=91-190*t*(1-t)+31*t;
+  c.save();c.translate(capX,capY);c.rotate(t*Math.PI*2);
+  c.fillStyle="#172334";c.beginPath();c.moveTo(0,-6);c.lineTo(12,0);c.lineTo(0,6);c.lineTo(-12,0);c.closePath();c.fill();
+  rect(c,"#efc876",9,0,2,8);c.restore();
+  if(launched)for(let i=0;i<17;i++){
+    const age=reducedMotion?1:t;
+    rect(c,["#f4bd66","#e0838b","#b9dfbb"][i%3],205+(i*23%125)*age,110+(i*17%66)*age-40*age*(1-age),3,3);
+  }
+}
 function renderScene(){
   updateSmokingUI();
   const scene=getScene();
@@ -794,10 +833,13 @@ function renderScene(){
   $("journalTitle").textContent=local("Diario e tasche · ","Journal and inventory · ")+state.secrets.length+"/"+totalSecrets+local(" scoperte"," discoveries");
   $("sceneTitle").textContent=tr(scene.title);
   const speaker=currentObject();
-  const conversation=Boolean(speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
+  $("polaCeremony").hidden=speaker?.native!=="pola-festa"||(!state.graduationSpeech&&!has("Festa a Pola"))||Boolean(state.ending);
+  if($("polaCeremony").hidden)polaThrowAt=null;
+  paintPolaCeremony(performance.now());
+  const conversation=Boolean($("polaCeremony").hidden&&speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
   $("speakerPortrait").hidden=!conversation;
   $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
-  $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
+  $("game").classList.toggle("game-conversation",conversation||!$("polaCeremony").hidden||Boolean(state.ending?.guard));
   $("game").classList.toggle("game-reading",Boolean(activeScene||state.prologue||state.ending));
   $("guardOutcome").hidden=!state.ending?.guard;
   refreshGateWarning();paintGuardOutcome(performance.now());

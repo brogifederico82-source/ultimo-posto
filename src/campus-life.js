@@ -48,12 +48,18 @@ function joinRomaniaEntrance(map){
   return map;
 }
 const vialeRoad=[[0,81],[12,81],[17,83],[37,83],[49,87.5],[55,88.75],[59,90],[68,94.5],[75,94],[144,94]];
+const vialeSlopes=vialeRoad.slice(1).map(([x,y],i)=>(y-vialeRoad[i][1])/(x-vialeRoad[i][0]));
+const vialeTangents=vialeRoad.map((_,i)=>{
+  const before=vialeSlopes[i-1]??0,after=vialeSlopes[i]??0;
+  return before*after>0?2*before*after/(before+after):0;
+});
 function vialeRoadY(x){
   const i=vialeRoad.findIndex(([end])=>end>=x);
   if(i<=0)return vialeRoad[i===0?0:vialeRoad.length-1][1];
   const [start,y]=vialeRoad[i-1], [end,nextY]=vialeRoad[i];
   const t=(x-start)/(end-start);
-  return y+(nextY-y)*t*t*(3-2*t);
+  const bend=t*(1-t);
+  return y+(nextY-y)*t*t*(3-2*t)+(end-start)*bend*((1-t)*vialeTangents[i-1]-t*vialeTangents[i]);
 }
 const vialeTraffic={
   "viale-romania-276":{east:true,start:9},
