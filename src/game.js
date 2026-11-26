@@ -496,6 +496,7 @@ function nativeScene(id){
       "“Up for a one-on-one? First to five goals. We can warm up first if you like.”"),
       [local("Gioca a calcetto","Play football"),()=>openChallenge("calcetto")],
       [local("Allenati","Practice"),()=>openChallenge("calcetto",true)]);
+    case "tabaccheria":return tobaccoShopScene();
     case "rosticceria":return scene(local("Rosticceria · Viale Romania","Rotisserie · Viale Romania"),
       local("«Supplì appena fritti! Se esci dal campus tardi, ti tengo da parte l’ultimo.»",
         "“Fresh supplì! If you leave campus late, I’ll save you the last one.”"),
@@ -654,6 +655,7 @@ function renderScene(){
   const speaker=currentObject();
   const conversation=Boolean(speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
   $("speakerPortrait").hidden=!conversation;
+  $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
   $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
   $("guardOutcome").hidden=!state.ending?.guard;
   refreshGateWarning();paintGuardOutcome(performance.now());

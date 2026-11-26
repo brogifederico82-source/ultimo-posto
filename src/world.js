@@ -398,6 +398,10 @@ function drawObject(c,o,now=0,editing=false){
         box("#4f4140",0,1,16,14);box(color,1,2,14,12);box("#f7e4ba",1,2,14,2);box("#3d5051",3,7,4,4);box("#725746",10,7,3,7);if(o.native==="shop"){
           box("#20294a",1,2,14,4);c.textAlign="center";c.font="bold 2.5px monospace";c.fillStyle="#fff1c8";
           c.fillText("LUISS SHOP",8,5,13);
+        }else if(o.native==="tabaccheria"){
+          box("#14233b",.75,1,14.5,5);box("#d7e9f3",1,1,14,.6);
+          c.textAlign="center";c.font="bold 2.5px monospace";c.fillStyle="#eaf6ff";c.fillText("TABACCHI",8,4.6,13);
+          box(Math.floor(now/650)%2?"#ffc878":"#946d47",2,7,5,3);
         }else if(o.native==="cavalli"){
           box("#1b234c",.5,1,15,5);box("#506dff",.5,1,15,.65);box("#c45ed9",.5,5.5,15,.45);
           box("#151d31",2,7,5,3.5);box("#6b87f3",2.5,7.5,4,1.5);box("#262b4e",10,6.5,3,6.5);

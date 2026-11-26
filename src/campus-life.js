@@ -77,6 +77,8 @@ function addVialeArcade(map){
     }
   }
   for(const [area,uid,name,x,y,w,color,native] of [
+    [street,"ingresso-tabaccheria","Tabaccheria · Viale Romania",21,17,2,"#426787","tabaccheria"],
+    [integrated?garden:null,"giardino-tabaccheria","Tabaccheria · Viale Romania",67,99,2,"#426787","tabaccheria"],
     [street,"ingresso-sala-giochi","Sala scommesse · Viale Romania",24,17,2,"#a45153","cavalli"],
     [integrated?garden:null,"giardino-sala-giochi","Sala scommesse · Viale Romania",63,102,3,"#a45153","cavalli"],
     [integrated?garden:null,"giardino-rosticceria","Rosticceria · Viale Romania",64,96,2,"#8b527e","rosticceria"]
@@ -222,4 +224,26 @@ function paintGuardOutcome(now){
   }
   rect(c,"#a2203b",158,105,16+31*t,5);
   rect(c,"#711831",154,110,20+22*t,3);
+}
+
+function tobaccoShopScene(){
+  const purse=wallet();
+  const products=[["Sigarette",local("Sigarette","Cigarettes"),2],["IQOS","IQOS",5]];
+  return scene(local("Tabaccheria · Viale Romania","Tobacconist · Viale Romania"),
+    local("Al bancone · Sigarette 2 monete · IQOS 5 monete. Saldo: ","At the counter · Cigarettes 2 coins · IQOS 5 coins. Balance: ")+purse.coins,
+    ...products.filter(([item,,cost])=>!testMode&&!has(item)&&purse.coins>=cost).map(([item,label,cost])=>[
+      local("Compra ","Buy ")+label+" · "+cost,()=>{
+        if(has(item)||purse.coins<cost)return;
+        purse.coins-=cost;carry(item);
+        if(!save()){
+          purse.coins+=cost;state.pockets.splice(state.pockets.indexOf(item),1);
+          return;
+        }
+        record("Tabaccheria · "+item);refreshWallet();chime([62,74],.06);
+        const animation=$("tobaccoHandoff");
+        animation.classList.remove("tobacco-handoff");
+        void animation.offsetWidth;
+        animation.classList.add("tobacco-handoff");
+      }
+    ]));
 }
