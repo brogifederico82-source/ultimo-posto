@@ -8,7 +8,7 @@ const catalog={
   "Viale Romania":[["shelter","Pensilina","edifici","#466e7a",4,2,true],["pillar","Pilastro con urna","edifici","#e9e4d3",1,3,true],["booth","Guardiola","edifici","#ddc4a0",3,3,true],["pine","Pino marittimo","decori","#526d49",3,3],["cypress","Cipresso","decori","#355246",1,2],["luiss","Scritta LUISS","decori","#325988",5,2],["zebra","Strisce pedonali","decori","#e4deca",1,3],["bus","Autobus ATAC 360","persone","#a84a45",5,1],["shuttle","Navetta LUISS","persone","#e4e5da",4,1,true],["car","Auto","persone","#b96054",2,1],["scooter","Motorino","persone","#e8bc45"]],
   "Architettura":[["wall","Muro","edifici","#887870",1,1,true],["door","Porta","edifici","#ac754d"],["window","Finestra","edifici","#78a5a5"],["stairs","Scale","edifici","#a09b88"],["roof","Edificio","edifici","#ab6654",4,3,true]],
   "Terreno":[["grass","Prato","terreno","#476f4d"],["road","Asfalto","terreno","#687078"],["paving","Pavimentazione","terreno","#a59a87"],["path","Sentiero","terreno","#b3a18a"],["floor","Pavimento interno","terreno","#806a65"]],
-  "Vegetazione":[["tree","Albero","decori","#4c7553",1,1,true],["hedge","Siepe","decori","#557c4e",1,1,true],["bush","Cespuglio","decori","#648052"],["flowers","Fiori","decori","#d8a86f"]],
+  "Vegetazione":[["orangeTree","Arancio","decori","#38674a",2,2,true],["roseBed","Roseto","decori","#c85c76",2,1],["flowerMeadow","Aiuola mista","decori","#dbab73",2,1],["tree","Albero","decori","#4c7553",1,1,true],["hedge","Siepe","decori","#557c4e",1,1,true],["bush","Cespuglio","decori","#648052"],["flowers","Fiori","decori","#d8a86f"]],
   "Arredamento":[["radioVan","Furgone di Radio Luiss","arredi","#ad3039",3,2,true],["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
   "Università":[["classroom","Aula","edifici","#a67762",3,2,true],["board","Lavagna","arredi","#487062"],["vending","Distributore","arredi","#9b6456",1,1,true],["turnstile","Tornello","edifici","#84958a"],["library","Biblioteca","edifici","#897460",3,2,true]],
   "Intrattenimento":[["foos","Biliardino","arredi","#48866d",2,1,true],["ping","Ping pong","arredi","#397d82",2,1,true],["bris","Tavolo da briscola","arredi","#80694b",2,1,true],["poker","Tavolo da poker","arredi","#33725e",2,1,true]],
@@ -104,7 +104,7 @@ function refineRomania(map){
   }
   return map;
 }
-const originalMap=normalizeCampus(installVillaAda(refineRomania(addRadioVan(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))))))));
+const originalMap=normalizeCampus(installVillaAda(refineRomania(furnishCampusGardens(addRadioVan(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,25],
@@ -268,6 +268,7 @@ function loadCampus(){
           if(prior[id]===map.zones[id]?.width)continue;
           map.zones[id]=normalizeCampus({version:1,zones:{ingresso:map.zones.ingresso,[id]:map.zones[id]}}).zones[id];
         }
+        furnishCampusGardens(map);
       }
       return embedded?map:normalizeCampus(installVillaAda(refineRomania(map)));
     }
@@ -530,6 +531,34 @@ function drawObject(c,o,now=0,editing=false){
           c.textAlign="center";c.font="bold 2.5px monospace";c.fillStyle="#e7f3ff";c.fillText("CORSE 360",8,4.7,13);
         }
         break;
+      case "orangeTree":{
+        box("#24372c70",2,11,13,4);
+        box("#795542",7,9,2,6);box("#a47c55",8,9,1,5);
+        const crown=(tone,x,y,rx,ry)=>{
+          c.fillStyle=tone;c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fill();
+        };
+        crown("#2a4b3b",8,7,7,6);
+        crown(color,7.5,6,6.3,5.3);
+        crown("#527d4c",5.6,4.5,3.6,3.4);
+        crown("#426d49",10.3,6.5,4,3.9);
+        for(const [x,y] of [[4,4],[7,2],[10,4],[6,7],[12,7],[8,10],[3,8]]){
+          box("#b97039",x,y,2,2);box("#e9a44d",x,y,2,1);box("#ffd079",x,y,1,1);
+        }
+        break;
+      }
+      case "roseBed":case "flowerMeadow":{
+        const roses=o.kind==="roseBed";
+        box("#36463370",1,11,14,3);box("#695543",1,7,14,6);
+        box("#88705a",1,7,14,1);
+        for(const [i,[x,y]] of [[2,7],[4,4],[6,8],[8,5],[10,7],[12,4],[13,9]].entries()){
+          box("#4c7551",x,y+1,2,4);
+          box("#73905d",x-1,y+2,2,1);
+          const bloom=roses?(i%3===0?"#a34058":color):[color,"#d9ccaf","#a490bd"][i%3];
+          box(bloom,x-1,y,3,2);
+          box(roses?"#f1a3a6":"#f0d292",x+(i%2),y,1,1);
+        }
+        break;
+      }
       case "tree":case "pine":{
         const pine=o.kind==="pine";
         const crown=(tone,cx,cy,rx,ry)=>{
