@@ -267,6 +267,7 @@ function saveCampus(){
   terrainCache=new WeakMap();
   minimapCache=new WeakMap();
   wallRuns=new WeakMap();
+  boundaryCache=new WeakMap();
   foregroundCache=new WeakMap();
   try{localStorage.setItem(mapStorageKey,JSON.stringify(campus));return true;}
   catch{return false;}
@@ -444,11 +445,21 @@ function drawObject(c,o,now=0,editing=false){
       c.fillStyle=bus?"#fff1b9":"#f4ead2";c.font="bold 6px monospace";
       c.textAlign="center";c.fillText(bus?"360":"LUISS",w/2,h*.71);
     }else if(o.kind==="car"){
-      box(shadow,0,3,16,10);box(color,1,4,14,8);box("#b1cad0",8,5,3,6);box("#435960",4,5,3,6);
-      box("#242a2b",3,2,2,2);box("#242a2b",11,12,2,2);
-      box("#dae5e1",7,5,2,1);box("#9baaa9",5,10,6,1);
-      box("#fff0ac",14,5,1,2);box("#fff0ac",14,9,1,1);
-      box(o.braking?"#ff9874":"#e85d50",1,5,1,2);box(o.braking?"#ff9874":"#e85d50",1,9,1,1);
+      const shell=(tone,inset)=>{
+        c.beginPath();
+        c.moveTo(1+inset,5);c.quadraticCurveTo(2,3+inset,5,3+inset);
+        c.lineTo(12,3+inset);c.quadraticCurveTo(15.8-inset,3.6,15.8-inset,6.5);
+        c.lineTo(15.8-inset,9.5);c.quadraticCurveTo(15.8-inset,12.5,12,12.8-inset);
+        c.lineTo(5,12.8-inset);c.quadraticCurveTo(2,12.5,1+inset,11);
+        c.closePath();c.fillStyle=tone;c.fill();
+      };
+      for(const axle of [3,11.5])for(const row of [2,10.6])box("#18232a",axle,row,2.7,2.7);
+      shell("#263439",0);shell(color,.65);
+      box("#172c38",4.4,4.8,6.6,6.4);box("#789aa5",9.1,5.25,1.65,5.5);
+      box("#435d66",4.6,5.45,1.15,5.1);box(color,6,5.4,2.65,5.2);
+      box("#e3e5d277",6,5.4,2.65,.65);box("#e3e5d239",11.8,4.6,2.1,.55);
+      box("#22353f",14.7,7,1,2);box("#fff1be",14,5,.95,1.55);box("#fff1be",14,9.5,.95,1.55);
+      for(const row of [5.1,9.6])box(o.braking?"#ff9874":"#ca5551",1.5,row,.9,1.35);
     }else{
       box(shadow,1,7,4,4);box(shadow,11,7,4,4);box(color,3,6,11,4);
       const lean=reducedMotion||o.bend===undefined?0:Math.sign(o.bend);
@@ -481,13 +492,20 @@ function drawObject(c,o,now=0,editing=false){
         box("#b6b5a7",2,5,12,11);box(color,3,5,9,10);box("#fff7e5",2,4,12,1);
         box("#afa691",4,1,8,2);box(light,5,0,6,2);box("#c6baa2",5,2,6,2);box("#777266",5,8,4,2);break;
       case "booth":
-        box("#4f4140",0,1,16,14);box(color,1,2,14,12);box("#f7e4ba",1,2,14,2);box("#3d5051",3,7,4,4);box("#725746",10,7,3,7);if(o.native==="shop"){
-          box("#20294a",1,2,14,4);c.textAlign="center";c.font="bold 2.5px monospace";c.fillStyle="#fff1c8";
-          c.fillText("LUISS SHOP",8,5,13);
-        }else if(o.native==="tabaccheria"){
-          box("#14233b",.75,1,14.5,5);box("#d7e9f3",1,1,14,.6);
-          c.textAlign="center";c.font="bold 2.5px monospace";c.fillStyle="#eaf6ff";c.fillText("TABACCHI",8,4.6,13);
-          box(Math.floor(now/650)%2?"#ffc878":"#946d47",2,7,5,3);
+        box("#20303666",.7,2.4,15.3,13.6);
+        box("#574740",0,.7,16,14.3);box(color,.55,1.1,14.9,13.7);
+        box("#edd9b1",.4,1,15.2,.65);box("#374345",2,7,5.5,5);box("#725746",10,7,3.6,7.4);
+        if(o.native==="shop"||o.native==="tabaccheria"){
+          const shop=o.native==="shop",navy=shop?"#26345b":"#18394a";
+          box(navy,.65,1.65,14.7,4.2);
+          box(shop?"#d8af69":"#8bbac5",.7,5.8,14.6,.55);
+          for(let i=0;i<6;i++)box(i%2?navy:shop?"#d8be91":"#d2e3da",1+i*2.35,6.35,2.35,1);
+          box("#f5d99d",1.9,7.55,6.8,4.7);box("#385462",2.25,7.9,6.1,4);
+          for(let i=0;i<3;i++)box(shop?["#e9c487","#aa7f96","#7898bb"][i]:["#bcd0cc","#c99b73","#ad7777"][i],2.8+i*1.75,9.5,1.25,1.8);
+          box("#c7a984",10,7.65,3.7,6.65);box("#45636e",10.4,8,2.9,4.5);
+          box("#f2d08a",12.8,11,.35,.48);box("#aa957c",.8,13.6,14.4,.9);
+          c.textAlign="center";c.font="bold 2.6px monospace";c.fillStyle="#fff1ce";
+          c.fillText(shop?"LUISS SHOP":"TABACCHI",8,4.75,13.7);
         }else if(o.native==="cavalli"){
           box("#1b234c",.5,1,15,5);box("#506dff",.5,1,15,.65);box("#c45ed9",.5,5.5,15,.45);
           box("#151d31",2,7,5,3.5);box("#6b87f3",2.5,7.5,4,1.5);box("#262b4e",10,6.5,3,6.5);
@@ -749,7 +767,7 @@ function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
 let wallRuns=new WeakMap();
 function continuousWalls(zone){
   if(wallRuns.has(zone))return wallRuns.get(zone);
-  const walls=sceneObjects(zone).filter(o=>o.kind==="wall"&&!o.rotation&&!o.action)
+  const walls=sceneObjects(zone).filter(o=>o.kind==="wall"&&!o.rotation&&!o.action&&!o.uid.startsWith("cinta-"))
     .sort((a,b)=>a.y-b.y||a.x-b.x);
   const runs=[];
   for(const wall of walls){
@@ -761,6 +779,34 @@ function continuousWalls(zone){
   const objects=[...sceneObjects(zone).filter(o=>o.kind!=="wall"||o.rotation||o.action),...runs];
   wallRuns.set(zone,objects);
   return objects;
+}
+let boundaryCache=new WeakMap();
+function boundaryStrokes(zone){
+  let lines=boundaryCache.get(zone);
+  if(lines)return lines;
+  const walls=zoneObjects(zone).solid.filter(o=>o.kind==="wall"&&o.uid.startsWith("cinta-"));
+  const points=walls.flatMap(o=>Array.from({length:Math.ceil(o.w*o.h)},(_,i)=>[
+    o.x+.5+i%Math.ceil(o.w),o.y+.5+Math.floor(i/Math.ceil(o.w))
+  ]));
+  lines=points.map(point=>[point,point]);
+  for(const [i,a] of points.entries())for(const b of points.slice(i+1)){
+    const dx=Math.abs(a[0]-b[0]),dy=Math.abs(a[1]-b[1]);
+    if(dx<=1&&dy<=1&&(dx||dy))lines.push([a,b]);
+  }
+  boundaryCache.set(zone,lines);
+  return lines;
+}
+function paintCampusBoundary(c,zone,left,top,right,bottom){
+  const lines=boundaryStrokes(zone).filter(([[x,y],[xx,yy]])=>
+    Math.max(x,xx)>=left-1&&Math.min(x,xx)<=right+1&&Math.max(y,yy)>=top-1&&Math.min(y,yy)<=bottom+1);
+  if(!lines.length)return;
+  c.save();c.scale(16,16);c.lineCap="round";c.lineJoin="round";
+  for(const [width,color,offset] of [[.92,"#333b38",.24],[.83,"#9a826c",.09],[.59,"#c3aa8b",-.10],[.18,"#e0caa7",-.27]]){
+    c.beginPath();
+    for(const [[x,y],[xx,yy]] of lines){c.moveTo(x,y+offset);c.lineTo(xx+.001,yy+offset);}
+    c.lineWidth=width;c.strokeStyle=color;c.stroke();
+  }
+  c.restore();
 }
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
@@ -808,6 +854,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     c.lineCap="round";c.lineWidth=1.65;c.strokeStyle="#8c9470";c.stroke();
     c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }
+  if(!editing&&visible.edifici)paintCampusBoundary(c,z,left,top,right,bottom);
   const foreground=[];
   for(const raw of editing?z.objects:continuousWalls(z)){
     const layer=kindLayer(raw);
