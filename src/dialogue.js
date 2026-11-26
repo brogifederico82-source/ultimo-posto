@@ -538,7 +538,8 @@ function draw(now){
 function minimapBase(zone){
   const cached=minimapCache.get(zone);
   if(cached)return cached;
-  const padding=3,scale=Math.min(79/zone.width,53/zone.height);
+  const compact=window.matchMedia?.("(max-width: 760px), (max-height: 520px)").matches?0.7:1;
+  const padding=3,scale=compact*Math.min(79/zone.width,53/zone.height);
   const mapWidth=zone.width*scale,mapHeight=zone.height*scale;
   const width=Math.ceil(mapWidth)+padding*2,height=Math.ceil(mapHeight)+padding*2;
   const layer=document.createElement("canvas");
@@ -566,6 +567,7 @@ function minimapBase(zone){
   minimapCache.set(zone,map);
   return map;
 }
+window.matchMedia?.("(max-width: 760px), (max-height: 520px)").addEventListener?.("change",()=>{minimapCache=new WeakMap();});
 function paintMinimap(zone,waypoint,playerX,playerY){
   const map=minimapBase(zone);
   const {layer,scale,padding,width,height,x,y}=map;
