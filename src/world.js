@@ -288,7 +288,7 @@ function loadCampus(){
           if(!prior||![hash].flat().includes(gardenFingerprint(prior.objects)))continue;
           map.zones[id]={...structuredClone(latest),name:prior.name,plan:prior.plan};
         }
-        const revisedZones={pola:[1834389237],giardino:[1377501407,80380783,3935577901,3770965331,785279541,2540694351,2053466179],primo:[1116216150,713528194],mensa:[4059249112]};
+        const revisedZones={pola:[1834389237],giardino:[2965020914,1377501407,80380783,3935577901,3770965331,785279541,2540694351,2053466179],primo:[1116216150,713528194],mensa:[4059249112]};
         for(const [id,hashes] of Object.entries(revisedZones)){
           const prior=map.zones[id], latest=originalMap.zones[id];
           if(!prior||(id!=="mensa"&&(prior.width!==latest.width||prior.height!==latest.height))||

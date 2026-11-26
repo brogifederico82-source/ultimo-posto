@@ -585,6 +585,30 @@ function widenCampusWalks(garden){
     const plant=garden.objects.find(o=>o.uid==="giardini-vivi-giardino-"+id);
     if(plant)Object.assign(plant,{x,y});
   }
+  // Paired seats on paved rest areas, flower beds on lawns and reachable signposts.
+  const furniture=new Map(garden.objects.map(o=>[o.uid,o]));
+  for(const [uid,x,y] of [
+    ["campus-bench-0",35,36],["campus-bench-1",35,38],["campus-bench-2",66,52],
+    ["campus-bench-3",66,54],["campus-bench-4",50,78],["campus-bench-5",50,80],
+    ["campus-bench-6",36,53],["interno-bench-0",39,53],["interno-bench-1",38,21],
+    ["interno-bench-2",41,21],["interno-bench-3",20,37],["interno-bench-4",23,37],
+    ["interno-bench-5",64,71],["interno-bench-6",67,71],["interno-bench-7",56,55],
+    ["campus-flowers-0",41,29],["campus-flowers-1",44,29],["campus-flowers-2",36,49],
+    ["campus-flowers-3",39,49],["campus-flowers-4",57,38],["campus-flowers-5",60,38],
+    ["campus-flowers-6",81,61],["campus-flowers-7",65,83],["interno-fiori-0",68,83],
+    ["interno-fiori-1",41,47],["interno-fiori-2",44,47],["interno-fiori-3",53,59],
+    ["interno-fiori-4",64,85],["interno-fiori-5",67,85],["interno-fiori-6",47,46],
+    ["campus-extra-1027",76,42],["orto-pollinatori",23,33],["ca-bacheca-impossibile",26,52],
+    ["ca-specchio",62,57]
+  ]){
+    const item=furniture.get(uid);
+    if(item)Object.assign(item,{x,y});
+  }
+  for(const [index,[x,y]] of [[35,37],[66,53],[50,79]].entries()){
+    garden.objects.push({uid:"tavolo-sosta-"+index,kind:"desk",name:"Tavolo da studio all’aperto",
+      x,y,w:2,h:1,color:"#9c7756",solid:true});
+  }
+
 }
 function hasIntegratedEntrance(){
   const garden=campus.zones.giardino;
