@@ -526,7 +526,8 @@ function polaParty(){
       state.polaCapThrown=true;
       polaThrowAt=performance.now();
       chime([60,64,67,76],.085);
-    }]);
+    }],
+    ["Ripensa al tuo semestre",ideeOpenRecap]);
   if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
     "Mostri la tessera all’accesso della festa. La villa resta chiusa. In giardino, Chiara ti indica la fontana e una scatola di sedie pieghevoli. «Mi dai una mano prima del discorso?»",
     ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
@@ -881,6 +882,7 @@ function renderScene(){
   pockets.textContent=local("In tasca: ","Inventory: ")+(state.pockets.map(item=>item==="Sigarette"?local("Sigarette","Cigarettes")+" ("+cigarettesLeft()+"/10)":tr(item)).join(", ")||local("solo il badge e un programma d’esame.","just your badge and an exam syllabus."));
   $("log").append(pockets);
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
+  ideeRender();
 }
 const stage=$("stage").getContext("2d");
 const cover=$("cover").getContext("2d");
