@@ -150,7 +150,10 @@ function show(next){
     preview();
   }
   if(next==="editor") enterEditor();
-  if(next==="game") renderScene();
+  if(next==="game"){
+    renderScene();
+    window.scrollTo(0,0);
+  }
   if(next!=="editor")refreshLanguage();
   syncBackgroundMusic();
 }
@@ -327,9 +330,11 @@ function carry(item){
 }
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
+const touchGameplay=matchMedia("(max-width: 760px), (pointer: coarse) and (max-height: 600px)");
 function interact(){
   if(screen!=="game"||state.ending||state.prologue||$("campusSurprise").open)return;
-  const spot=nearby();if(!spot)return;
+  const spot=nearby();
+  if(!spot){sound("error","interface");return;}
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
     sound("gate","map");
@@ -346,8 +351,11 @@ function interact(){
     travel(...destination);save();renderScene();$("interact").focus();
     return;
   }
+  if(spot.uid!=="viale-ingresso-varco"){
+    sound(gateLocked(spot.gate)?"error":kindLayer(spot)==="persone"?"talk":"inspect","map");
+  }
   state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);renderScene();
-  if(!$("speakerPortrait").hidden)$("sceneTitle").focus();
+  if(!$("speakerPortrait").hidden||touchGameplay.matches)$("sceneTitle").focus();
 }
 const nativeDoors={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
 function doorDestination(spot){
@@ -664,6 +672,7 @@ function renderScene(){
   $("speakerPortrait").hidden=!conversation;
   $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
   $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
+  $("game").classList.toggle("game-reading",Boolean(activeScene||state.prologue||state.ending));
   $("guardOutcome").hidden=!state.ending?.guard;
   refreshGateWarning();paintGuardOutcome(performance.now());
   paintSpeaker(performance.now());
@@ -679,7 +688,7 @@ function renderScene(){
       button.dataset.shortcut=String(index);
       button.setAttribute("aria-keyshortcuts",String(index));
     }
-    button.onclick=()=>{state.chatTopic=null;action();if(screen==="game"){save();renderScene();if(!minigame)($("speakerPortrait").hidden?$("interact"):$("sceneTitle")).focus();}};
+    button.onclick=()=>{state.chatTopic=null;action();if(screen==="game"){save();renderScene();if(!minigame)(($("speakerPortrait").hidden&&!touchGameplay.matches)?$("interact"):$("sceneTitle")).focus();}};
     $("choices").append(button);
   }
   if(activeScene && !state.ending){

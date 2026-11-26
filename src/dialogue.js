@@ -270,7 +270,9 @@ function autoEncounter(o){
   if(isFree()||!o.auto||state.events.includes(o.uid))return false;
   if(o.action==="native"&&o.native==="trend"&&has("Trend superato"))return false;
   state.events.push(o.uid);
-  activeScene=o.uid;completeObjective(o);
+  activeScene=o.uid;
+  sound(kindLayer(o)==="persone"?"talk":"inspect","map");
+  completeObjective(o);
   keys.clear();controls.clear();save();renderScene();
   if(o.native==="trend"&&o.action==="native")openChallenge("dance");
   return true;
@@ -572,7 +574,7 @@ $("audio").onclick=()=>{
     $("audio").setAttribute("aria-pressed","false");
     currentMusic.pause();stopEffects();
   }else{
-    enableAudio();musicFailed=false;syncBackgroundMusic();
+    enableAudio();sound("menu","interface");musicFailed=false;syncBackgroundMusic();
   }
 };
 window.addEventListener("keydown",event=>{
