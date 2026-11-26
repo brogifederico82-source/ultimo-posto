@@ -487,6 +487,7 @@ function draw(now){
   const viewWidth=320/zoom,viewHeight=192/zoom;
   const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
   const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
+  vividGrade(state.zone);
   stage.setTransform(2,0,0,2,0,0);
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
@@ -559,7 +560,7 @@ function minimapBase(zone){
   const tiles=terrainCache.get(zone)??terrainMap(zone);
   rect(c,palette[zone.ground],0,0,zone.width,zone.height);
   if(zone===campus.zones.giardino&&zone.width===144){
-    rect(c,"#53595b",0,0,zone.width,zone.height);
+    rect(c,vividOn?"#7b6e58":"#53595b",0,0,zone.width,zone.height);
     c.beginPath();campusOutlineFor(zone).forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
   }
   for(const [key,tile] of tiles){

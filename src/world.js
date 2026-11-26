@@ -413,6 +413,7 @@ function nearbyIn(id,x,y,now=0){
   return best;
 }
 function colorVariant(hex,variant){
+  hex=vividHex(hex);
   if(!variant)return hex;
   const amount=variant===1?28:-27;
   return "#"+[1,3,5].map(i=>Math.min(255,Math.max(0,parseInt(hex.slice(i,i+2),16)+amount)).toString(16).padStart(2,"0")).join("");
@@ -696,7 +697,7 @@ function drawObject(c,o,now=0,editing=false){
         // Barrel roof: a continuous curved highlight and transverse ribs.
         box(shadow,0,.6,16,15.4);
         const vault=c.createLinearGradient(0,0,16,0);
-        for(const [stop,tone] of [[0,"#53666b"],[.25,"#acbabc"],[.45,"#e2e6dc"],[.78,color],[1,"#59696d"]])
+        for(const [stop,tone] of vividOn?[[0,"#4f6b78"],[.25,"#c9d0c6"],[.45,"#f6ead0"],[.78,color],[1,"#6a6f68"]]:[[0,"#53666b"],[.25,"#acbabc"],[.45,"#e2e6dc"],[.78,color],[1,"#59696d"]])
           vault.addColorStop(stop,tone);
         c.fillStyle=vault;c.fillRect(.2,.2,15.4,13.8);
         for(let i=1;i<14;i+=1.7)box("#42596366",.3,i,15.2,.12);
@@ -967,7 +968,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
       const tile=tiles.get(x+y*z.width);
       const outside=outline&&(tile?.kind??z.ground)==="grass"&&!insideCampusOutline(x+.5,y+.5,outline);
-      if(outside)rect(c,"#53595b",x*16,y*16,16,16);
+      if(outside)rect(c,vividOn?"#7b6e58":"#53595b",x*16,y*16,16,16);
       else if(curvedRoad&&tile?.uid.startsWith("romania-surface-carreggiata-")){
         groundTile(c,"paving",x,y,"#a49a87");
       }else groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
@@ -976,7 +977,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
           const xx=x+dx,yy=y+dy;
           if(xx<0||xx>=z.width||yy<0||yy>=z.height)continue;
           const kind=tiles.get(xx+yy*z.width)?.kind??z.ground;
-          if(kind==="paving"||kind==="floor")rect(c,"#b6aa90",x*16+px,y*16+py,w,h);
+          if(kind==="paving"||kind==="floor")rect(c,vividOn?"#cdb98f":"#b6aa90",x*16+px,y*16+py,w,h);
         }
       }
     }
