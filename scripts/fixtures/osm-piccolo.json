@@ -1,0 +1,54 @@
+{
+  "_nota": "dati finti per test",
+  "version": 0.6,
+  "generator": "fixture-finta",
+  "elements": [
+    {
+      "type": "way",
+      "id": 900001,
+      "nodes": [900101, 900102, 900103],
+      "tags": { "highway": "residential", "name": "Via finta Uno", "oneway": "yes" },
+      "geometry": [
+        { "lat": 41.9300, "lon": 12.5020 },
+        { "lat": 41.9310, "lon": 12.5030 },
+        { "lat": 41.9320, "lon": 12.5040 }
+      ]
+    },
+    {
+      "type": "way",
+      "id": 900002,
+      "nodes": [900201, 900202],
+      "tags": { "highway": "primary", "name": "Via finta Due", "width": "9" },
+      "geometry": [
+        { "lat": 41.9305, "lon": 12.5010 },
+        { "lat": 41.9305, "lon": 12.5050 }
+      ]
+    },
+    {
+      "type": "way",
+      "id": 900003,
+      "nodes": [900301, 900302, 900303, 900304, 900301],
+      "tags": { "building": "yes", "name": "Palazzo di prova", "building:levels": "4" },
+      "geometry": [
+        { "lat": 41.9312, "lon": 12.5026 },
+        { "lat": 41.9312, "lon": 12.5032 },
+        { "lat": 41.9316, "lon": 12.5032 },
+        { "lat": 41.9316, "lon": 12.5026 },
+        { "lat": 41.9312, "lon": 12.5026 }
+      ]
+    },
+    {
+      "type": "way",
+      "id": 900004,
+      "nodes": [900401, 900402, 900403, 900404, 900401],
+      "tags": { "leisure": "park", "name": "Parco di prova" },
+      "geometry": [
+        { "lat": 41.9300, "lon": 12.5040 },
+        { "lat": 41.9300, "lon": 12.5048 },
+        { "lat": 41.9306, "lon": 12.5048 },
+        { "lat": 41.9306, "lon": 12.5040 },
+        { "lat": 41.9300, "lon": 12.5040 }
+      ]
+    }
+  ]
+}
