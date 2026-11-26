@@ -690,15 +690,32 @@ function polaParty(){
 }
 
 let vialeEncounterEffect=null;
+let vialeGesture=null;
 function vialeEncounterScene(npc){
   const purse=wallet(),cost=5;
-  const offer=npc.uid==="viale-nadia"
+  const nadia=npc.uid==="viale-nadia";
+  const offer=nadia
     ?local("«Mi chiamo Nadia. Se cerchi compagnia, sono cinque monete.»","“I'm Nadia. If you're looking for company, it's five coins.”")
     :local("«Sono Mila. Un momento in privato? Cinque monete.»","“I'm Mila. A moment in private? Five coins.”");
+  const topics=[
+    [local("Saluta","Say hello"),nadia
+      ?local("Nadia alza la mano. «Ciao. Ti ho già visto rincorrere il 360?»","Nadia waves. “Hi. Have I seen you chasing the 360 before?”")
+      :local("Mila sorride e ricambia il saluto. «Ciao, studente.»","Mila smiles and waves back. “Hi, student.”"),"wave"],
+    [local("Chiedi del 360","Ask about the 360"),nadia
+      ?local("«La fermata è verso l’ingresso della LUISS. Da qui lo vedi passare, ma non si ferma.»","“The stop is by the Luiss entrance. You can see it pass from here, but it doesn't stop.”")
+      :local("«Per la fermata, torna verso le strisce davanti alla LUISS.»","“For the stop, head back toward the crossing by Luiss.”"),"point"],
+    [local("Fai due chiacchiere","Make small talk"),nadia
+      ?local("Nadia ride. «Al tabacchi ormai mi tengono da parte l’accendino.»","Nadia laughs. “The tobacconist keeps a lighter aside for me now.”")
+      :local("Mila ride. «Il bello di stare qui? Sento tutte le scuse di chi ha perso il bus.»","Mila laughs. “Best thing about standing here? I get to hear every excuse for missing the bus.”"),"laugh"]
+  ];
+  const choices=topics.map(([prompt,reply,kind])=>[prompt,()=>{
+    state.chatTopic={uid:npc.uid,prompt,reply};
+    vialeGesture={uid:npc.uid,kind,start:performance.now()};
+  }]);
   const balance=local("Saldo: ","Balance: ")+purse.coins;
   if(purse.coins<cost)return scene(npc.name,offer+" "+balance+" · "+
-    local("Ti servono 5 monete.","You need 5 coins."));
-  return scene(npc.name,offer+" "+balance,
+    local("Ti servono 5 monete.","You need 5 coins."),...choices);
+  return scene(npc.name,offer+" "+balance,...choices,
     [local("Accetta · 5 monete","Accept · 5 coins"),()=>{
       if(currentObject()?.uid!==npc.uid||wallet().coins<cost)return;
       wallet().coins-=cost;
@@ -706,6 +723,21 @@ function vialeEncounterScene(npc){
       sound("buy","map");
       activeScene=null;
     }]);
+}
+
+// The same cigarette cycle is drawn at map and portrait scale.
+function drawVialeCigarette(c,npc,x,y,scale,now){
+  const nadia=npc.uid==="viale-nadia";
+  const phase=reducedMotion||!now?0:((now+(nadia?700:2400))%4200)/4200;
+  const raised=phase>.20&&phase<.49;
+  const handX=x+(raised?2:5)*scale,handY=y+(raised?0:4)*scale;
+  rect(c,"#f1e9dd",handX,handY,2*scale,scale);
+  rect(c,"#f58c59",handX+2*scale,handY,scale,scale);
+  if(phase>.49){
+    const drift=(phase-.49)*12;
+    rect(c,"#f2e9de8c",x+(4+drift*.6)*scale,y-drift*scale,2*scale,scale);
+    rect(c,"#f2e9de48",x+(5+drift)*scale,y-(2+drift)*scale,2*scale,scale);
+  }
 }
 
 function nativeScene(id){
@@ -922,6 +954,8 @@ function showCaption(text, animate){
   captionFrame=requestAnimationFrame(type);
 }
 const campusPortraits={
+  "viale-nadia":{pelle:0,capelli:7,tinta:2,occhi:1,abito:0,taglio:1,zaino:0,baffi:0,accessorio:0},
+  "viale-mila":{pelle:0,capelli:4,tinta:1,occhi:2,abito:4,taglio:3,zaino:0,baffi:0,accessorio:5},
   "prof-storia":{capelli:4,tinta:2,pelle:0,occhi:1,volto:0,accessorio:3,taglio:2,abito:4},
   "tutor-viola":{capelli:7,tinta:1,pelle:2,occhi:0,volto:1,accessorio:5,taglio:1,abito:1},
   "giardiniera-nora":{capelli:5,tinta:0,pelle:1,occhi:2,volto:0,accessorio:1,taglio:1,abito:1},
@@ -985,10 +1019,25 @@ function paintSpeaker(now){
     rect(c,"#e7c69356",middle+offset*panelWidth/2-(offset===1?1:0),11,1,height-18);
     rect(c,"#efe1be30",middle+offset*(panelWidth/2-8),15,2,height-28);
   }
+  const vialeNpc=o.native==="incontro-viale";
+  const elapsed=vialeGesture?.uid===o.uid?now-vialeGesture.start:Infinity;
+  const reacting=elapsed>=0&&elapsed<950;
+  const reaction=reacting?vialeGesture.kind:null;
+  const bounce=!reducedMotion&&reaction==="laugh"?Math.abs(Math.sin(elapsed/65))*3:0;
   const gesture=moving?[0,-9,4,9][beat]:o.kind==="professor"&&beat===1?2:0;
   const scale=Math.min(width/28,height/22);
   const bustBaseline=height+scale*9.5;
-  sprite(c,a,middle+gesture,bustBaseline-(moving&&beat%2?5:0),moving?beat%3:0,"down",scale,characterCoat(o));
+  sprite(c,a,middle+gesture,bustBaseline-(moving&&beat%2?5:0)-bounce,moving?beat%3:0,
+    reaction==="point"?"left":"down",scale,characterCoat(o));
+  if(vialeNpc){
+    drawVialeCigarette(c,o,middle,height*.50-bounce,scale*.72,now);
+    if(reaction==="wave"||reaction==="point"){
+      const point=reaction==="point";
+      const handX=middle+(point?-9:7)*scale;
+      const handY=height*.61-(point||reducedMotion?0:Math.sin(elapsed/85)*2);
+      rect(c,"#edbc94",handX,handY,(point?5:2)*scale,2*scale);
+    }
+  }
   rect(c,"#d5b481",middle-panelWidth/2,height-9,panelWidth,1);
   rect(c,"#172331",0,height-8,width,8);
 }

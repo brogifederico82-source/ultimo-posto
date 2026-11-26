@@ -598,10 +598,11 @@ function drawObject(c,o,now=0,editing=false){
     if(o.native==="trend"){
       sprite(c,{...appearance,capelli:5,tinta:2,abito:3},21,15,(Math.floor(now/170)+1)%3,"down",.89);
     }
-    if(o.kind==="heatedStudent"||o.native==="incontro-viale"){
+    if(o.native==="incontro-viale")drawVialeCigarette(c,o,7,5,1,editing?0:now);
+    if(o.kind==="heatedStudent"){
       box("#e9e0d4",12,6,2,1);box("#9b8c80",14,6,1,1);
       const cycle=(Math.floor(now/210)+o.x)%17;
-      if(now&&cycle<4&&(o.kind==="heatedStudent"||!reducedMotion)){
+      if(now&&cycle<4){
         box("#e5dec87a",14+cycle/2,5-cycle,2,1);
         if(cycle>1)box("#dfd8bb42",15+cycle/2,3-cycle,2,1);
       }
