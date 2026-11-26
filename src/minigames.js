@@ -144,7 +144,6 @@ function tickDance(now){
   if(now>=g.deadline)danceInput(-1);
 }
 for(const [i,button] of [...$("dancePad").querySelectorAll("button")].entries())button.onclick=()=>danceInput(i);
-window.touchGameplay??=matchMedia("(max-width: 760px), (pointer: coarse) and (max-height: 600px)");
 function openChallenge(id,practice=false){
   keys.clear();controls.clear();
   $("challengeAudio").open=false;
