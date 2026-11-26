@@ -1014,7 +1014,9 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   if(player)foreground.push(player);
   foreground.sort((a,b)=>a.row-b.row).forEach(o=>o.draw());
 }
-const reducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches??false;
+const systemReducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches??false;
+let reducedMotion=systemReducedMotion;
+try{if(localStorage.getItem("ultimo-posto-movimento-ridotto")==="on")reducedMotion=true;}catch{}
 let mapClock=0,trafficClock=0,lastTrafficFrame=0;
 function trafficImpact(){
   if(isFree()||state.ending||minigame||activeScene||state.prologue)return;
