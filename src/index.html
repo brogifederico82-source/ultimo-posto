@@ -6,39 +6,57 @@
 <a class="skip-link" href="#main">Vai al contenuto</a>
 <main id="main" tabindex="-1">
 <header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><span id="audioFeedback" class="hint" role="status" hidden></span><button id="musicRetry" aria-describedby="audioFeedback" hidden>Riprova musica</button><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
-<section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1 class="arcade-title" aria-label="Ultimo Posto"><svg viewBox="0 0 347 118" aria-hidden="true" focusable="false">
-<defs><path id="ultimo-posto-lettering" d="
-M14 12V36Q14 46 24 46H36Q46 46 46 36V12
-M72 12V40Q72 46 78 46H102
-M119 12H155M137 12V46
-M181 12V46
-M208 46V12H214L230 29L246 12H252V46
-M282 12H306Q316 12 316 22V36Q316 46 306 46H282Q272 46 272 36V22Q272 12 282 12Z
-M14 103V69H37Q46 69 46 78Q46 87 37 87H14
-M82 69H98Q108 69 108 79V93Q108 103 98 103H82Q72 103 72 93V79Q72 69 82 69Z
-M168 69H143Q134 69 134 77Q134 85 143 85H159Q168 85 168 94Q168 103 159 103H134
-M194 69H230M212 69V103
-M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69Z"/></defs>
-<use href="#ultimo-posto-lettering" class="wordmark-shadow" transform="translate(2 5)"/>
-<use href="#ultimo-posto-lettering" class="wordmark-edge"/>
-<use href="#ultimo-posto-lettering" class="wordmark-blue"/>
-<use href="#ultimo-posto-lettering" class="wordmark-line"/>
-</svg></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button><button id="installGame" type="button" hidden>Installa il gioco</button><a id="downloadGame" href="./Ultimo-Posto.zip" download hidden>Scarica il pacchetto</a></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
-<section id="creator" hidden>
-<div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
-<div class="grid creator-grid">
-<section class="panel creator-id"><h2>Badge studente</h2>
-<div class="portrait-card"><canvas id="portrait" class="portrait" width="240" height="144" aria-label="Anteprima dell’avatar"></canvas>
-<div class="badge-details"><strong id="ticket"></strong><span id="ticketNumber"></span></div></div>
-<div id="identityFields" class="fields"></div><p><button id="suggestName">Suggerisci un nome</button></p>
+<section id="home" class="hero" aria-label="Schermata del titolo">
+<canvas id="homeScene" class="sch-scene" aria-hidden="true"></canvas>
+<canvas id="cover" width="320" height="192" aria-hidden="true" hidden></canvas>
+<div class="sch-tint" aria-hidden="true"></div>
+<div class="sch-top">
+<div class="sch-lang" role="group" aria-label="Lingua"><button id="langIt" type="button" lang="it" aria-pressed="true">IT</button><button id="langEn" type="button" lang="en" aria-pressed="false">EN</button></div>
+<button id="homeAudio" class="sch-audio" type="button" aria-pressed="false" aria-label="Audio spento"><i aria-hidden="true"></i></button>
+</div>
+<div class="hero-copy sch-title">
+<p class="sch-eyebrow">LUISS · Viale Romania 32</p>
+<h1 class="sch-logo" aria-label="Ultimo Posto"><span aria-hidden="true" class="sch-l1">Ultimo</span><span aria-hidden="true" class="sch-l2">Posto</span></h1>
+<p class="sch-tagline">Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p>
+<nav class="sch-menu" id="homeMenu" role="menu" aria-label="Menu principale" aria-orientation="vertical">
+<button id="start" class="primary" type="button" role="menuitem">Inizia la storia</button>
+<button id="resume" type="button" role="menuitem" hidden>Nuova storia</button>
+<button id="free" type="button" role="menuitem">Esplora il campus</button>
+<button id="optOpen" type="button" role="menuitem">Opzioni</button>
+<button id="edOpen" type="button" role="menuitem">Editor del campus</button>
+<button id="fsOpen" type="button" role="menuitem">Schermo intero</button>
+</nav>
+<div class="sch-extra"><button id="installGame" type="button" hidden>Installa il gioco</button><a id="downloadGame" href="./Ultimo-Posto.zip" download hidden>Scarica il pacchetto</a></div>
+</div>
+<p class="sch-credits"><span id="homeKeys" class="sch-hint-key">Frecce o W/S per scegliere · E o Invio per confermare</span><span class="sch-hint-touch">Tocca una voce per iniziare</span><span>Satira studentesca · Pianta di gioco stilizzata</span></p>
 </section>
-<div class="creator-settings">
-<section class="panel"><h2>Aspetto</h2><div id="fields" class="fields"></div></section>
-<section class="panel"><h2>Guardaroba</h2><div id="wardrobeFields" class="fields"></div><p><button id="shuffle">Mescola il guardaroba</button></p></section>
-<section class="panel"><h2>Carattere</h2><p class="hint">I tratti cambiano le risposte disponibili durante la storia.</p><div id="traits" class="traits"></div>
-<p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
-<button id="play" class="primary">Entra a Viale Romania</button></section>
-</div></div></section>
+<section id="creator" hidden aria-label="Creazione del personaggio">
+<div class="sch-cr-bg" aria-hidden="true"><canvas id="creatorScene"></canvas></div>
+<header class="sch-cr-head"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></header>
+<div class="sch-cr-body">
+<section class="sch-stage" aria-label="Anteprima">
+<div class="sch-stage-frame"><canvas id="portrait" class="portrait" width="192" height="192" role="img" aria-label="Anteprima dell’avatar"></canvas></div>
+<div class="sch-turn" role="group" aria-label="Direzione dell’anteprima"><button id="turnLeft" type="button" class="sch-arrow left" aria-label="Ruota a sinistra"></button><span id="turnLabel">In cammino</span><button id="turnRight" type="button" class="sch-arrow right" aria-label="Ruota a destra"></button></div>
+<div class="badge-details"><span class="sch-badge-cap">Badge studente</span><strong id="ticket"></strong><span id="ticketNumber"></span></div>
+</section>
+<section class="sch-card">
+<div class="sch-tabs" role="tablist" aria-label="Sezioni del personaggio">
+<button type="button" role="tab" id="tabAspetto" aria-controls="panAspetto" aria-selected="true">Aspetto</button>
+<button type="button" role="tab" id="tabAbiti" aria-controls="panAbiti" aria-selected="false" tabindex="-1">Abiti</button>
+<button type="button" role="tab" id="tabTratti" aria-controls="panTratti" aria-selected="false" tabindex="-1">Tratti</button>
+<button type="button" role="tab" id="tabNome" aria-controls="panNome" aria-selected="false" tabindex="-1">Nome</button>
+</div>
+<div class="sch-panes">
+<div role="tabpanel" id="panAspetto" aria-labelledby="tabAspetto" class="sch-pane"><div id="identityFields" class="fields"></div><div id="fields" class="fields"></div></div>
+<div role="tabpanel" id="panAbiti" aria-labelledby="tabAbiti" class="sch-pane" hidden><div id="wardrobeFields" class="fields"></div><p class="sch-pane-actions"><button id="shuffle" type="button">Mescola il guardaroba</button></p></div>
+<div role="tabpanel" id="panTratti" aria-labelledby="tabTratti" class="sch-pane" hidden><p class="hint">I tratti cambiano le risposte disponibili durante la storia.</p><div id="traits" class="traits"></div>
+<p class="sch-pane-actions"><button id="observer" type="button">Profilo investigativo</button><button id="mediator" type="button">Profilo diplomatico</button><button id="reckless" type="button">Profilo spericolato</button></p></div>
+<div role="tabpanel" id="panNome" aria-labelledby="tabNome" class="sch-pane" hidden><div id="nameBox" class="sch-namebox"></div><p class="sch-pane-actions"><button id="suggestName" type="button">Suggerisci un nome</button></p></div>
+</div>
+<div class="sch-foot"><button id="crBack" type="button" class="sch-back">Indietro</button><span class="sch-step-count" id="crStep" aria-live="polite">1 / 4</span><button id="crNext" type="button">Avanti</button><button id="play" type="button" class="primary">Inizia</button></div>
+</section>
+</div>
+</section>
 <section id="game" hidden><div class="map-status"><span class="zone" id="zone"></span><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span><details id="inventory" class="inventory"><summary id="inventoryTitle">Tasche</summary><ul id="inventoryItems"></ul></details></div><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong><small id="storyWaypointHint" aria-live="polite" hidden></small><small id="radioTapeHint" class="hint" hidden></small></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
 <div class="direction-pad" role="group" aria-label="Movimento">
 <button data-move="up" aria-label="Cammina in alto">↑</button>

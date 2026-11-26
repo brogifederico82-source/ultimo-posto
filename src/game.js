@@ -45,6 +45,7 @@ function refreshLanguage(){
   }
   updateHomeActions();
   $("audio").textContent=tr(audioOn?"Audio acceso":"Audio spento");
+  if(typeof schermateLingua==="function")schermateLingua();
 }
 function chooseLanguage(value){
   locale=value;
@@ -139,6 +140,7 @@ function save(){
 }
 function updateHomeActions(){
   if(screen!=="home")return;
+  if(typeof schermateAggiornaHome==="function")return schermateAggiornaHome();
   const story=Boolean(stored("story"));
   const free=Boolean(stored("free"));
   $("start").textContent=story?local("Continua la storia","Continue story"):local("Inizia la storia","Start story");
@@ -156,7 +158,7 @@ function show(next){
   $("testBack").hidden=!testMode||next!=="game";
   if(next==="home")paintCover();
   if(next==="creator"){
-    $("play").textContent=selectedMode==="free"?tr("Entra nel campus"):tr("Entra a Viale Romania");
+    $("play").textContent=local("Inizia","Start");
     preview();
   }
   if(next==="editor") enterEditor();
@@ -165,6 +167,7 @@ function show(next){
     window.scrollTo(0,0);
   }
   if(next!=="editor")refreshLanguage();
+  if(typeof schermateMostra==="function")schermateMostra(next);
   syncBackgroundMusic();
 }
 const studentNames=[
@@ -210,6 +213,7 @@ for(const [id,labelText] of Object.entries(traits)){
 }
 function updateMeters(){
   for(const id in traits) meters[id].textContent=sliders[id].value;
+  if(typeof schermateTratti==="function")schermateTratti();
 }
 function preset(values){
   for(const id in traits) sliders[id].value=values[id]??50;
@@ -435,6 +439,7 @@ function preview(){
   sprite(c,a,120,123,0,"down",4.15);
   $("ticket").textContent=badgeName();
   $("ticketNumber").textContent=local("Matricola di gioco ","Game student ID ")+draftMatricola;
+  if(typeof schermatePreview==="function")schermatePreview();
 }
 function resetGame(){
   testMode=false;
