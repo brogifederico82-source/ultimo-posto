@@ -505,6 +505,7 @@ function draw(now){
   paintRestrictedLine(stage,state.zone);
   paintCampusCoins(stage,state.zone,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},time);
   paintVillaBoars(stage,state.zone,now);
+  ambienteMondo(stage,state.zone,cameraX,cameraY,viewWidth,viewHeight,now,state.x,state.y);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
@@ -522,18 +523,23 @@ function draw(now){
     const width=Math.min(302,stage.measureText(label).width+9);
     let sx=clamp(((nearest.x+nearest.w/2)*16-cameraX)*zoom,width/2,320-width/2);
     let sy=clamp((nearest.y*16-cameraY)*zoom-13,3,178);
+    sy+=ambienteEtichetta(nearest.uid,now);
     if((z.width>20||z.height>12)&&sy<64&&sy+11>4&&sx+width/2>227){
       if(width<=227)sx=227-width/2;
       else sy=65;
     }
+    ambienteFoco(stage,nearest,cameraX,cameraY,zoom,now);
+    stage.globalAlpha=ambienteAlfa();
     rect(stage,"#221f2d",sx-width/2,sy,width,11);
     stage.fillStyle="#ffd499";stage.fillText(label,sx,sy+8,width-6);
+    stage.globalAlpha=1;
     const left=(nearest.x*16-cameraX)*zoom, top=(nearest.y*16-cameraY)*zoom;
     const right=left+nearest.w*16*zoom, bottom=top+nearest.h*16*zoom;
     stageInteraction={uid:nearest.uid,boxes:[
       [sx-width/2-4,sy-4,sx+width/2+4,sy+15],[left-7,top-13,right+7,bottom+6]
     ]};
   }
+  ambienteSchermo(stage,now);
 }
 function minimapBase(zone){
   const cached=minimapCache.get(zone);

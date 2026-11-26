@@ -344,6 +344,7 @@ function interact(){
   if(!exploringCampus())return;
   const spot=nearby();
   if(!spot){sound("error","interface");return;}
+  ambienteInteragisci(spot);
   clearCampusInputs();
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
@@ -881,6 +882,7 @@ function renderScene(){
   pockets.textContent=local("In tasca: ","Inventory: ")+(state.pockets.map(item=>item==="Sigarette"?local("Sigarette","Cigarettes")+" ("+cigarettesLeft()+"/10)":tr(item)).join(", ")||local("solo il badge e un programma d’esame.","just your badge and an exam syllabus."));
   $("log").append(pockets);
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
+  ambienteScena();
 }
 const stage=$("stage").getContext("2d");
 const cover=$("cover").getContext("2d");
