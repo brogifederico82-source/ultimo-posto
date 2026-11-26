@@ -11,7 +11,7 @@ const catalog={
   "Arredamento":[["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
   "Università":[["classroom","Aula","edifici","#a67762",3,2,true],["board","Lavagna","arredi","#487062"],["vending","Distributore","arredi","#9b6456",1,1,true],["turnstile","Tornello","edifici","#84958a"],["library","Biblioteca","edifici","#897460",3,2,true]],
   "Intrattenimento":[["foos","Biliardino","arredi","#48866d",2,1,true],["ping","Ping pong","arredi","#397d82",2,1,true],["bris","Tavolo da briscola","arredi","#80694b",2,1,true],["poker","Tavolo da poker","arredi","#33725e",2,1,true]],
-  "Personaggi":[["athlete","Gymbro","persone","#a94e47"],["heatedStudent","Studente con IQOS","persone","#af6380"],["sportGlasses","Studente con occhiali sportivi","persone","#527f87"],["student","Studente","persone","#bb6268"],["guard","Guardia","persone","#6089aa"],["creator","Influencer","persone","#9966a3"],["bartender","Barista","persone","#ae775e"],["professor","Professore","persone","#b09461"],["cleaner","Spazzino","persone","#80a471"]],
+  "Personaggi":[["athlete","Gymbro","persone","#a94e47"],["heatedStudent","Studente con IQOS","persone","#af6380"],["sportGlasses","Studente con occhiali sportivi","persone","#527f87"],["student","Studente","persone","#bb6268"],["guard","Guardia","persone","#6089aa"],["creator","Influencer","persone","#9966a3"],["bartender","Barista","persone","#ae775e"],["professor","Professore","persone","#b09461"],["cleaner","Spazzino","persone","#80a471"],["boar","Cinghiale","persone","#6a5848"]],
   "Decorazioni":[["sign","Cartello","decori","#d1ae72"],["bin","Cestino","decori","#71877c",1,1,true],["lamp","Lampione","decori","#d2ac66"],["fountain","Fontana","decori","#699b9b",2,2,true],["nasone","Nasone romano","decori","#465556"],["rope","Cordone","decori","#a94057"],["entrance","Ingresso","decori","#d1af6d"],["event","Evento","decori","#c67668"],["goal","Obiettivo","decori","#d6bb74"]]
 };
 const assets=Object.fromEntries(Object.values(catalog).flat().map(row=>[row[0],row]));
@@ -97,7 +97,7 @@ function refineRomania(map){
   }
   return map;
 }
-const originalMap=normalizeCampus(refineRomania(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))));
+const originalMap=normalizeCampus(installVillaAda(refineRomania(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,25],
@@ -254,7 +254,7 @@ function loadCampus(){
         }
       }
       if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);}
-      return embedded?map:normalizeCampus(refineRomania(map));
+      return embedded?map:normalizeCampus(installVillaAda(refineRomania(map)));
     }
   }catch{}
   return freshMap();
@@ -467,6 +467,9 @@ function drawObject(c,o,now=0,editing=false){
       box("#e7dfc5",10,4+lean,2,1);box("#fff1ad",13,6,2,1);
       box(o.braking?"#ff9874":"#e85d50",3,7,1,2);
     }
+  }else if(o.kind==="boar"){
+    c.translate(8-8*1.3,15-15*1.3);c.scale(1.3,1.3);
+    drawBoarShape(c,o.look??"left","calm",now,o.x);
   }else if(spec[2]==="persone"){
     const appearance=characterAppearance(o);
     const size=o.kind==="athlete"?1.05:.89;

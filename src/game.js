@@ -759,6 +759,7 @@ function paintSpeaker(now){
   const o=currentObject();
   if(!o)return;
   const c=canvas.getContext("2d");
+  if(o.kind==="boar"){drawBoarPortrait(c,canvas.width,canvas.height,reducedMotion?0:Math.floor(now/170)%4);return;}
   const colors=["#6c5d87","#77614d","#476c73","#5e7255"];
   const seed=characterSeed(o.uid);
   const beat=reducedMotion?0:Math.floor(now/170)%4;
@@ -810,7 +811,7 @@ function paintPolaCeremony(now){
 function renderScene(){
   updateSmokingUI();
   const scene=getScene();
-  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
+  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard||state.ending?.boar)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
   const nextStep=isFree()?-1:storySteps.findIndex(([item])=>!has(item));
   const chapter=nextStep<0?"":nextStep<4?"Romania":nextStep===4?"Parenzo":"Pola";
   $("taskChapter").hidden=!chapter||Boolean(state.ending);

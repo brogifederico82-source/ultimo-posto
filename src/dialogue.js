@@ -345,6 +345,7 @@ function getScene(){
     [state.x,state.y]=reachEntry(state.zone,"viale");
     keys.clear();controls.clear();activeScene=null;syncBackgroundMusic();
   }]);
+  if(state.ending?.boar)return villaAdaEndingScene();
   if(state.ending?.traffic)return scene("Game Over",state.ending.text,[atViale(state)?"Riprova dall’ingresso":local("Riprova dal giardino","Retry from the garden"),()=>{
     state.ending=null;[state.x,state.y]=reachEntry(state.zone,atViale(state)&&hasIntegratedEntrance()?"viale":state.zone==="giardino"?"ingresso":undefined);
     keys.clear();controls.clear();activeScene=null;
@@ -356,6 +357,8 @@ function getScene(){
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
   if(!o&&atViale(state))return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
   if(!o)return scene("Cerca un posto per studiare","Avvicinati a persone, porte e oggetti e premi E. Apri la mappa sotto i comandi per orientarti.");
+  const villaScene=villaAdaScene(o);
+  if(villaScene)return villaScene;
   if(o.uid==="pola-inside"&&!polaAuthorized())return polaParty();
   if(gateLocked(o.gate))return scene(o.name,"Per sbloccarlo, vinci a "+challengeNames[o.gate].toLowerCase()+".");
   const note=o.text||"Sei vicino a "+o.name+".";
@@ -462,6 +465,7 @@ function draw(now){
   }
   paintRestrictedLine(stage,state.zone);
   paintCampusCoins(stage,state.zone,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},time);
+  paintVillaBoars(stage,state.zone,now);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
@@ -675,6 +679,7 @@ function frame(now){
     if(polaThrowAt!==null&&now-polaThrowAt<=1400)paintPolaCeremony(now);
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
+    tickVillaAda(now);
     nearbyTrafficSound(now);
     tickSmoking(now);
     if(!exploringCampus())queuedTap=null;
