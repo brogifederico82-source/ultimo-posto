@@ -546,9 +546,10 @@ function autoEncounter(o){
   return true;
 }
 function exploringCampus(){
-  return screen==="game"&&!state.prologue&&!state.ending&&!activeScene&&!minigame&&!$("campusSurprise").open;
+  return screen==="game"&&!state.prologue&&!state.ending&&!activeScene&&!minigame&&!$("campusSurprise").open&&!(typeof schermoPausato==="function"&&schermoPausato());
 }
 function focusScene(){
+  if(typeof schermoFocus==="function"&&schermoFocus())return;
   $(exploringCampus()?"interact":"sceneTitle").focus();
 }
 function closeScene(){
@@ -666,7 +667,7 @@ function minimapBase(zone){
     if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);
   }
   c.restore();
-  const map={layer,scale,padding,width,height,x:315-width,y:5};
+  const map={layer,scale,padding,width,height,x:315-width,y:typeof schermoMinimapTop==="number"?schermoMinimapTop:5};
   minimapCache.set(zone,map);
   return map;
 }

@@ -841,11 +841,26 @@ function finish(title,text){
   else state.ending={title,text};
 }
 let captionFrame=0, captionText="";
+const captionSpeed=24;
+// Il testo completo sta sempre in textContent: la rivelazione e solo visiva (due span, il secondo nascosto).
+function captionPaint(count){
+  const box=$("sceneText");
+  let shown=box.firstElementChild, rest=box.lastElementChild;
+  if(box.childElementCount!==2||!shown.classList.contains("tw-on")){
+    box.textContent="";
+    shown=document.createElement("span");shown.className="tw-on";
+    rest=document.createElement("span");rest.className="tw-off";
+    box.append(shown,rest);
+  }
+  shown.textContent=captionText.slice(0,count);
+  rest.textContent=captionText.slice(count);
+}
 function finishCaption(){
   if($("skipCaption").hidden)return false;
   cancelAnimationFrame(captionFrame);
   $("sceneText").textContent=captionText;
   $("skipCaption").hidden=true;
+  if(typeof schermoCaptionDone==="function")schermoCaptionDone();
   return true;
 }
 $("skipCaption").onclick=()=>{finishCaption();$("choices").querySelector("button")?.focus();};
@@ -853,13 +868,16 @@ function showCaption(text, animate){
   cancelAnimationFrame(captionFrame);
   $("sceneTranscript").textContent=text;
   captionText=text;
-  $("skipCaption").hidden=!animate||!text||reducedMotion;
-  if($("skipCaption").hidden){$("sceneText").textContent=text;return;}
-  $("sceneText").textContent="";
+  const instant=!animate||!text||reducedMotion||navigator.webdriver;
+  $("skipCaption").hidden=instant;
+  if(instant){$("sceneText").textContent=text;return;}
+  captionPaint(0);
   const start=performance.now();
+  let painted=-1;
   function type(now){
-    $("sceneText").textContent=text.slice(0,Math.floor((now-start)/16));
-    if($("sceneText").textContent===text){finishCaption();return;}
+    const count=Math.floor((now-start)/captionSpeed);
+    if(count>=text.length){finishCaption();return;}
+    if(count!==painted){painted=count;captionPaint(count);}
     captionFrame=requestAnimationFrame(type);
   }
   captionFrame=requestAnimationFrame(type);
@@ -1115,6 +1133,7 @@ function renderScene(){
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
   ambienteScena();
   ideeRender();
+  if(typeof schermoRender==="function")schermoRender();
 }
 const stage=$("stage").getContext("2d");
 const cover=$("cover").getContext("2d");
