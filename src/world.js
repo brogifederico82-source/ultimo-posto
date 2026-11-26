@@ -519,6 +519,7 @@ function drawObject(c,o,now=0,editing=false){
   if(o.rotation%180)c.scale(h/w,w/h);
   c.translate(-w/2,-h/2);
   c.scale(w/16,h/16);
+  if(!editing)ambienteOggetto(c,o,now);
   const box=(t,a,b,ww,hh)=>rect(c,t,a,b,ww,hh);
   const shadow="#283236",light="#ead6ac",white="#fff1c8";
   if(o.uid==="sport-court"&&o.kind==="roof"){
@@ -580,7 +581,7 @@ function drawObject(c,o,now=0,editing=false){
   }else if(spec[2]==="persone"){
     const appearance=characterAppearance(o);
     const size=o.kind==="athlete"?1.05:.89;
-    sprite(c,appearance,8,15,o.step??0,o.look??"down",size,characterCoat(o));
+    sprite(c,appearance,8,15,o.step??0,editing?o.look??"down":ambienteSguardo(o,now),size,characterCoat(o));
     if(o.native==="trend"){
       sprite(c,{...appearance,capelli:5,tinta:2,abito:3},12,15,(Math.floor(now/170)+1)%3,"down",.73);
     }
