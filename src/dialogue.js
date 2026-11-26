@@ -356,8 +356,10 @@ function focusScene(){
   $(exploringCampus()?"interact":"sceneTitle").focus();
 }
 function closeScene(){
+  const shouldSave=Boolean(resumableScene(activeScene));
   activeScene=null;state.chatTopic=null;state.freeMoment=null;
   keys.clear();controls.clear();
+  if(shouldSave)save();
   renderScene();focusScene();
 }
 let stageInteraction=null;
@@ -566,7 +568,7 @@ const moves=[
   {control:"up",keys:["w","arrowup"],dx:0,dy:-1},
   {control:"down",keys:["s","arrowdown"],dx:0,dy:1}
 ];
-let movementPriority=[...moves];
+let movementPriority=[...moves],nextWalkSave=0;
 function prioritizeMove(move){
   movementPriority=movementPriority.filter(item=>item!==move);
   movementPriority.unshift(move);
@@ -603,7 +605,9 @@ function frame(now){
       }
       lastWalk=now;
     }
-    if(dirty&&(!move||activeScene||now-lastWalk>=300)){save();dirty=false;}
+    if(dirty&&(!move||now>=nextWalkSave)){
+      save();dirty=false;nextWalkSave=now+1500;
+    }
     if(!$("challengeAudio").open){
       if(minigame?.kind==="arcade")tickArcade(now);
       if(minigame?.kind==="calcetto")tickCalcetto(minigame,now);
@@ -864,7 +868,12 @@ $("homeButton").onclick=()=>{if(screen==="game")save();show("home");};
 function openMode(mode){
   selectedMode=mode;testMode=false;
   const prior=stored(mode);
-  if(prior){state=prior;activeScene=null;show("game");return;}
+  if(prior){
+    state=prior;dirty=false;
+    activeScene=resumableScene(prior.resumeScene);
+    if(state.chatTopic?.uid!==activeScene)state.chatTopic=null;
+    show("game");focusScene();return;
+  }
   show("creator");
 }
 $("start").onclick=()=>openMode("story");

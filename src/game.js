@@ -82,20 +82,28 @@ const keys = new Set();
 const controls = new Set();
 let screen="home", state=null, activeScene=null, dirty=false, selectedMode="story";
 const isFree=()=>state?.mode==="free";
-const gateLocked=id=>Boolean(id&&!isFree()&&!won(id));
+const gateLocked=(id,profile=state)=>Boolean(id&&profile?.mode!=="free"&&!profile?.wins?.[id]);
+const resumableStories=new Set(["parenzo-seminario","pola-festa","tutor-orientamento","storia","loft-progetto"]);
+function resumableScene(id){
+  if(typeof id!=="string"||state.prologue||state.ending)return null;
+  const object=zoneObjects(room(state.zone)).byId.get(id);
+  if(object?.action!=="native"||!resumableStories.has(object.native)||gateLocked(object.gate))return null;
+  return nearbyIn(state.zone,state.x,state.y,mapClock)?.uid===id?id:null;
+}
 
 function stored(mode="story"){
   try{
     const data=JSON.parse(localStorage.getItem(saveProfileKey(mode)));
     if(data?.version!==1 || !data.avatar || !data.traits || !Array.isArray(data.log))return null;
+    data.mode=mode;
     if(data.zone==="td2"&&!Object.hasOwn(campus.zones,"td2")&&room("giardino").objects.some(o=>o.uid==="dome2-calcetto")){
       data.zone="giardino";
-      [data.x,data.y]=reachEntry("giardino","dome2");
+      [data.x,data.y]=reachEntry("giardino","dome2",data);
       data.campusGateOpen=true;
     }
     if(!Object.hasOwn(campus.zones,data.zone))data.zone="ingresso";
     if(data.zone==="ingresso"&&!data.streetVisited&&room("ingresso").width===30){
-      [data.x,data.y]=reachEntry("ingresso");data.streetVisited=true;
+      [data.x,data.y]=reachEntry("ingresso",undefined,data);data.streetVisited=true;
     }
     const garden=room("giardino");
     const enlarged=garden.objects.some(o=>o.uid==="entry-from-panama");
@@ -103,11 +111,11 @@ function stored(mode="story"){
     if(data.zone==="giardino"&&layout&&(!data.campusLayout||data.campusLayout<layout)){
       if(data.campusLayout===2&&Number.isFinite(data.x)&&Number.isFinite(data.y)&&data.x>=0&&data.y>=0){
         if(data.x>=72||data.y>=79){
-          [data.x,data.y]=reachEntry("giardino",data.x>=72?"panama":"ingresso");
+          [data.x,data.y]=reachEntry("giardino",data.x>=72?"panama":"ingresso",data);
         }else{
           data.x=Math.floor((data.x+.5)*4/3);data.y=Math.floor((data.y+.5)*4/3);
         }
-      }else [data.x,data.y]=reachEntry("giardino","ingresso");
+      }else [data.x,data.y]=reachEntry("giardino","ingresso",data);
     }else if(data.zone==="giardino"&&!data.campusExpanded){data.x=8;data.y=32;}
     if(layout&&(!data.campusLayout||data.campusLayout<layout))data.campusLayout=layout;
     if(data.zone==="giardino"&&data.x===26&&data.y===22&&!data.wins)data.y=24;
@@ -118,14 +126,14 @@ function stored(mode="story"){
       data.campusGateOpen=false;
     }
     if(hasIntegratedEntrance()&&data.zone==="giardino"&&typeof data.campusGateOpen!=="boolean")data.campusGateOpen=true;
-    [data.x,data.y]=freeTile(data.zone,Number.isFinite(data.x)?data.x:2,Number.isFinite(data.y)?data.y:2);
-    return {...data,mode,freeMoment:null,campusExpanded:true,wins:data.wins??{},events:Array.isArray(data.events)?data.events:[],
+    [data.x,data.y]=freeTile(data.zone,Number.isFinite(data.x)?data.x:2,Number.isFinite(data.y)?data.y:2,data);
+    return {...data,freeMoment:null,campusExpanded:true,wins:data.wins??{},events:Array.isArray(data.events)?data.events:[],
       completedEvents:Array.isArray(data.completedEvents)?data.completedEvents:[],mission:typeof data.mission==="string"?data.mission:"",missionTarget:typeof data.missionTarget==="string"?data.missionTarget:""};
   }catch{return null;}
 }
 function save(){
   if(testMode||!state)return true;
-  try{localStorage.setItem(saveProfileKey(state.mode),JSON.stringify(state));return true;}
+  try{localStorage.setItem(saveProfileKey(state.mode),JSON.stringify({...state,resumeScene:resumableScene(activeScene)}));return true;}
   catch{return false;}
 }
 function updateHomeActions(){
@@ -350,8 +358,9 @@ function interact(){
     travel(...destination);save();renderScene();$("interact").focus();
     return;
   }
-  state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);renderScene();
-  focusScene();
+  state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);
+  if(resumableScene(activeScene))save();
+  renderScene();focusScene();
 }
 const nativeDoors={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
 function doorDestination(spot){

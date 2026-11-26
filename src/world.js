@@ -292,25 +292,25 @@ function positionOf(o,now,width){
   return o;
 }
 function insideObject(o,x,y){return x>=o.x-.002&&x<o.x+o.w&&y>=o.y-.002&&y<o.y+o.h;}
-function blocked(id,x,y,now=0){
+function blocked(id,x,y,now=0,profile=state){
   const zone=room(id);
   if(x<0||y<0||x>=zone.width||y>=zone.height)return true;
   return zoneObjects(zone).solid.some(o=>
-    (o.uid!=="viale-ingresso-varco"||(!state?.campusGateOpen&&!isFree()))&&
-    (!o.gate||gateLocked(o.gate))&&insideObject(positionOf(o,now),x+.5,y+.5));
+    (o.uid!=="viale-ingresso-varco"||(!profile?.campusGateOpen&&profile?.mode!=="free"))&&
+    (!o.gate||gateLocked(o.gate,profile))&&insideObject(positionOf(o,now),x+.5,y+.5));
 }
-function freeTile(id,x,y){
+function freeTile(id,x,y,profile=state){
   const z=room(id);
   const sx=Math.round(clamp(x,0,z.width-1)),sy=Math.round(clamp(y,0,z.height-1));
   for(let radius=0;radius<Math.max(z.width,z.height);radius++)
     for(let dy=-radius;dy<=radius;dy++)for(let dx=-radius;dx<=radius;dx++)
-      if(Math.max(Math.abs(dx),Math.abs(dy))===radius&&!blocked(id,sx+dx,sy+dy))return [sx+dx,sy+dy];
+      if(Math.max(Math.abs(dx),Math.abs(dy))===radius&&!blocked(id,sx+dx,sy+dy,0,profile))return [sx+dx,sy+dy];
   return [sx,sy];
 }
-function reachEntry(id,preferred){
+function reachEntry(id,preferred,profile=state){
   const entries=entriesIn(id);
   const entry=entries.find(e=>e.uid===preferred||e.target===preferred)??entries[0];
-  return freeTile(id,entry?.x??2,entry?.y??2);
+  return freeTile(id,entry?.x??2,entry?.y??2,profile);
 }
 function currentObject(){return zoneObjects(room(state.zone)).byId.get(activeScene);}
 function nearbyIn(id,x,y,now=0){
