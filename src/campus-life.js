@@ -496,6 +496,65 @@ function furnishCampusGardens(map){
   return map;
 }
 
+// Broad routes between the entrances and the building fronts in the campus plan.
+const campusPromenades=[
+  [[23,74],[24,66],[25,56],[25,44],[29,37],[42,36]],
+  [[24,66],[27,56],[38,54],[48,53],[63,55],[72,49],[78,47]],
+  [[26,65],[38,65],[48,68]],
+  [[26,69],[37,74],[38,78],[48,79],[59,80],[68,75],[74,65],[72,49]],
+  [[25,47],[15,44],[11,40]],
+  [[29,37],[33,31],[37,26],[47,24],[54,28],[64,37],[72,49]]
+];
+const campusOuterWalks=[
+  [[0,81],[7,79],[19,78],[29,80],[39,83],[55,89],[73,92],[97,91],[143,91]],
+  [[0,85],[12,85],[26,86],[40,87],[54,92],[73,97],[100,97],[143,97]],
+  [[9,78],[3,68],[3,55],[5,43],[9,31],[14,19],[19,7],[24,4]],
+  [[73,92],[83,79],[83,71],[88,61],[85,54],[79,47],[72,40],[62,28],[55,20],[46,16],[35,14],[24,10]],
+  [[100,60],[111,68],[113,83],[117,91],[117,99],[128,110],[143,110]],
+  [[1,101],[22,101],[38,105],[70,108],[101,108],[128,110]]
+];
+function widenCampusWalks(garden){
+  const {width,height}=garden,old=terrainMap(garden);
+  const structures=garden.objects.filter(o=>o.solid&&kindLayer(o)==="edifici");
+  const insideBuilding=(x,y)=>structures.some(o=>insideObject(o,x+.5,y+.5));
+  const zones=[
+    {routes:campusPromenades,inside:true,radius:2.7,color:"#baac95",name:"Passeggiata del campus",id:"campus"},
+    {routes:campusOuterWalks,inside:false,radius:2.25,color:"#b2aa9a",name:"Marciapiede esterno",id:"quartiere"}
+  ];
+  for(const {routes,inside,radius,color,name,id} of zones){
+    const onRoute=(x,y)=>{
+      const tile=old.get(x+y*width);
+      return tile?.kind!=="road"&&!tile?.uid.startsWith("orto-")&&
+        routes.some(route=>distanceFromRoute(x+.5,y+.5,route)<radius)&&
+        insideCampusOutline(x+.5,y+.5)===inside&&!insideBuilding(x,y);
+    };
+    // Contiguous rows use a single terrain object, which also keeps the editor responsive.
+    for(let y=0;y<113;y++){
+      for(let x=0;x<width;){
+        if(!onRoute(x,y)){x++;continue;}
+        const start=x++;
+        while(x<width&&onRoute(x,y))x++;
+        garden.objects.push({uid:"passeggiata-"+id+"-"+start+"-"+y,kind:"paving",name,x:start,y,w:x-start,h:1,color});
+      }
+    }
+  }
+  for(const [id,x,y,w,h] of [["panama",118,77,14,10],["romania",18,91,18,8],["sud",81,112,18,12]]){
+    garden.objects.push({uid:"quartiere-verde-"+id,kind:"grass",name:"Verde di quartiere",x,y,w,h,color:"#697b58"});
+    for(const [index,offset] of [2,7,12].entries()){
+      garden.objects.push({uid:"quartiere-albero-"+id+"-"+index,kind:"tree",name:"Albero di quartiere",
+        x:x+offset,y:y+2,w:2,h:2,color:"#617952"});
+    }
+  }
+  garden.objects.push({uid:"campus-circulation",kind:"paving",name:"Soglia principale",x:22,y:73,w:3,h:1,color:"#baac95"});
+  for(const [uid,x,y] of [
+    ["romania-seduta-dome",53,54],["romania-seduta-atrio",44,78],
+    ["acqua-romania-vialetto",18,45],["campus-tree-31",28,67],
+    ["campus-tree-14",27,34],["giardini-vivi-giardino-0",20,42]
+  ]){
+    const item=garden.objects.find(o=>o.uid===uid);
+    if(item)Object.assign(item,{x,y});
+  }
+}
 function hasIntegratedEntrance(){
   const garden=campus.zones.giardino;
   return Boolean(garden&&zoneObjects(garden).byId.has("viale-ingresso-start"));
@@ -509,7 +568,9 @@ function atViale(s){
     s.zone==="giardino"&&hasIntegratedEntrance()&&inVialeDistrict(s.x,s.y)));
 }
 function blockedBeforeCampus(x,y){
-  return state.zone==="giardino"&&hasIntegratedEntrance()&&!state.campusGateOpen&&!isFree()&&!inVialeDistrict(x,y);
+  return state.zone==="giardino"&&hasIntegratedEntrance()&&!state.campusGateOpen&&!isFree()&&(zoneObjects(room("giardino")).byId.has("campus-circulation")
+    ?insideCampusOutline(x+.5,y+.5)&&!(y>=75&&x>=21&&x<=25)
+    :!inVialeDistrict(x,y));
 }
 function wallet(){
   return (state.wallet??={coins:0,picked:[],owned:[]});

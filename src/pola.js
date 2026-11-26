@@ -1,3 +1,24 @@
+const polaCharacterConversations={
+  "pola-portinaia":[
+    "Marisa segna un nome su un elenco tenuto fermo con un portachiavi di legno. «Sei per la laurea? In cima alle scale. Dimmi prima se qui fuori stai aspettando qualcuno. Se devo, gli tengo il cancello.»",
+    ["Da quanto lavora qui?","«Da quando, la prima volta che mi hanno dato le chiavi, ne ho provate sette prima di trovare quella giusta. Oggi alcune le riconosco dal peso. Quella piccola apre il Tinello: mio figlio la sceglieva sempre quando mi aiutava a chiudere.»"],
+    ["C’è tempo per vedere il Tinello?","«Segui il vialetto a sinistra. Guarda il Nilo prima di leggere la targa. Quando ci portavo mio figlio facevamo così: lui decideva chi erano i personaggi e io poi gli leggevo i nomi veri. Quasi sempre preferivo i suoi.»"],
+    ["E se arrivo tardi?","«Vai su piano. I primi quattro gradini rimbombano. Se al microfono stanno leggendo un nome, aspetta sul pianerottolo e poi entra. Vedrai che qualcuno ti farà posto.»"]
+  ],
+  "pola-cortile-ospite":[
+    "Lele allenta una cravatta presa in prestito. Ha infilato nel taschino un foglietto col numero del treno. «La prima volta che sono venuto a Pola avevo seguito il gruppo sbagliato. Sono finito a un seminario sul diritto inglese. Quel giorno almeno mi sono seduto in prima fila.»",
+    ["Come ti senti stasera?","«A metà fra la voglia di fare la foto e la tentazione di andare al bar uguale a tutti gli altri giorni. Giovedì torno in ufficio in treno. Di solito studio durante il viaggio. Dovrò imparare a starci senza sentirmi in colpa.»"],
+    ["Conosci il laureando?","«Sì. Sul primo treno dopo un esame avevo detto a tutti che era andato bene. Lui mi ha chiesto solo se volevo il posto vicino al finestrino. Ero partito in piedi proprio per non dover parlare.»"],
+    ["Il nodo va bene?","«Se il fotografo ci mette più di due minuti, me la tolgo. Era di mio fratello. Lui oggi lavora; mi ha detto di non riportargliela stirata, così almeno vede che ci ho fatto qualcosa.»"]
+  ],
+  "pola-cortile-quartetto":[
+    "Nadia ha piegato la scaletta sotto il piede del leggio per farlo stare fermo. Sul foglio, al posto dell’ultimo brano, ha scritto a matita «aspettare il segnale». «Faccio la musica da quando mia sorella mi ha convinta che alle feste il silenzio era colpa mia.»",
+    ["Suoni anche la sigla del podcast?","«Sì. Greta mi ha mandato la traccia con la porta del 360. Ho provato a suonarla pulita e suonava come qualunque sigla. Il rumore del bus è rimasto.»"],
+    ["Che aspetti per cominciare?","«Che il laureando posi il microfono. Una volta sono partita prima: tutti si sono messi a battere le mani e lui aveva ancora una persona da ringraziare. Ci penso ogni volta che qui diventa silenzioso.»"],
+    ["Mi dedichi un pezzo?","«Se mi dai un nome che ancora nessuno ha detto stasera, lo scrivo accanto all’ultima traccia. Il titolo non lo sente nessuno, ma io so a chi sto suonando.»"]
+  ]
+};
+
 // Playable interpretation of Villa Alberoni. Keep the original portal and story IDs.
 function installPola(map){
   const entrance=map.zones.pola, courtyard=map.zones["pola-cortile"];
@@ -48,7 +69,7 @@ function installPola(map){
       add("tinello","polaNinfeo",4,13,10,5,{name:"Tinello Alberoni · Ninfeo del Nilo"});
       add("targa-nilo","sign",13,19,1,1,{name:"Il Nilo e i Tritoni",action:"event",
         text:"Nel ninfeo del Tinello il Nilo riposa fra due Tritoni. La costruzione circolare conserva la memoria del giardino settecentesco degli Alberoni."});
-      add("portinaia","guard",24,24,1,1,{name:"Portineria · Villa Alberoni",action:"dialog",
+      add("portinaia","guard",24,24,1,1,{name:"Marisa · Portineria di Villa Alberoni",action:"dialog",
         text:"«La festa è sopra, nel cortile. Se siete in anticipo fate un giro al Tinello. Il Nilo almeno sa aspettare.»"});
       add("auto-parcheggiata","car",25,28,2,1,{name:"Auto del car sharing",color:"#527584"});
       for(const [i,x,y] of [[0,7,23],[1,12,6],[2,2,10],[3,5,6],[4,30,21],[5,37,21],[6,39,6],[7,40,24],[8,2,23]]){
@@ -87,8 +108,8 @@ function installPola(map){
       add("buffet","polaBuffet",20,7,7,2,{name:"Tavolo del brindisi",action:"dialog",
         text:"Bicchieri in fila e una torta già tagliata. Il cartellino dice «Lasciarne un pezzo al laureando». Qualcuno ha sottolineato «un»."});
       add("foto","student",28,10,1,1,{name:"Fotografa della serata",action:"native",native:"pola-foto"});
-      add("ospite","student",8,10,1,1,{name:"Compagno di corso",action:"dialog",text:"«Sono arrivato dieci minuti prima. È la prima volta in tre anni. Vale come crescita personale?»"});
-      add("quartetto","student",17,7,1,1,{name:"Ospite vicino alla pedana",action:"dialog",text:"«Avevo detto musica d’ambiente. Ora mi stanno chiedendo la sigla del podcast.»"});
+      add("ospite","student",8,10,1,1,{name:"Lele · Compagno di corso",action:"dialog",text:"«Sono arrivato dieci minuti prima. È la prima volta in tre anni. Vale come crescita personale?»"});
+      add("quartetto","student",17,7,1,1,{name:"Nadia · Musica della cerimonia",action:"dialog",text:"«Avevo detto musica d’ambiente. Ora mi stanno chiedendo la sigla del podcast.»"});
       for(const [i,x,y] of [[0,6,4],[1,28,4],[2,5,17],[3,25,17],[4,31,11]]){
         add("fioriera-"+i,"flowers",x,y,2,1,{color:"#be8668"});
       }

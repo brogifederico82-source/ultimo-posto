@@ -1,63 +1,64 @@
 const conversations={
+  ...polaCharacterConversations,
   "giardini-vivi-marta":[
-    "«Hai visto gli aranci? Li riconosci da lontano. I cestini invece continuiamo a cercarli con la cartina.»",
+    "Marta strofina una foglia d’arancio tra due dita. «Senti? Quelli del vivaio nuovo fanno già profumo. Ci ho messo due inverni a fidarmi di questo terreno.»",
     ["Che cosa hai piantato qui?","«Aranci accanto ai vialetti, rose dove ci si ferma e fiori più bassi vicino alle panchine. Se cade un petalo, lasciaglielo fare.»"],
     ["Dove mi siedo per ripassare?","«Prova il giardino delle panchine. Se trovi una borsa su ogni sedia, fai un giro verso il portico.»"],
     ["Chi annaffia quando chiude il campus?","«Noi. Gli studenti del gruppo studio si sono proposti, ma hanno aperto un sondaggio sugli orari.»"]],
   "giardini-vivi-bar":[
-    "«Avevo chiesto un caffè al volo. Ho già assistito a una rivincita, a un appello delle presenze e all’arrivo del furgone della radio.»",
+    "Lea ha portato due tazzine al tavolo, ma è sola. «L’altra è per mia sorella. Ha appena finito il suo primo orale e ha scritto che è andato bene. Di lei, di solito, vuol dire che è andato benissimo.»",
     ["Che succede sulla terrazza?","«A ping pong hanno finito. Al biliardino sono ancora alle presentazioni. Ognuno vuole spiegare come gioca.»"],
     ["Hai trovato un posto libero?","«Sul vialetto dietro il bar sì. Al tavolo vicino alla porta tutti aspettano uno che deve ancora uscire di casa.»"],
     ["Che cosa hai ordinato?","«Un espresso. Mi hanno chiesto se volevo lo scontrino con l’aria di chi conosce già la risposta.»"]],
   "giardini-vivi-orto":[
-    "«Mi hanno affidato l’aiuola mista. Qui almeno quando qualcosa cresce lo vedi anche senza aprire Excel.»",
+    "Karim annota la data sul retro di un cartellino bagnato. «È uscita la prima calendula. La prima volta che ho provato, avevo scritto tutto sul quaderno e sepolto i semi troppo in fondo.»",
     ["Perché alterni le fioriture?","«Così l’aiuola cambia durante l’anno e gli impollinatori trovano qualcosa anche dopo il primo giro di fiori.»"],
     ["Posso dare una mano?","«Chiedi a chi cura il giardino dove serve acqua. L’ultima volta hanno annaffiato la lavagna degli avvisi.»"],
     ["Hai un consiglio per l’orale?","«Spiega un concetto mentre cammini. Se non riesci a finire la frase prima della prossima aiuola, riprova più semplice.»"]],
   "giardini-vivi-dome":[
-    "«Ho prenotato la sala per ripetere. Il gruppo mi ha chiesto se possiamo farlo prima a voce nel gruppo WhatsApp.»",
+    "Eva ha lasciato sul tavolo una pila di cartoncini bianchi. «Ci scrivo le domande a cui ho paura di rispondere. Le metto in cima, così non posso far finta di non averle viste.»",
     ["Dove si trova il tuo gruppo?","«Vicino al Dome. Ci riconosci da uno che spiega e tre che cercano il caricatore.»"],
     ["Qual è la domanda peggiore?","«“Faccia un esempio”. Quando ripasso sembra facile, quando me lo chiedono invento un mercato delle melanzane.»"],
     ["Preferisci ripetere fuori?","«Oggi sì. Mi metto vicino ai fiori finché nessuno comincia a fare networking.»"]],
   "giardini-vivi-radio":[
-    "«Siamo col furgone di fianco al bar. Dovevamo raccogliere due voci per una puntata e siamo a otto opinioni sulla briscola.»",
+    "Dario piega il cavo del microfono in asole uguali. «La prima intervista al bar l’ho registrata con il microfono spento. Da allora chiedo all’ospite di dirmi il suo nome anche se lo conosco.»",
     ["Chi è il prossimo ospite?","«Il primo volontario che riesce a raccontare una sessione d’esami in trenta secondi.»"],
     ["Perché il furgone è qui?","«Ci serviva una presa per il mixer. Il barista ci ha indicato quella che usa per la macchinetta e ha detto di scegliere.»"],
     ["Quale rumore useresti per la sigla?","«Il clic del cancello, una tazzina e il collega che dice “questa parte tagliala”.»"]],
   "giardini-vivi-pola":[
-    "«Prima del brindisi faccio sempre un giro in giardino. Il Tinello è il posto dove nessuno mi chiede la media.»",
+    "Noemi porta una fotografia di Pola in una busta trasparente. «L’ha scattata mio padre il giorno in cui mi accompagnò alla prima lezione. La scala è la stessa. Io quella volta non sapevo nemmeno dove portasse.»",
     ["Come arrivo al ninfeo?","«Scendi alla salita e prendi a sinistra. Vedrai la vasca del Nilo davanti alla nicchia di pietra.»"],
     ["Dove si fa la festa?","«Risali verso il villino. L’ingresso al cortile è sulla terrazza, davanti alla facciata.»"],
     ["Perché sei arrivata in anticipo?","«Per riuscire a sentire la fontana prima che accendano la musica. E per scegliere un posto vicino alla torta.»"]],
   "giardini-vivi-festa":[
-    "«Mi hanno chiesto di controllare la torta. L’ho controllata tre volte. Sta diventando più piccola.»",
+    "Irene si china a recuperare una posata. «Avevo promesso alla mia amica che, quando fosse arrivato il giorno, avrei pensato io alle cose piccole. Pennarello, bicchieri, torta. Così le resta tempo di guardarsi attorno.»",
     ["Dove facciamo la foto?","«La fotografa è in fondo dalla parte del buffet. Cerca le lucine, non il gruppo che ha già iniziato a mangiare.»"],
     ["Che cosa scrivo nel biglietto?","«Una cosa che è successa davvero. Anche solo quando ti hanno tenuto il posto mentre eri in fila al bar.»"],
     ["Sei pronto per il brindisi?","«Il bicchiere c’è. Il discorso è: grazie a tutti e viva chi ha tenuto in vita il file condiviso.»"]],
 
   "sport-vince":[
-    "Vince si sistema gli occhiali avvolgenti a specchio. «Stavo andando a lezione. Poi mi sono ricordato che passando dal bar il tragitto è quasi il doppio.»",
+    "Vince si asciuga il ponte degli occhiali con l’orlo della maglia. «Dopo l’infortunio il fisioterapista mi faceva fare il giro del quartiere a piedi. Ora riesco a correrlo tutto. Ho tenuto gli occhiali della prima uscita.»",
     ["Vai a correre dopo lezione?","«Oggi vado dal Dome alla mensa. Se chiude il banco della pasta, aumento il passo.»"],
     ["Come mai gli occhiali a specchio?","«Quando mi chiedono “hai letto l’ultima mail?”, cerco di sembrare già in movimento.»"],
     ["Dove sono i tavoli sotto i pini?","«Dal bar prendi il sentiero che gira dietro le aiuole. Se sbagli e arrivi al campo, chiedi a Noemi.»"]
   ],
   "sport-adele":[
-    "Adele alza gli occhiali sportivi sulla fronte. «Mi ero fermata qui per studiare. Sono al terzo capitolo dei discorsi di quelli al tavolo accanto.»",
+    "Adele sfila dalla tasca una chiave da bicicletta assieme alla tessera universitaria. «Mia madre mi diceva di non venire qui in bici. Oggi le ho mandato il tempo della salita. Mi ha risposto con le previsioni della pioggia.»",
     ["Che stai preparando?","«Micro. Stamattina ho provato a spiegare l’elasticità facendo variare il prezzo dell’espresso.»"],
     ["Sei venuta in bici?","«Sì. Il ritorno è in salita. Se mi vedi in mensa prendere il bis di pasta, sto pensando a quello.»"]
   ],
   "sport-giulio":[
-    "Giulio pulisce le lenti a specchio con la maglietta. «Sto aspettando uno che mi ha scritto “sono al cortile”. Qui ce ne sono tre.»",
+    "Giulio pulisce le lenti con la maglietta e tiene fermo il cronometro. «Con Riccardo facevamo a gara per vedere chi arrivava prima al tornello. Ho smesso di prendere il tempo. Oggi, a quanto pare, ha smesso anche lui.»",
     ["Gli hai chiesto che cosa vede?","«Dice professori e panchine. Gli ho risposto che allora dev’essere a un ricevimento all’aperto.»"],
     ["Passi anche dal biliardino?","«Dopo pranzo. Riccardo mi deve una rivincita, ma quando perde cambia sport.»"]
   ],
   "prof-mancini":[
-    "La professoressa Mancini scorre le slide sulla panchina. «Sono uscita per controllare se una diapositiva si leggeva al sole. La risposta è no.»",
+    "Mancini ha due fascicoli, uno intatto e uno pieno di graffette. «Il secondo viene dallo sportello dove lavoravo prima di insegnare. Nei casi veri la domanda importante arriva quasi sempre quando la persona sta per uscire.»",
     ["Cosa chiede agli orali di pubblico?","«Di solito parto da un collegamento. Se mi dice come una regola entra in un caso concreto, abbiamo già qualcosa di cui parlare.»"],
     ["Dov’è il portico?","«Segua il vialetto verso Via Panama. Se arriva alla navetta, ha superato l’ingresso.»"]
   ],
   "interno-anna":[
-    "Anna tiene fermo il quaderno con l’astuccio. «I tavoli all’ombra si liberano sempre quando arriva il vento.»",
+    "Anna tiene fermo il quaderno con l’astuccio. «Mio fratello mi lasciava foglietti nella calcolatrice prima delle verifiche. All’università me li scrivo da sola. Quello di oggi dice: spiegalo senza leggere.»",
     ["Ti serve una mano con gli appunti?","«Se mi tieni ferma la pagina, sì. Sono riuscita a spiegare il TIR, ma il foglio della spiegazione è finito sotto un pino.»"],
     ["Quanto manca all’esame?","«Domani alle nove. A giudicare da come scorrono le pagine, il mio quaderno pensa che sia fra un mese.»"]
   ],
@@ -72,12 +73,12 @@ const conversations={
     ["Ci si arriva al bar passando dal giardino?","«Sì. Da queste panchine segui il sentiero verso i pini e poi gira verso la terrazza.»"]
   ],
   "interno-paolo":[
-    "Paolo solleva il caricatore per farti vedere la spina. «Mi manca solo il dettaglio di dove metterla.»",
+    "Paolo solleva il caricatore. «Ho imparato a riparare il portatile al negozio di mio zio. So cambiare la ventola e recuperare un disco guasto. Ricordarmi di caricarlo resta fuori dalle mie competenze.»",
     ["Hai provato al portico?","«Sì, c’è un posto vicino alla finestra. Il ragazzo seduto lì mi ha detto che ha appena iniziato i suoi “cinque minuti”.»"],
     ["Ti presto una batteria?","«Mi salveresti la media, o almeno il file. Da ora in poi salvo prima e faccio battute dopo.»"]
   ],
   "iqos-giorgia":[
-    "Giorgia abbassa l’IQOS. «Pausa di cinque minuti. Al quarto mi ricordo sempre che devo cambiare aula.»",
+    "Giorgia ripone l’IQOS e rilancia un vocale che aveva messo in pausa. «Mia nonna ha imparato a mandarmeli quando mi sono trasferita. Stamattina mi ha dettato la lista della spesa, ma secondo me voleva sapere che stavo bene.»",
     ["Da che parte vai?","«Al Dome. Se vuoi un posto, ti conviene arrivare prima che finiscano quelli del corso prima.»"],
     ["Hai visto Andrea?","«È lì accanto. Ha chiesto una sigaretta a tre persone e gli hanno risposto tutte la stessa cosa.»"]
   ],
@@ -87,7 +88,7 @@ const conversations={
     ["Hai mangiato in mensa?","«Sì, dal cortile ho saltato il giro delle scale. La fila, invece, non la salti.»"]
   ],
   "iqos-viola":[
-    "Viola spegne l’IQOS e guarda la panchina di fronte. «Mi sono messa sul lato interno della cinta. A pochi passi dal cancello c’è ancora un po’ di silenzio.»",
+    "Viola spegne l’IQOS e rigira nel palmo un elastico da cartellina. «Qui aspettavo la fine delle lezioni il primo mese. Mi mancava casa. Ora mi siedo ancora nello stesso punto, ma qualche volta chiamo per prima.»",
     ["Vieni qui tra una lezione e l’altra?","«Quando posso. Se apro il computer al Dome, qualcuno mi chiede sempre di controllargli una formula.»"],
     ["Che leggi?","«Il programma del prossimo appello. Trama complicata e un finale che preferisco non conoscere.»"]
   ],
@@ -98,12 +99,12 @@ const conversations={
     ["Hai già chiesto al bar?","«Sì. Il barista mi ha messo in mano un espresso. Aveva ragione lui, ma mi rovina la lamentela.»"]
   ],
   "prof-riva":[
-    "Il professor Riva si ferma sul vialetto e chiude il registro. «Questa è la pausa in cui gli studenti mi chiedono la stessa cosa con tre formulazioni diverse.»",
+    "Riva chiude il registro e lo tiene sotto il braccio. «Il primo piano d’investimento che mi affidarono riguardava una tipografia. Il foglio tornava alla perfezione. Peccato che nessuno fosse andato a vedere la macchina.»",
     ["Si può ripassare il VAN in ascensore?","«Provi a spiegarlo nel tempo di una corsa. Se deve premere tutti i piani, ripassi ancora.»"],
     ["Com’è andato l’ultimo appello?","«Uno aveva fatto tutti i calcoli bene, ma alla domanda “comprerebbe questo progetto?” ha detto che non ci aveva pensato.»"]
   ],
   "prof-vitali":[
-    "La professoressa Vitali cammina verso The Dome con una cartellina sotto il braccio. «Mi manca un’aula e ho già trovato tre studenti che mi chiedono se l’esame sarà corto.»",
+    "Vitali sfila una pagina dalla cartellina mentre cammina. «Ho cancellato il nome delle parti. Il caso viene dal mio primo praticantato. Il cliente voleva salvare il negozio. Io avevo impiegato tutta la mattina a capire che tipo di contratto avesse firmato.»",
     ["Posso chiederle una cosa sul commerciale?","«Certo. Se mi cita un articolo, però, poi le chiedo di farmi un esempio.»"],
     ["Sa dov’è la mensa?","«Dal cortile dell’edificio principale entri nell’atrio centrale. Per la mensa chieda al personale.»"]
   ],
@@ -167,7 +168,7 @@ const conversations={
     ["Hai visto quello con gli occhiali a specchio?","«Tre volte. Ogni volta se n’è andato nella direzione opposta. Mi chiedo se stia correndo o si sia perso.»"]
   ],
   "navetta-driver":[
-    "Marco controlla l’orologio dalla pensilina. «Ancora qualche minuto e partiamo per Parenzo.»",
+    "Marco controlla l’orologio e raddrizza il cartellino della corsa. «Mio padre guidava il primo bus del mattino. Quando mi accompagna ancora oggi alla rimessa, si siede dietro. Dice che i figli al volante si rispettano in silenzio.»",
     ["Che tratta fai?","«Romania–Parenzo. Oggi il viaggio più lungo sarà convincere l’ultimo passeggero a chiudere lo zaino.»"],
     ["Si può aspettare qui?","«Sì, mettiti sotto la pensilina. La piazzola deve restare libera per le manovre.»"]
   ],
@@ -180,14 +181,14 @@ const conversations={
   "fashion-laura":["«Ho appena chiuso un sondaggio sul calendario. Il risultato è che tutti preferiscono un giorno diverso.»",
     ["Che cosa chiedevate?","«Di spostare una lezione. Adesso abbiamo una chat nuova e la lezione nello stesso giorno.»"],
     ["Hai trovato un posto per studiare?","«Sul lato di Via Panama c’è il portico. Se non trovi posto, chiedi del tavolo dopo pranzo.»"]],
-  "radio-tommaso":["«Sto cercando un rumore riconoscibile per la sigla. Ho registrato il tornello, ma sembrava un frullatore.»",
+  "radio-tommaso":["Tommaso si sfila una cuffia. «A casa ascoltavo le partite in radio con mio nonno. Si capiva che qualcuno stava per segnare dal fiato del cronista. Vorrei che bastasse un rumore per capire che siamo qui, a Romania.»",
     ["Perché non registri il biliardino?","«Buona idea. Se vinco una partita lo spaccio per giornalismo d’inchiesta.»"],
     ["Che cosa mandate in onda?","«Interviste, musica e una rubrica sugli esami rimandati. L’ultima va fortissimo.»"],
     ["Dove avete messo il furgone?","«Sul lato destro del bar. È quello rosso: se senti parlare del tornello nei microfoni, siamo noi.»"]],
   "campus-giada":["«Sono uscita per prendere aria. Adesso sto valutando se tornare a lezione passando dal bar.»",
     ["Ti sei ambientata a Roma?","«Abbastanza da distinguere il rumore della navetta da quello di un motorino. Il resto verrà.»"],
     ["Hai provato il ping pong?","«Sì. Ottimo per smettere di pensare al portatile. Meno ottimo per il mio polso.»"]],
-  "dome-fabio":["«Nel gruppo studio siamo in quattro. Tre ripetono a voce alta. Il quarto ha comprato i tappi.»",
+  "dome-fabio":["Fabio ha una graffetta fra le dita e quattro pile di fogli sul tavolo. «Il primo semestre studiavo da solo. Quando me la sono cavata a Sociologia, mi sono accorto che avrei voluto avere qualcuno a cui dirlo. Da lì è partito il gruppo.»",
     ["Come vi dividete il programma?","«Una parte a testa. Ovviamente le domande migliori arrivano sulla parte di chi manca.»"],
     ["Hai visto il ficus del Dome?","«Sì, dietro la pianta si intravede una presa. Il problema è arrivarci prima degli altri.»"]],
   "garden-teo":["«Sono alla terza pausa. La prima sarebbe dovuta durare cinque minuti.»",
@@ -196,24 +197,24 @@ const conversations={
   "bar-emi":["«Qui misuro il tempo in espressi. Sono le tre e mezzo circa.»",
     ["Vuoi fare una partita a carte?","«Siediti dai Nullafacenti. Se cali un Asso a caso ti ricorderanno il momento fino a giugno.»"],
     ["Quando si libera il tavolo al portico?","«Dopo pranzo. Chiedi ai baristi, conoscono il turno di tutti.»"]],
-  "terra-nadia":["«Oggi faccio da tutor. Mi hanno chiesto due volte dov’è la stessa aula. Una volta ero io.»",
+  "terra-nadia":["Nadia ha segnato a penna le porte che aprono davvero. «Il primo giorno ho seguito una pianta vecchia fino a un ripostiglio. Ora faccio da tutor. Se mi chiedi dov’è un’aula, ti accompagno almeno fino al primo bivio.»",
     ["Come trovo l’Aula Chiesa?","«Torna fuori e cerca il corpo in cotto sul lato del cancello.»"],
     ["Come ripasso in poco tempo?","«Fatti una domanda per capitolo e prova a rispondere a voce. Dove ti fermi, riapri il libro.»"]],
   "mensa-vittorio":["«Mi ero messo in fila per il pranzo. A metà ho cominciato a ripassare e ormai questa è la mia aula.»",
     ["Com’è il piatto del giorno?","«Compatto. Se lo lasci nel piatto, conserva la forma.»"],
     ["C’è un tavolo nel chiostro?","«Uno in fondo. Prima bisogna riportare due vassoi, poi è tutto tuo.»"],
     ["Dove vai dopo pranzo?","«Faccio un giro fra gli aranci. Il mio obiettivo per oggi è vedere un albero prima di rivedere una slide.»"]],
-  "walker-0":["«Se senti qualcuno chiedere se “l’esame sarà uguale all’anno scorso”, l’ho già chiesto io.»",
+  "walker-0":["Niccolò piega in quattro l’elenco delle domande. «Mi hanno eletto rappresentante perché facevo già la domanda che gli altri mi mandavano in privato. Oggi provo a portarne una per chi non è in chat.»",
     ["Che cosa vi hanno risposto?","«Che dipende da come interpretiamo “uguale”. Da allora abbiamo un’altra domanda.»"]],
-  "walker-1":["«Cerco la presa dietro il ficus. Se non funziona passo al piano B. Ho portato una penna.»",
+  "walker-1":["Andre solleva il caricatore legato con un elastico. «Questo è di mia sorella. Dice che posso tenerlo fino a quando le mando la prima pagina della tesi. Oggi sarebbe la terza scadenza.»",
     ["Com’è il Dome per studiare?","«Bello, se arrivi prima del gruppo con i computer tutti scarichi.»"]],
   "walker-2":["«Mi cercavi? Le domande sulla prova di domani sono ufficialmente diventate argomento di corridoio.»",
     ["Cosa conviene ripassare?","«Le definizioni che credi di sapere. Prova a spiegarne una senza usare il termine da definire.»"]],
-  "walker-3":["«Faccio da tutor alle matricole. Oggi ho disegnato il tragitto per il bar quattro volte.»",
+  "walker-3":["Pierfrancesco piega una piantina e la porge a una matricola. «Al primo anno una tutor mi ha accompagnato fino all’aula e ha aspettato che entrassi. Mi sono iscritto al tutorato quando ho capito quanto mi fosse costato chiederlo.»",
     ["Prendo anch’io una piantina?","«Apri la panoramica. Cerca la terrazza col numero del bar e poi segui il vialetto.»"]],
-  "walker-4":["«Mi sono perso. Dopo venti minuti ho deciso di chiamarlo esplorazione.»",
+  "walker-4":["Alessandrino ha il telefono in mano, con la mappa capovolta. «A mio padre ho detto che ormai qui mi oriento. Il mio segreto è che mando una foto quando finalmente arrivo. Del tragitto non parliamo.»",
     ["Che cosa cercavi?","«L’edificio principale. Mi sa che ne ho fatto tutto il giro senza provare la porta davanti.»"]],
-  "walker-5":["«Oggi corro al treno. I pendolari sono gli unici che fanno il conto alla rovescia prima della fine della lezione.»",
+  "walker-5":["Microsoft ha già riposto il quaderno quando vibra l’orologio. «Mi chiamano così perché mi sono fatto un foglio per calcolare le coincidenze. Il foglio dà sempre ragione a me. Il treno è di un altro parere.»",
     ["Da dove esci?","«Da Via Panama. È più avanti, sul lato del Dome.»"]],
   "walker-6":["«Il car sharing è qui vicino. Se cerchi il minibus, invece, guarda poco più avanti verso la pensilina.»",
     ["Arriva gente anche da Parenzo?","«Certo. Il bello è quando chiedono dov’è l’Aula Chiesa e indicano una chiesa fuori dal campus.»"]],
@@ -223,6 +224,34 @@ const conversations={
     ["Qui si riesce a studiare?","«Sì. La porta chiude bene e il rumore della terrazza arriva appena.»"]],
   "portico-reader":["«Qui riesco a leggere venti pagine senza accorgermi del tempo. Al bar arrivo a tre.»",
     ["Da quanto sei qui?","«Dal momento in cui al bar hanno cominciato a discutere le regole della briscola.»"]]
+};
+const campusEnglishIntros={
+  "giardini-vivi-marta":"Marta rubs an orange leaf between her fingers. “Smell that? The trees from the new nursery already have a scent. It took me two winters to trust this soil.”",
+  "giardini-vivi-bar":"Lea has brought two espressos to the table, but she’s alone. “The other one’s for my sister. She’s just finished her first oral exam and texted to say it went well. From her, that usually means it went brilliantly.”",
+  "giardini-vivi-orto":"Karim writes the date on the back of a damp plant marker. “The first calendula’s up. My first time growing them, I wrote everything down and buried the seeds too deep.”",
+  "giardini-vivi-dome":"Eva has left a pile of blank cards on the table. “I write down the questions I’m afraid to answer. Then I put them on top so I can’t pretend I haven’t seen them.”",
+  "giardini-vivi-radio":"Dario coils the mic cable in even loops. “My first interview at the café, I left the mic switched off. Now I ask guests to say their names even when I know them.”",
+  "giardini-vivi-pola":"Noemi carries a photo of Pola in a plastic sleeve. “Dad took it when he walked me to my first class. Same stairs. Back then I didn’t even know where they went.”",
+  "giardini-vivi-festa":"Irene stoops to pick up a fork. “I promised my friend I’d handle the little things when the day came. Marker, glasses, cake. That gives her time to look around.”",
+  "sport-vince":"Vince wipes the bridge of his goggles on his shirt. “After the injury my physio had me walk around the neighbourhood. Now I can run the whole way. I kept the goggles from that first outing.”",
+  "sport-adele":"Adele pulls a bike key out of her pocket along with her student card. “Mum told me not to cycle here. I sent her my time up the hill today. She sent back the rain forecast.”",
+  "sport-giulio":"Giulio cleans the lenses on his shirt and stops his watch. “Riccardo and I used to race to the turnstile. I stopped timing it. Apparently he’s stopped today, too.”",
+  "prof-mancini":"Mancini has two folders, one pristine and the other full of paper clips. “That one’s from the advice desk where I worked before I taught. In real cases, the important question usually comes when the person’s about to leave.”",
+  "interno-anna":"Anna pins her notebook down with her pencil case. “My brother used to slip notes into my calculator before tests. At uni I write my own. Today’s says: explain it without reading.”",
+  "interno-paolo":"Paolo holds up the charger. “I learned to fix laptops in my uncle’s shop. I can replace the fan and retrieve a dead drive. Remembering to charge one is outside my skill set.”",
+  "iqos-giorgia":"Giorgia pockets her IQOS and restarts a voice note. “Gran learned to send these when I moved. This morning she dictated her shopping list, but I think she just wanted to know I was all right.”",
+  "iqos-viola":"Viola switches off her IQOS and rolls an elastic band in her palm. “I waited here after classes all through the first month. I missed home. I still sit in the same spot, but sometimes I make the first call now.”",
+  "prof-riva":"Riva shuts the register and tucks it under his arm. “The first investment plan I worked on was for a print shop. The spreadsheet was perfect. Pity no one went to look at the machine.”",
+  "prof-vitali":"Vitali slides a page out of her folder as she walks. “I crossed out the names. It’s a case from my first placement. The client wanted to save their shop. I spent the entire morning figuring out what sort of contract they’d signed.”",
+  "navetta-driver":"Marco checks his watch and straightens the route sign. “My dad drove the first bus of the morning. When he comes to the depot with me now, he sits behind me. He says you let your kids drive in peace.”",
+  "radio-tommaso":"Tommaso takes off one earcup. “I listened to matches on the radio with my grandfather. You could tell someone was about to score from the commentator’s breathing. I’d like one sound to tell you we’re here at Romania.”",
+  "dome-fabio":"Fabio has a paper clip between his fingers and four piles of notes on the table. “I studied alone in my first term. After I passed Sociology, I realised I wanted someone to tell. That’s how the group started.”",
+  "terra-nadia":"Nadia has marked the doors that actually open. “My first day, an old map sent me to a broom cupboard. I’m a tutor now. Ask me where a room is and I’ll walk with you to the first junction at least.”",
+  "walker-0":"Niccolò folds his list of questions in quarters. “They elected me rep because I already asked the questions people messaged me privately. Today I’m trying to ask one for those who aren’t in the chat.”",
+  "walker-1":"Andre holds up a charger bundled with an elastic. “My sister’s. She says I can keep it until I send her my first thesis page. Today’s the third deadline.”",
+  "walker-3":"Pierfrancesco folds a map and hands it to a first-year. “A tutor walked me to my classroom in first year and waited till I went in. I signed up to be one when I remembered how hard it was to ask.”",
+  "walker-4":"Alessandrino is holding his phone with the map upside down. “I told Dad I know my way around by now. My trick is I send a photo after I finally get there. We don’t discuss the journey.”",
+  "walker-5":"Microsoft has already put his notebook away when his watch buzzes. “That’s what they call me since I made a spreadsheet for my connections. The spreadsheet always agrees with me. The train has other ideas.”"
 };
 const localTopics=[
   ["Come ti trovi qui?","«Dipende dall’orario. Quando escono tutti da lezione, sul vialetto si cammina al passo della persona più lenta.»"],
@@ -238,7 +267,10 @@ const nativeConversations={
   "silenzio":[["Come hai trovato questo posto?","«Sono salita finché ho smesso di sentire gente dire “mandami il file”.»"]]
 };
 function conversationFor(o){
-  const profile=Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
+  const conversation=Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
+  const translatedIntro=Object.hasOwn(campusEnglishIntros,o.uid)?campusEnglishIntros[o.uid]:null;
+  const profile=conversation&&translatedIntro&&locale==="en"
+    ?[translatedIntro,...conversation.slice(1)]:conversation;
   if(o.uid!=="cerca-sigaretta"||!has("Biglietto del 360 bis"))return profile;
   return [local("Andrea controlla l’orologio. «Vedi? Anche oggi il 360 bis è perfettamente in ritardo.»",
     "Andrea checks his watch. “See? The 360 bis is perfectly late again today.”"),...profile.slice(1)];
@@ -260,6 +292,56 @@ const campusEpilogue={
   "tutor-viola":"«Hai restituito quel che ti avevano prestato?» Viola sorride. «La sedia, intendo. Gli appunti puoi passarli avanti.»",
   "prof-storia":"«Ti ricordi quando cercavi la data giusta?» Serra chiude il registro. «A Pola hai trovato anche il tempo giusto per fare una pausa.»",
   "radio-tommaso":"«Ho tenuto dieci secondi del cortile dopo il brindisi. Si sente l’acqua e niente altro. È il pezzo più difficile da tagliare.»"
+};
+const campusPersonalStories={
+  "tutor-viola":{
+    question:["Chi ti ha aiutata al primo anno?","Who helped you in your first year?"],
+    reply:["Viola apre l’agenda a una pagina vecchia. «Avevo scritto tre volte: chiedere aiuto. Teresa mi ha fatto sedere e mi ha chiesto da quale fermata venivo. Poi abbiamo disegnato il tragitto fino all’aula. Tengo ancora la linea storta che ha fatto lei.»",
+      "Viola opens her planner to an old page. “I’d written ‘ask for help’ three times. Teresa sat me down and asked which stop I came from. Then we drew the route to my classroom. I still have the crooked line she drew.”"]
+  },
+  "prof-storia":{
+    question:["Da dove vengono i ritagli nel registro?","Where did the clippings in your register come from?"],
+    reply:["Serra mostra una pagina con due date sottolineate. «Mia madre ritagliava la prima pagina del giornale quando succedeva qualcosa di grosso. Accanto scriveva cosa stava facendo. Qui c’è scritto: spesa, niente latte. È da lei che ho imparato a chiedere sempre chi sta raccontando la storia.»",
+      "Serra shows you a page with two dates underlined. “My mother clipped the front page whenever something big happened. Beside it she wrote what she’d been doing. This one says: groceries, no milk. She taught me to ask who’s telling the story.”"]
+  },
+  "radio-tommaso":{
+    question:["Chi ti ha insegnato ad ascoltare?","Who taught you how to listen?"],
+    reply:["«Mio nonno mi faceva abbassare la radio quando il cronista parlava troppo. Diceva: adesso senti lo stadio. Quando registro qualcuno qui, provo a lasciare un secondo dopo la risposta. È lì che la gente spesso mi dice la cosa vera.»",
+      "“My grandfather made me turn down the radio when the commentator talked too much. ‘Now listen to the stadium,’ he’d say. When I record someone here, I leave a second after their answer. That’s often when they tell me what they really mean.”"],
+    checkpoint:"Nastro di Radio Luiss",
+    after:["«Ho fatto sentire il montaggio a Nora. Ha riconosciuto subito il terzo colpo del rubinetto. Del nostro lavoro ha detto solo: domani ve lo aggiusto. Le ho chiesto un’altra settimana.»",
+      "“I played the edit for Nora. She recognised the third knock of the tap right away. All she said was, ‘I’ll fix it tomorrow.’ I asked her for another week.”"]
+  },
+  "giardiniera-nora":{
+    question:["Da quanto curi quest’orto?","How long have you looked after this garden?"],
+    reply:["Nora ti porge un metro pieghevole. «Dieci anni. Prima lavoravo in un vivaio. Qui ho iniziato con due cassoni e un secchio bucato. L’anno scorso Karim ha piantato i semi troppo a fondo. Quest’anno ne ha portati in più per chi sbaglia come lui.»",
+      "Nora hands you a folding ruler. “Ten years. I used to work in a nursery. Here I started with two raised beds and a leaky bucket. Last year Karim planted his seeds too deep. This year he brought extras for anyone who makes the same mistake.”"]
+  },
+  "viale-ingresso-guardia":{
+    question:["Che cosa riconosci dalla guardiola?","What can you recognise from the booth?"],
+    reply:["La guardia appoggia il badge di servizio sul banco. «Le persone dai passi, i motorini dal rumore. Mia figlia al primo anno correva anche quando era in anticipo. Da allora, quando uno viene di corsa col badge già in mano, prima gli dico di riprendere fiato.»",
+      "The guard sets his staff badge on the counter. “People by their footsteps, scooters by the engine. My daughter ran everywhere in her first year, even when she was early. When someone comes running with their badge already in hand, I tell them to catch their breath first.”"]
+  },
+  "gymbro":{
+    question:["Com’è iniziata la sfida con Giulio?","How did the rivalry with Giulio start?"],
+    reply:["Riccardo controlla che l’angolo del tavolo tenga. «Ci allenavamo nei ritagli di tempo, quando mia sorella finiva tardi e dovevo andarla a prendere. Giulio ha cominciato a fermarsi con me. Ancora oggi viene anche se gli dico che non giochiamo.»",
+      "Riccardo checks that the corner of the table is steady. “We trained whenever we could, when my sister finished late and I had to pick her up. Giulio started waiting with me. He still comes, even when I tell him we’re not playing.”"]
+  },
+  "cerca-sigaretta":{
+    question:["Che cosa c’è nel taccuino?","What’s in your notebook?"],
+    reply:["Andrea mostra una pagina piena di orari cancellati. «Faccio il pendolare. Ho iniziato a scrivere quando passavano davvero gli autobus per far sapere a mio fratello a che ora tornavo. Il 360 bis è nato una sera che ci siamo stufati di aspettare. Almeno quella corsa partiva quando dicevamo noi.»",
+      "Andrea shows you a page full of crossed-out times. “I commute. I started writing down when buses actually came so my brother knew when I’d be home. We invented the 360 bis one night when we got tired of waiting. At least that bus left when we said it would.”"]
+  },
+  "terra-nadia":{
+    question:["Come hai imparato la pianta del campus?","How did you learn your way around campus?"],
+    reply:["«Facevo una foto a ogni svolta. Ci sono ancora cento foto di muri sul mio telefono. Adesso mando alle matricole solo quelle di due porte: se riescono a trovare quelle, il resto lo imparano facendo il giro.»",
+      "“I took a photo at every turn. There are still a hundred pictures of walls on my phone. Now I send first-years photos of just two doors. Once they can find those, they learn the rest by walking around.”"]
+  },
+  "giardini-vivi-radio":{
+    question:["Che ruolo hai quando registrate?","What do you do when you record?"],
+    reply:["«Tommaso fa le domande, io ascolto il rumore dietro la risposta. L’altro giorno c’erano i cucchiaini del bar. Gli ho fatto tenere anche quelli. Da quando abbiamo iniziato a registrare fuori dal furgone, ci riconoscono dal sottofondo.»",
+      "“Tommaso asks the questions. I listen to what’s happening behind the answer. The other day you could hear teaspoons at the café. I made him keep them in. Ever since we started recording outside the van, people recognise us by the background noise.”"]
+  }
 };
 const campusSmallStories={
   "mensa-ada":["Leggi il cartellino del cucchiaio","Sotto il porta-posate c’è scritto: «Cucchiaio di riserva. In caso di esame, rompere il vetro». Il vetro è un tovagliolo."],
@@ -372,6 +454,14 @@ function campusOptionalScene(sceneData,o){
   if(tapeChoice)sceneData.choices.push(tapeChoice);
   const optional=campusSmallStories[o.uid];
   if(optional)sceneData.choices.push(speechChoice(o,optional[0],optional[1]));
+  const personal=campusPersonalStories[o.uid];
+  if(personal){
+    const question=local(...personal.question);
+    const reply=personal.checkpoint&&has(personal.checkpoint)?personal.after:personal.reply;
+    if(state.chatTopic?.uid!==o.uid||state.chatTopic.prompt!==question){
+      sceneData.choices.push(speechChoice(o,question,local(...reply)));
+    }
+  }
   const memory=has("Festa a Pola")?campusEpilogue[o.uid]:null;
   if(memory)sceneData.choices.push(speechChoice(o,"Ripensa alla festa di Pola",memory));
   return sceneData;
@@ -483,7 +573,8 @@ function draw(now){
   const [drawX,drawY]=walkPosition(now);
   const x=Math.round(drawX*16),y=Math.round(drawY*16);
   const time=reducedMotion?0:now;
-  const zoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
+  const defaultZoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
+  const zoom=Math.max(defaultZoom,20/z.width,12/z.height);
   const viewWidth=320/zoom,viewHeight=192/zoom;
   const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
   const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
@@ -560,11 +651,11 @@ function minimapBase(zone){
   const tiles=terrainCache.get(zone)??terrainMap(zone);
   rect(c,palette[zone.ground],0,0,zone.width,zone.height);
   if(zone===campus.zones.giardino&&zone.width===144){
-    rect(c,vividOn?"#7b6e58":"#53595b",0,0,zone.width,zone.height);
+    rect(c,zoneObjects(zone).byId.has("campus-circulation")?"#9b9587":(vividOn?"#7b6e58":"#53595b"),0,0,zone.width,zone.height);
     c.beginPath();campusOutlineFor(zone).forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
   }
   for(const [key,tile] of tiles){
-    if(tile.kind!==zone.ground)rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
+    if(tile.kind!==zone.ground||tile.uid.startsWith("quartiere-verde-"))rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
   }
   for(const o of zoneObjects(zone).solid){
     if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);
