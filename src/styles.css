@@ -541,3 +541,11 @@ button, select, input { font-family: var(--interface); }
   #game.game-reading .scene #polaCeremony {max-height:34dvh;object-fit:contain;}
   #game.game-reading :is(.hud,.journal,.control-guide,.gate-warning) {visibility:hidden;}
 }
+/* Colori vivaci: interfaccia piu calda, meno grigio-blu spento (contrasto AA mantenuto). */
+:root{--night:#161d19;--panel:#26382f;--cream:#f7e6bf;--gold:#f0b266;--line:#6f7a58}
+.frame,.frame canvas{background:#17261f}
+.panel{border-color:#9a7a52}
+button,select,input[type=text]{background:#32463a}
+button:hover{background:#3b5242}
+.hero{background:#2b4a3c}
+.journal{border-block-color:#7a8460}
