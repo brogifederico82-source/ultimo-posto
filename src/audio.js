@@ -29,6 +29,7 @@ function syncMixer(){
     for(const [id,bus] of effectBuses)bus.gain.setTargetAtTime(channelLevel(id),now,.015);
   }
   applyMusicVolume();
+  syncBackgroundMusic();
   if(!channelLevel("voices")||!channelLevel("master"))window.speechSynthesis?.cancel();
 }
 function initEffects(){
@@ -97,7 +98,7 @@ function saveMixer(){
 }
 function mixerPreview(channel){
   if(!audioOn||!channelLevel("master")||!channelLevel(channel))return false;
-  if(channel==="music"){syncBackgroundMusic();return true;}
+  if(channel==="music"){retryMusic();return true;}
   if(channel==="voices"&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
     const voice=new SpeechSynthesisUtterance(local("Prova voce","Voice test"));
     voice.lang=local("it-IT","en-GB");voice.volume=.55*channelLevel("voices")*channelLevel("master");

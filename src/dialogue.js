@@ -628,36 +628,63 @@ function nearbyTrafficSound(now){
   if(close){lastTrafficSound=now;sound("traffic","map");}
 }
 const entranceMusic=$("entranceMusic"),campusMusic=$("campusMusic");
-let currentMusic=entranceMusic,musicStart=null,musicFailed=false;
+let currentMusic=entranceMusic,musicStart=null,musicFailed=false,musicStatus="";
 function applyMusicVolume(){
   entranceMusic.volume=campusMusic.volume=channelLevel("master")*channelLevel("music");
 }
 applyMusicVolume();
-function audioFeedback(message=""){
-  $("audioFeedback").textContent=message;
-  $("audioFeedback").hidden=!message;
+function renderMusicFeedback(){
+  const status=$("audioFeedback"),retry=$("musicRetry");
+  const message=musicStatus==="muted"?local("Musica silenziata.","Music muted."):
+    musicStatus==="unavailable"?local("Musica non disponibile.","Music unavailable."):"";
+  if(status.textContent!==message)status.textContent=message;
+  status.hidden=!message;
+  retry.textContent=local("Riprova musica","Retry music");
+  retry.hidden=musicStatus!=="unavailable";
+}
+function setMusicStatus(next){
+  if(musicStatus===next)return;
+  musicStatus=next;
+  renderMusicFeedback();
+}
+function pauseMusic(){
+  musicStart=null;
+  if(!currentMusic.paused)currentMusic.pause();
 }
 function syncBackgroundMusic(){
   const nextMusic=screen==="game"&&state&&!atViale(state)?campusMusic:entranceMusic;
   if(currentMusic!==nextMusic){
-    if(audioOn)currentMusic.pause();
-    currentMusic=nextMusic;musicStart=null;musicFailed=false;
-    if(audioOn)audioFeedback();
+    pauseMusic();
+    currentMusic=nextMusic;
+    musicFailed=false;
   }
-  if(!audioOn||musicStart||musicFailed||!currentMusic.paused)return;
-  const selected=currentMusic,attempt=selected.play();
+  if(!audioOn||currentMusic.volume===0){
+    pauseMusic();
+    setMusicStatus(audioOn?"muted":"");
+    return;
+  }
+  setMusicStatus(musicFailed?"unavailable":"");
+  if(musicStart||musicFailed||!currentMusic.paused)return;
+  const attempt=currentMusic.play();
   musicStart=attempt;
   attempt?.then(()=>{
-    if(musicStart!==attempt||selected!==currentMusic||!audioOn)return;
-    musicStart=null;audioFeedback(selected.volume===0?"Volume della musica a zero.":"");
-  }, error=>{
-    if(musicStart!==attempt||selected!==currentMusic||!audioOn)return;
+    if(musicStart!==attempt)return;
     musicStart=null;
-    if(error.name==="AbortError")return;
+  },()=>{
+    if(musicStart!==attempt)return;
+    musicStart=null;
     musicFailed=true;
-    audioFeedback("Musica non disponibile. Premi Audio per riprovare.");
+    setMusicStatus("unavailable");
   });
 }
+function retryMusic(){
+  musicFailed=false;
+  syncBackgroundMusic();
+}
+$("musicRetry").onclick=()=>{
+  retryMusic();
+  $("audio").focus();
+};
 function enableAudio(){
   const Audio=window.AudioContext||window.webkitAudioContext;
   if(Audio){
@@ -670,13 +697,15 @@ function chime(notes,spacing=.12,volume=.065){
 }
 $("audio").onclick=()=>{
   if(audioOn){
-    audioOn=false;musicStart=null;audioFeedback();
+    audioOn=false;
     $("audio").textContent=tr("Audio spento");
     $("audio").setAttribute("aria-pressed","false");
-    currentMusic.pause();stopEffects();
+    stopEffects();
   }else{
-    enableAudio();musicFailed=false;syncBackgroundMusic();
+    enableAudio();
+    musicFailed=false;
   }
+  syncBackgroundMusic();
 };
 window.addEventListener("keydown",event=>{
   if(screen!=="game"||$("campusSurprise").open||event.ctrlKey||event.altKey||event.metaKey)return;

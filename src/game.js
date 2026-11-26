@@ -31,6 +31,7 @@ function refreshLanguage(){
   document.documentElement.lang=locale;
   $("challengeAudioLabel").textContent=local("Opzioni audio","Audio options");
   renderMixers();
+  renderMusicFeedback();
   $("langIt").setAttribute("aria-pressed",String(locale==="it"));
   $("langEn").setAttribute("aria-pressed",String(locale==="en"));
   const nodes=["home","creator","game","challenge"].flatMap(id=>[...$(id).querySelectorAll("button,h2,p,label,option,li,th,td,summary,span")]);
