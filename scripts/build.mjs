@@ -20,8 +20,20 @@ const [template, css, map, plan, entranceMusic, campusMusic, ...parts] = await P
 const game = parts.map(part => part.trim()).join('\n');
 new Script(game, { filename: 'Ultimo Posto' });
 
+// Font pixel-art (licenza OFL, vedi src/fonts): incorporati nell'HTML e disponibili come variabili CSS.
+const fontFiles = [
+  ['Pixelify Sans', 400, 'pixelify-sans-latin-400-normal.woff2'],
+  ['Pixelify Sans', 700, 'pixelify-sans-latin-700-normal.woff2'],
+  ['Press Start 2P', 400, 'press-start-2p-latin-400-normal.woff2'],
+];
+const fontFaces = await Promise.all(fontFiles.map(async ([family, weight, file]) => {
+  const data = (await readFile(new URL('fonts/' + file, source))).toString('base64');
+  return `@font-face{font-family:"${family}";font-weight:${weight};font-style:normal;font-display:swap;src:url(data:font/woff2;base64,${data}) format("woff2")}`;
+}));
+const fontCss = fontFaces.join('\n') + '\n:root{--font-ui:"Pixelify Sans",ui-monospace,monospace;--font-title:"Press Start 2P","Pixelify Sans",ui-monospace,monospace}\n';
+
 const sections = {
-  STYLES: css.trim(),
+  STYLES: fontCss + css.trim(),
   CAMPUS: JSON.stringify(JSON.parse(map)).replaceAll('<', '\\u003c'),
   PLAN: plan.toString('base64'),
   ENTRANCE_MUSIC: entranceMusic.toString('base64'),

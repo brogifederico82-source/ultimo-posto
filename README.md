@@ -98,3 +98,6 @@ Riferimenti per il villino e il gruppo scultoreo in [Villa Alberoni · Luiss](ht
 Apri [Ultimo Posto](https://brogifederico82-source.github.io/ultimo-posto/) e scegli **Installa il gioco**. Su iPhone apri il link in Safari e usa **Condividi → Aggiungi alla schermata Home → Apri come app web**. Dopo il primo caricamento online, l’app può riaprire il gioco offline.
 
 Ogni esecuzione di `node scripts/build.mjs` genera anche `dist/Ultimo-Posto.zip`, scaricabile dalla pagina del gioco. Su computer puoi estrarlo e aprire `index.html` direttamente. La build richiede Node.js 22.2 o successivo e il comando `zip`.
+
+## Font
+Il gioco incorpora due font pixel-art con licenza SIL Open Font License 1.1, in `src/fonts/` (con le rispettive licenze): **Pixelify Sans** (testi e interfaccia) e **Press Start 2P** (titoli). La build li inserisce nell'HTML; sono disponibili come `--font-ui` e `--font-title`. Non contengono frecce o triangoli: le icone vanno disegnate in CSS o canvas.
