@@ -27,7 +27,7 @@ function saveProfileKey(mode){
 }
 
 const mapId=()=>globalThis.crypto?.randomUUID?.()??("obj-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2));
-const maxCampusZones=33;
+const maxCampusZones=34;
 const stockCampus=installTeachingRooms(JSON.parse($("edOriginal").textContent));
 const priorInteriors=normalizeCampus({version:1,zones:Object.fromEntries(
   ["ingresso","aula-chiesa","polivalente","loft"].map(id=>[id,stockCampus.zones[id]])
@@ -50,10 +50,57 @@ function updateGardenStudentNames(map){
     if(names&&student.name===names[0])student.name=names[1];
   }
 }
-const originalMap=normalizeCampus(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))));
+const campusOutline=[[20,8],[24,9],[29,12],[34,14],[42,17],[49,19],[61,25],[73,38],[84,49],[85,60],[83,73],[68,91],[9,78],[5,53],[13,28],[17,15]];
+function insideCampusOutline(x,y){
+  return campusOutline.reduce((inside,[ax,ay],i)=>{
+    const [bx,by]=campusOutline[(i+1)%campusOutline.length];
+    return (ay>y)!==(by>y)&&x<(bx-ax)*(y-ay)/(by-ay)+ax?!inside:inside;
+  },false);
+}
+function refineRomania(map){
+  const garden=map.zones.giardino;
+  if(garden?.width!==144||!garden.objects.some(o=>o.uid==="entry-from-panama"&&o.x===72&&o.y===47))return map;
+  const add=(uid,kind,name,x,y,extra={})=>({uid,kind,name,x,y,...extra});
+  if(!garden.objects.some(o=>o.uid==="ada-gate")){
+    for(const o of garden.objects){
+      if((o.uid.startsWith("orto-")||o.uid==="giardiniera-nora")&&o.y<16)o.y+=12;
+      if(o.uid==="sport-court"&&o.x===9&&o.y===52)Object.assign(o,{kind:"roof",name:"Prese d’aria · The Dome 2",color:"#737f79",solid:true});
+    }
+    garden.objects.push(add("ada-gate","door","Sentiero per Villa Ada",79,47,{action:"portal",target:"villa-ada#panama"}));
+    garden.objects.push(add("ada-return-point","entrance","Rientro da Villa Ada",78,47,{target:"villa-ada"}));
+    garden.objects.push(add("dome2-vent-sign","sign","Prese d’aria · The Dome 2",14,59,{action:"dialog",text:"Griglie di aerazione. Il passaggio al Dome 2 è dal piazzale più a sud."}));
+  }
+  if(!map.zones["villa-ada"]&&Object.keys(map.zones).length<maxCampusZones){
+    map.zones["villa-ada"]={name:"Villa Ada · Sentiero nel parco",width:26,height:16,ground:"grass",objects:[
+      add("ada-entry","entrance","Ingresso dal sentiero",3,12,{target:"panama"}),
+      add("ada-exit","door","Torna verso il campus",3,13,{action:"portal",target:"giardino#villa-ada"}),
+      add("ada-walk","path","Sentiero",3,10,{w:18,h:2}),
+      add("ada-bench","bench","Panchina del ripasso",10,9,{w:2,solid:true,action:"event",text:"Sul retro della panchina qualcuno ha inciso: «Se sai spiegarlo al pino, sei pronto». Il pino ha appena chiesto un esempio."}),
+      add("ada-notes","sign","Cartello delle deviazioni",20,9,{action:"event",text:"Sentiero breve: 5 minuti. Sentiero lungo: 20 minuti. Sentiero di chi ripassa: da definire dopo l’appello."}),
+      ...[5,9,14,18,22].flatMap(x=>[add("ada-pine-n-"+x,"pine","Pino",x,3,{w:2,h:3}),add("ada-pine-s-"+x,"pine","Pino",x,13,{w:2,h:3})])
+    ]};
+  }
+  const classroomNotes=[
+    "«Se la risposta è dipende, scrivi da che cosa». Sul retro ci sono tre variabili e una macchia di caffè.",
+    "Un vecchio appunto chiede di spiegare la lezione senza usare la parola più importante. Una mano diversa ha scritto «ci vediamo al prossimo appello».",
+    "Due compagni hanno lasciato due soluzioni incompatibili e lo stesso punto interrogativo. Puoi segnare il foglio nel diario."
+  ];
+  for(const [id,z] of Object.entries(map.zones)){
+    if(!Object.hasOwn(teachingRooms,id)&&!["aula-chiesa","aula-toti","polivalente","dome2","parenzo-interno"].includes(id))continue;
+    const uid=id+"-retro-banco";
+    if(z.objects.some(o=>o.uid===uid))continue;
+    const y=z.height-3;
+    const x=[2,4,6].find(x=>!z.objects.some(o=>(o.solid||o.action)&&x>=o.x-1&&x<o.x+(o.w??1)+1&&y>=o.y-1&&y<o.y+(o.h??1)+1))??2;
+    const course=teachingRooms[id]?.title??z.name.split(" · ").at(-1);
+    z.objects.push(add(uid,"sign","Appunto lasciato in aula",x,y,{action:"event",
+      text:course+" · "+classroomNotes[id.length%classroomNotes.length]}));
+  }
+  return map;
+}
+const originalMap=normalizeCampus(refineRomania(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
-  ["giardiniera-nora",35,13],
+  ["giardiniera-nora",35,25],
   ["viale-ingresso-bacheca",25,76],
   ["viale-luiss-shop",20,77]
 ]){
@@ -207,7 +254,7 @@ function loadCampus(){
         }
       }
       if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);}
-      return map;
+      return embedded?map:normalizeCampus(refineRomania(map));
     }
   }catch{}
   return freshMap();
@@ -366,6 +413,15 @@ function drawObject(c,o,now=0,editing=false){
   c.scale(w/16,h/16);
   const box=(t,a,b,ww,hh)=>rect(c,t,a,b,ww,hh);
   const shadow="#283236",light="#ead6ac",white="#fff1c8";
+  if(o.uid==="sport-court"&&o.kind==="roof"){
+    box("#394340",0,0,16,16);box("#87958d",.45,.55,15.1,14.8);
+    for(const top of [2.4,8.9])for(const left of [1.6,6.4,11.2]){
+      box("#c5c9bc",left,top,3.2,4.4);
+      box("#35423d",left+.26,top+.38,2.68,3.64);
+      for(let i=0;i<5;i++)box("#65776d",left+.32,top+.71+i*.59,2.56,.18);
+    }
+    c.restore();return;
+  }
   if(isVehicle(o)){
     if(o.look==="left"){c.translate(16,0);c.scale(-1,1);}
     box("#17212688",1,11,14,3);
@@ -717,7 +773,9 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     if(!tiles){tiles=terrainMap(z);if(!editing)terrainCache.set(z,tiles);}
     for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
       const tile=tiles.get(x+y*z.width);
-      groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
+      const outside=id==="giardino"&&z.width===144&&(tile?.kind??z.ground)==="grass"&&!insideCampusOutline(x+.5,y+.5);
+      if(outside)rect(c,"#53595b",x*16,y*16,16,16);
+      else groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
     }
   }
   const panama=editing?null:zoneObjects(z).byId.get("entry-from-panama");

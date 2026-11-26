@@ -519,3 +519,25 @@ button, select, input { font-family: var(--interface); }
 }
 
 #polaCeremony{display:block;width:min(100%,620px);height:auto;margin:0 auto 12px;border-radius:12px;border:1px solid #8d7462}
+
+/* On a phone the dialogue stays near the thumbs; long choices scroll within it. */
+@media (max-width:760px), (pointer:coarse) and (max-height:600px) {
+  body:has(#game:not([hidden]).game-reading) { overflow:hidden; }
+  #game.game-reading .scene {
+    position:fixed; inset:auto 8px max(8px,env(safe-area-inset-bottom)) 8px;
+    z-index:6; width:auto; max-width:none; max-height:calc(100dvh - 80px);
+    overflow:auto; overscroll-behavior:contain; margin:0; padding:12px;
+    color:#222833; background:#fff9ed;
+    border:2px solid #63503a; border-radius:14px; box-shadow:0 6px 26px #08121bb3;
+  }
+  #game.game-reading .scene h3,#game.game-reading .scene #playerLine {color:#53352a;}
+  #game.game-reading .scene #sceneText {color:#222833;}
+  #game.game-reading .scene button {
+    color:#292a33; background:#f4e9d8; border:1px solid #c6ab89;
+  }
+  #game.game-reading .scene button:focus-visible {outline:2px solid #5c5038;}
+  #game.game-reading .scene button::before {color:#654329;}
+  #game.game-reading .scene #speakerPortrait {max-height:22dvh;width:auto;max-width:100%;object-fit:contain;}
+  #game.game-reading .scene #polaCeremony {max-height:34dvh;object-fit:contain;}
+  #game.game-reading :is(.hud,.journal,.control-guide,.gate-warning) {visibility:hidden;}
+}

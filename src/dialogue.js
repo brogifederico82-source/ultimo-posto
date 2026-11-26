@@ -504,6 +504,10 @@ function minimapBase(zone){
   const palette={grass:"#35584a",floor:"#65514e",paving:"#a4937d",path:"#9c8d69",road:"#596878"};
   const tiles=terrainCache.get(zone)??terrainMap(zone);
   rect(c,palette[zone.ground],0,0,zone.width,zone.height);
+  if(zone===campus.zones.giardino&&zone.width===144){
+    rect(c,"#53595b",0,0,zone.width,zone.height);
+    c.beginPath();campusOutline.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
+  }
   for(const [key,tile] of tiles){
     if(tile.kind!==zone.ground)rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
   }
@@ -914,8 +918,8 @@ $("interact").onclick=()=>{
 };
 const surprisePreference="ultimo-posto-sorprese";
 const campusSurprises=[
-  {zone:"giardino",x:13,y:39,id:"Fantasma del fuoricorso",voice:"Guagliò!",line:"Da Napoli, il fantasma del fuoricorso. Gli rimane un esame dal 1998.",theme:"ghost"},
-  {zone:"giardino",x:47,y:14,id:"Custode delle zucchine",voice:"Guagliò, lascia stare le zucchine!",line:"Il custode dell’orto difende l’ultima zucchina con una torcia e un verbale.",theme:"garden"},
+  {zone:"giardino",x:13,y:39,id:"Fantasma del fuoricorso",voice:"Uagliò! Chi ha lasciato gli appunti?",line:"Dal buio sbuca il fantasma del fuoricorso con una cartellina. «Uagliò, so’ vent’anni che aspetto l’appello. Almeno tu hai portato gli appunti?»",theme:"ghost"},
+  {zone:"giardino",x:47,y:26,id:"Custode delle zucchine",voice:"Guagliò, lascia stare le zucchine!",line:"Il custode dell’orto difende l’ultima zucchina con una torcia e un verbale.",theme:"garden"},
   {zone:"dome2",x:19,y:3,id:"Tecnico del Dome",voice:"Guagliò, il microfono è acceso!",line:"Il tecnico del Dome era nascosto dietro l’ultima fila. L’aula lo ha sentito benissimo.",theme:"dome"},
   {zone:"loft",x:16,y:8,id:"Conduttore fantasma",voice:"Guagliò, siamo in onda!",line:"Il conduttore fantasma presenta una trasmissione che nessuno ha acceso.",theme:"radio"},
   {zone:"pola-cortile",x:25,y:12,id:"Ospite del brindisi",voice:"Guagliò, aspetta il brindisi!",line:"Un compagno esce da dietro il tavolo con una corona d’alloro grande quanto lui.",theme:"party"}

@@ -1,7 +1,7 @@
 const vialeEntrance={x:8,y:69,gateY:75,width:30};
 const vialeCoins=[
   ["fermata","giardino",24,86],["shop","giardino",22,77],["panchine","giardino",18,40],
-  ["orto","giardino",46,13],["dome","giardino",60,56],["radio","giardino",35,57],
+  ["orto","giardino",46,25],["dome","giardino",60,56],["radio","giardino",35,57],
   ["panama","giardino",72,48],["atrio","terra",11,6],["chiesa","aula-chiesa",11,15],
   ["polivalente","polivalente",11,10],["loft","loft",16,7],["parenzo","parenzo-corridoio",11,9],
   ["pola","pola-cortile",23,11]
