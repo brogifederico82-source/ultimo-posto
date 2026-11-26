@@ -47,47 +47,64 @@ function joinRomaniaEntrance(map){
   }
   return map;
 }
-const vialeRoad=[[1,81],[12,81],[15,83],[35,83],[42,84],[51,87],[55,88],[57,89],[60,90],[62,93],[65,94],[74,95],[85,95],[94,97]];
-const vialeRoadDistances=[0];
-for(let i=1;i<vialeRoad.length;i++){
-  const [x,y]=vialeRoad[i], [px,py]=vialeRoad[i-1];
-  vialeRoadDistances.push(vialeRoadDistances.at(-1)+Math.hypot(x-px,y-py));
-}
+const vialeRoad=[[0,81],[12,81],[17,83],[37,83],[49,87.5],[55,88.75],[59,90],[68,94.5],[75,94],[144,94]];
 function vialeRoadY(x){
   const i=vialeRoad.findIndex(([end])=>end>=x);
   if(i<=0)return vialeRoad[i===0?0:vialeRoad.length-1][1];
-  const [a,y]=vialeRoad[i-1], [b,endY]=vialeRoad[i];
-  return y+(endY-y)*(x-a)/(b-a);
+  const [start,y]=vialeRoad[i-1], [end,nextY]=vialeRoad[i];
+  const t=(x-start)/(end-start);
+  return y+(nextY-y)*t*t*(3-2*t);
 }
-function vialeBusAt(bus,now){
-  const length=vialeRoadDistances.at(-1);
-  const initial=Math.max(0,bus.x+bus.w/2-vialeRoad[0][0]);
-  const cycle=(initial+now*bus.speed/1000)%(length*2);
-  const east=cycle<length,distance=east?cycle:length*2-cycle;
-  const i=Math.max(1,vialeRoadDistances.findIndex(end=>end>=distance));
-  const fraction=(distance-vialeRoadDistances[i-1])/(vialeRoadDistances[i]-vialeRoadDistances[i-1]);
-  const [x,y]=vialeRoad[i-1], [nx,ny]=vialeRoad[i];
-  return {...bus,x:x+(nx-x)*fraction-bus.w/2,y:y+(ny-y)*fraction+(east?-.7:.2),look:east?"right":"left"};
+const vialeTraffic={
+  "viale-romania-276":{east:true,start:9},
+  "viale-romania-277":{east:true,start:22},
+  "viale-bus-360":{east:true,start:33},
+  "viale-romania-278":{east:false,start:38},
+  "viale-romania-279":{east:false,start:21}
+};
+function vialeVehicleAt(vehicle,now,lane){
+  const end=vialeRoad.at(-1)[0],margin=6,span=end+2*margin;
+  // All vehicles in a lane use the same clock and slowdown curve to maintain separation.
+  const traveled=((lane.east?lane.start+margin:end+margin-lane.start)+now*(lane.east?4.5:5.2)/1000)%span;
+  const x=lane.east?traveled-margin:end+margin-traveled;
+  const approach=(x-23)/5;
+  const approaching=lane.east?approach<0:approach>0;
+  const center=x-Math.atan(approach)*1.15;
+  const bend=Math.atan2(vialeRoadY(center+1)-vialeRoadY(center-1),2);
+  const westInset=.36*Math.max(0,Math.min(1,(17-center)/3));
+  const curveInset=.28*Math.max(0,Math.min(1,(center-53)/2,(67-center)/2));
+  const laneInset=westInset+curveInset;
+  return {...vehicle,x:center-vehicle.w/2,y:vialeRoadY(center)+(lane.east?-.93+laneInset:.96-laneInset),
+    look:lane.east?"right":"left",bend,braking:approaching&&Math.abs(approach)<1.3};
+}
+const vialeSurfacePrefix="viale-asfalto-";
+function layVialeRoad(garden){
+  const end=vialeRoad.at(-1)[0];
+  if(!garden||garden.width<end||garden.height<105||
+      garden.objects.some(o=>o.uid.startsWith(vialeSurfacePrefix)))return;
+  if(!garden.objects.some(o=>o.uid==="viale-ingresso-start"))return;
+  garden.objects=garden.objects.filter(o=>!o.uid.startsWith("viale-prolungamento-"));
+  const blocked=new Set();
+  for(const o of garden.objects){
+    if(!o.solid)continue;
+    for(let x=Math.floor(o.x);x<o.x+(o.w??1);x++)
+      for(let y=Math.floor(o.y);y<o.y+(o.h??1);y++)blocked.add(x+y*garden.width);
+  }
+  for(let x=0;x<end;x++){
+    if(x>=17&&x<37)continue; // Keep the existing crossing and street tiles in front of the gate.
+    const middle=Math.round(vialeRoadY(x+.5));
+    for(let y=middle-1;y<=middle+1;y++){
+      if(blocked.has(x+y*garden.width))continue;
+      garden.objects.push({uid:vialeSurfacePrefix+x+"-"+y,kind:"road",name:"Viale Romania",
+        x,y,w:1,h:1,color:"#4b5663",solid:false});
+    }
+  }
 }
 function addVialeArcade(map){
   const street=map.zones.ingresso;
   const garden=map.zones.giardino;
   const integrated=garden?.objects.some(o=>o.uid==="viale-ingresso-start");
-  if(integrated&&garden.width>94&&garden.height>104){
-    const blocked=new Set(), roads=new Set();
-    for(const o of garden.objects){
-      if(!o.solid&&o.kind!=="road")continue;
-      for(let x=Math.floor(o.x);x<o.x+(o.w??1);x++)
-        for(let y=Math.floor(o.y);y<o.y+(o.h??1);y++)
-          (o.solid?blocked:roads).add(x+y*garden.width);
-    }
-    for(let x=38;x<=94;x++)for(let offset=-1;offset<=1;offset++){
-      const y=Math.round(vialeRoadY(x))+offset,key=x+y*garden.width;
-      if(blocked.has(key)||roads.has(key))continue;
-      garden.objects.push({uid:"viale-prolungamento-"+x+"-"+y,kind:"road",name:"Viale Romania",x,y,w:1,h:1,
-        color:"#687078",solid:false,action:"",native:"",gate:"",target:"",rotation:0,variant:0});
-    }
-  }
+  layVialeRoad(garden);
   for(const [area,uid,name,x,y,w,color,native] of [
     [street,"ingresso-tabaccheria","Tabaccheria · Viale Romania",21,17,2,"#426787","tabaccheria"],
     [integrated?garden:null,"giardino-tabaccheria","Tabaccheria · Viale Romania",67,99,2,"#426787","tabaccheria"],
@@ -114,7 +131,7 @@ function hasIntegratedEntrance(){
 }
 function inVialeDistrict(x,y){
   if(x>=vialeEntrance.x&&x<vialeEntrance.x+vialeEntrance.width)return y>vialeEntrance.gateY;
-  return x>=38&&x<=96&&y>=Math.floor(vialeRoadY(x))-1&&y<=105;
+  return x>=0&&x<vialeRoad.at(-1)[0]&&y>=Math.round(vialeRoadY(x+.5))-1&&y<=105;
 }
 function atViale(s){
   return Boolean(s&&(s.zone==="ingresso"||
