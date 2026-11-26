@@ -106,6 +106,14 @@ function installVillaAda(map){
     }
   }
 
+  // Villa Ada sta a ovest del campus (a sinistra nella mappa): si entra dal lato est del parco e si cammina
+  // verso ovest. Specchiamo orizzontalmente tutta la zona, compresi gli oggetti già presenti.
+  const parkWidth=villa.width;
+  for(const o of villa.objects){
+    o.x=parkWidth-o.x-(o.w??1);
+    if(Array.isArray(o.route))o.route=o.route.map(([px,py])=>[parkWidth-1-px,py]);
+  }
+
   // Personaggi sparsi per il campus (posizione cercata attorno a un punto, poi spostata sul primo spazio libero)
   const tiles=new Set();
   for(const o of garden.objects){
@@ -128,6 +136,17 @@ function installVillaAda(map){
     }
     return [wantX,wantY];
   };
+  // Il cancello per Villa Ada passa dal lato est (Via Panama) al lato ovest del campus.
+  const gate=garden.objects.find(o=>o.uid==="ada-gate"),back=garden.objects.find(o=>o.uid==="ada-return-point");
+  if(gate&&back&&gate.x>60){
+    const [gx,gy]=freeSpot(10,40);
+    const [bx,by]=tiles.has((gx+1)+","+gy)?[gx,gy+1]:[gx+1,gy];
+    gate.x=gx;gate.y=gy;back.x=bx;back.y=by;
+    tiles.add(bx+","+by);
+    const [sx,sy]=freeSpot(gx+2,gy-2);
+    sign("ca-verso-ada","Verso Villa Ada",sx,sy,
+      "Una freccia di legno indica l’ovest: «Villa Ada». Sotto, un cartello del Comune: «Non dare da mangiare ai cinghiali». Sotto ancora, a pennarello: «Loro però hanno già mangiato».");
+  }
   const campusNpc=(uid,kind,name,x,y,color,patrol)=>{
     const [fx,fy]=freeSpot(x,y);
     const route=patrol?[[fx,fy],[fx+patrol[0],fy+patrol[1]]]:[];
@@ -270,14 +289,14 @@ Object.assign(conversations,{
 // Sorprese nascoste (stesso sistema del «Guagliò!» del campus)
 // ---------------------------------------------------------------------------
 campusSurprises.push(
-  {zone:"villa-ada",x:60,y:4,id:"Cinghiale con la tesi",voice:"Grunf! Cerco un relatore!",line:"Un cinghiale ti porge una tesi masticata a metà. Il titolo sopravvissuto: «Mobilità sociale nei sottoboschi». Il relatore, per ora, è irreperibile.",theme:"garden"},
-  {zone:"villa-ada",x:10,y:44,id:"Tasso del retroscena",voice:"Shh! Sono nel retroscena!",line:"Dal cespuglio esce un tasso con gli occhiali da sole. Davanti alla gente fa il tasso, nel retroscena fa tutt’altro. Goffman lo avrebbe adorato.",theme:"garden"},
-  {zone:"villa-ada",x:54,y:40,id:"Fantasma del picnic",voice:"Posso restare a cena?",line:"Un fantasma in tovaglia a quadri chiede il bis di tiramisù. Ti spiega che sta aspettando da vent’anni un amico che aveva detto «arrivo tra cinque minuti».",theme:"party"},
+  {zone:"villa-ada",x:3,y:4,id:"Cinghiale con la tesi",voice:"Grunf! Cerco un relatore!",line:"Un cinghiale ti porge una tesi masticata a metà. Il titolo sopravvissuto: «Mobilità sociale nei sottoboschi». Il relatore, per ora, è irreperibile.",theme:"garden"},
+  {zone:"villa-ada",x:53,y:44,id:"Tasso del retroscena",voice:"Shh! Sono nel retroscena!",line:"Dal cespuglio esce un tasso con gli occhiali da sole. Davanti alla gente fa il tasso, nel retroscena fa tutt’altro. Goffman lo avrebbe adorato.",theme:"garden"},
+  {zone:"villa-ada",x:9,y:40,id:"Fantasma del picnic",voice:"Posso restare a cena?",line:"Un fantasma in tovaglia a quadri chiede il bis di tiramisù. Ti spiega che sta aspettando da vent’anni un amico che aveva detto «arrivo tra cinque minuti».",theme:"party"},
   {zone:"giardino",x:30,y:43,id:"Piccione del Rettorato",voice:"Cru! Ho letto il regolamento!",line:"Un piccione ti blocca il passo con un volantino nel becco: è il regolamento della mensa. Lo ha già letto tre volte e vorrebbe discuterne con qualcuno di competente.",theme:"garden"},
   {zone:"giardino",x:49,y:64,id:"Barista fantasma",voice:"Un caffè? Lo vuoi lungo?",line:"Il barista fantasma ti porge un caffè che non esiste. Dice che è così che si prepara l’esame perfetto: vuoto, caldo e con un po’ di schiuma di speranza.",theme:"ghost"},
   {zone:"giardino",x:68,y:42,id:"Professore dell’ultimo appello",voice:"Ultimo appello! Ultimo appello!",line:"Compare e scompare alla fine di ogni sessione. Oggi ha solo due domande: «Come stai?» e «Hai letto il programma?». La seconda, dice, è facoltativa. Anche la prima.",theme:"dome"},
   {zone:"giardino",x:40,y:68,id:"Voce del tornello",voice:"Prego... riprovare!",line:"Il tornello ha parlato. Nessuno sa cosa abbia detto, ma alla guardia è sembrato un buon segno. Il display ha cambiato scritta tre volte e ora dice «ciao».",theme:"radio"},
-  {zone:"villa-ada",x:30,y:28,id:"Conduttore della Radura",voice:"Siamo in onda dal bosco!",line:"Un conduttore con le cuffie appese a un ramo presenta il meteo: «Domani sole, con possibilità di cinghiali nel pomeriggio. Seguiranno approfondimenti».",theme:"radio"}
+  {zone:"villa-ada",x:33,y:28,id:"Conduttore della Radura",voice:"Siamo in onda dal bosco!",line:"Un conduttore con le cuffie appese a un ramo presenta il meteo: «Domani sole, con possibilità di cinghiali nel pomeriggio. Seguiranno approfondimenti».",theme:"radio"}
 );
 
 // Correzione: la sorpresa dell'orto era finita sotto un albero solido e non si poteva attivare mai.
@@ -289,8 +308,8 @@ campusSurprises.push(
 
 // Monete aggiuntive a Villa Ada
 vialeCoins.push(
-  ["va-moneta-1","villa-ada",38,14],["va-moneta-2","villa-ada",24,16],["va-moneta-3","villa-ada",56,12],
-  ["va-moneta-4","villa-ada",50,40],["va-moneta-5","villa-ada",34,44],["va-moneta-6","villa-ada",58,26]
+  ["va-moneta-1","villa-ada",25,14],["va-moneta-2","villa-ada",39,16],["va-moneta-3","villa-ada",7,12],
+  ["va-moneta-4","villa-ada",13,40],["va-moneta-5","villa-ada",29,44],["va-moneta-6","villa-ada",5,26]
 );
 
 // ---------------------------------------------------------------------------
@@ -320,10 +339,10 @@ function villaAdaEndingScene(){
 // Cinghiali: disegno, comportamento e collisione
 // ---------------------------------------------------------------------------
 const villaZone="villa-ada";
-const villaBounds={left:8,top:1,right:62,bottom:46};
+const villaBounds={left:1,top:1,right:55,bottom:46};
 const villaBoars=[];
 let villaHerdSpawned=false,villaLast=0,villaWasInside=false;
-const villaSpawnPoints=[[36,24,"left",false],[52,14,"left",false],[44,36,"right",false],[56,42,"left",false],[41,18,"left",true]];
+const villaSpawnPoints=[[27,24,"left",false],[11,14,"left",false],[19,36,"right",false],[7,42,"left",false],[22,18,"left",true]];
 
 function drawBoarShape(c,look,mode,now,seed){
   c.save();
