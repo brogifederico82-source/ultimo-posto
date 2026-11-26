@@ -131,6 +131,41 @@ function addVialeArcade(map){
   }
   return map;
 }
+function furnishCampusFountains(map){
+  const garden=map.zones.giardino;
+  if(!garden||garden.width!==144||garden.height!==144||
+      !garden.objects.some(o=>o.uid==="viale-ingresso-start")||
+      garden.objects.some(o=>o.uid.startsWith("acqua-romania-")))return map;
+  const objects=garden.objects;
+  const building=objects.findIndex(o=>o.uid==="quartiere-12"&&o.kind==="roof"&&
+    o.x===49&&o.y===91&&o.w===8&&o.h===10&&!o.action);
+  if(building!==-1){
+    const [removed]=objects.splice(building,1);
+    objects.push({...removed,uid:"acqua-romania-pavimento",kind:"paving",name:"Pavimentazione dello slargo",
+      x:49,y:92,w:8,h:7,color:"#ada18e",solid:false});
+  }
+  const furniture=[
+    ["giardino","fountain","Fontana del giardino",13,34,2,2,"#679994"],
+    ["vialetto","fountain","Fontana del vialetto",25,45,2,2,"#578d89"],
+    ["piazzale","fountain","Fontana del piazzale",63,50,2,2,"#6b9c98"],
+    ["slargo","fountain","Fontana dello slargo",52,94,2,2,"#679994"],
+    ["panca-ovest","bench","Panchina dello slargo",49,97,2,1,"#a1865f"],
+    ["panca-est","bench","Panchina dello slargo",55,97,2,1,"#a1865f"],
+    ["aiuola-ovest","flowers","Aiuola dello slargo",49,93,2,1,"#c89379"],
+    ["aiuola-est","flowers","Aiuola dello slargo",55,93,2,1,"#c89379"],
+    ...[[16,86],[28,86],[43,88],[60,94],[85,96],[108,96],[129,96]].map(([x,y])=>
+      ["nasone-"+x,"nasone","Nasone · Viale Romania",x,y,1,1,"#465556"])
+  ];
+  for(const [id,kind,name,x,y,w,h,color] of furniture){
+    if(objects.some(o=>(o.solid||o.action||o.kind==="entrance")&&
+        o.x<x+w&&o.x+o.w>x&&o.y<y+h&&o.y+o.h>y))continue;
+    if(kind==="nasone"&&Math.abs(y-vialeRoadY(x+.5))<1.85)continue;
+    objects.push({uid:"acqua-romania-"+id,kind,name,x,y,w,h,color,solid:kind==="fountain",
+      rotation:0,variant:0,action:"",native:"",text:"",target:"",gate:"",missionTarget:"",
+      auto:false,behavior:"idle",speed:1.7,route:[]});
+  }
+  return map;
+}
 function hasIntegratedEntrance(){
   const garden=campus.zones.giardino;
   return Boolean(garden&&zoneObjects(garden).byId.has("viale-ingresso-start"));
