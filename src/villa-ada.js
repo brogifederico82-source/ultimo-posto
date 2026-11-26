@@ -454,7 +454,7 @@ function tickVillaAda(now){
     villaHerdSpawned=false;villaWasInside=false;villaLast=now;return;
   }
   if(state.ending||state.prologue){villaLast=now;return;}
-  if(activeScene||minigame||$("campusSurprise").open){
+  if(activeScene||minigame||$("campusSurprise").open||(typeof schermoPausato==="function"&&schermoPausato())){
     for(const b of villaBoars)b.nextAt+=now-villaLast;
     villaLast=now;return;
   }

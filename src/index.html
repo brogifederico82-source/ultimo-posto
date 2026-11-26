@@ -75,21 +75,29 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 </section>
 </div>
 </section>
-<section id="game" hidden><div class="map-status"><span class="zone" id="zone"></span><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span><details id="inventory" class="inventory"><summary id="inventoryTitle">Tasche</summary><ul id="inventoryItems"></ul></details></div><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong><small id="storyWaypointHint" aria-live="polite" hidden></small><small id="radioTapeHint" class="hint" hidden></small></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
-<div class="direction-pad" role="group" aria-label="Movimento">
-<button data-move="up" aria-label="Cammina in alto">↑</button>
-<button data-move="left" aria-label="Cammina a sinistra">←</button>
-<button data-move="down" aria-label="Cammina in basso">↓</button>
-<button data-move="right" aria-label="Cammina a destra">→</button>
-</div>
-<div id="smokingTools" class="actions"><button id="smokingAction">Fuma</button><button id="smokingAsh" hidden></button><button id="smokingEnd" hidden></button><small id="smokingStatus" role="status"></small></div>
-<button id="interact" class="primary" aria-keyshortcuts="E">Interagisci <kbd>E</kbd></button>
-</div><details id="controlGuide" class="control-guide">
-<summary>Guida ai comandi</summary>
-<p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa.</p>
-</details>
+<section id="game" hidden aria-label="Schermata di gioco"><div class="gs-view" id="gsView">
+<div class="gs-stagebox" id="gsStagebox"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas>
+<div class="gs-cut" id="gsCut"><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><canvas id="impactOutcome" width="320" height="144" aria-hidden="true" hidden></canvas><div id="tobaccoCounter" class="tobacco-counter" hidden aria-hidden="true"><i></i><span id="tobaccoHandoff"></span></div><canvas id="polaCeremony" width="480" height="224" role="img" aria-label="Cerimonia nel giardino di Villa Alberoni con gli invitati" hidden></canvas></div></div>
+<div class="gs-hud" id="gsHud">
+<div class="gs-top"><div class="gs-place"><span class="zone" id="zone"></span></div><div class="gs-topright"><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span><button type="button" id="gsMenuBtn" class="gs-menubtn" aria-haspopup="dialog" aria-keyshortcuts="Escape"><i class="gs-burger" aria-hidden="true"></i><span class="gs-sr" id="gsMenuLabel">Menu</span></button></div></div>
+<div class="gs-plate" id="gsPlate"><span id="taskChapter" hidden></span><strong id="objective"></strong><small id="storyWaypointHint" aria-live="polite" hidden></small><small id="radioTapeHint" hidden></small></div>
 <p id="gateWarning" class="gate-warning" role="status" hidden>Guardia: «Fermati alla linea gialla. Mostrami il badge, poi passa dal tornello.»</p>
-<section class="panel scene" aria-live="polite"><div class="scene-toolbar"><button id="closeConversation" type="button" aria-keyshortcuts="Escape" hidden><span aria-hidden="true">‹ </span><span id="closeConversationLabel">Torna al campus</span> <kbd>Esc</kbd></button></div><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><canvas id="impactOutcome" width="320" height="144" aria-hidden="true" hidden></canvas><div id="tobaccoCounter" class="tobacco-counter" hidden aria-hidden="true"><i></i><span id="tobaccoHandoff"></span></div><canvas id="polaCeremony" width="480" height="224" role="img" aria-label="Cerimonia nel giardino di Villa Alberoni con gli invitati" hidden></canvas><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<div id="smokingTools" class="gs-smoke"><button id="smokingAction">Fuma</button><button id="smokingAsh" hidden></button><button id="smokingEnd" hidden></button><small id="smokingStatus" role="status"></small></div>
+<div class="gs-touch" role="group" aria-label="Comandi del campus">
+<div class="gs-pad" role="group" aria-label="Movimento">
+<button data-move="up" aria-label="Cammina in alto"><i aria-hidden="true"></i></button>
+<button data-move="left" aria-label="Cammina a sinistra"><i aria-hidden="true"></i></button>
+<button data-move="down" aria-label="Cammina in basso"><i aria-hidden="true"></i></button>
+<button data-move="right" aria-label="Cammina a destra"><i aria-hidden="true"></i></button>
+</div>
+<button id="interact" class="primary" aria-keyshortcuts="E">Interagisci <kbd>E</kbd></button>
+</div>
+<section id="gsDialog" class="scene gs-dialog" hidden><button id="closeConversation" type="button" aria-keyshortcuts="Escape" hidden><i aria-hidden="true"></i><span id="closeConversationLabel" class="gs-sr">Torna al campus</span></button><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><div class="gs-body"><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden" aria-live="polite" aria-atomic="true"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button></div><div class="actions" id="choices" role="group" aria-label="Scelte"></div></section>
+</div>
+<div class="gs-menu" id="gsMenu" role="dialog" aria-modal="true" aria-labelledby="gsMenuTitle" hidden><div class="gs-menubox"><h2 id="gsMenuTitle">Menu</h2><p id="status" class="gs-status"></p><ul id="gsMenuList" role="menu"></ul><p id="gsMenuNote" class="gs-note" role="status"></p></div></div>
+<div class="gp gs-owned gp-tasche gs-panel" id="gsPanelTasche" role="dialog" aria-modal="true" aria-labelledby="gsTitleTasche" hidden><div class="gs-panelbox"><header><h2 id="gsTitleTasche">Tasche</h2><button type="button" class="gs-back">Indietro</button></header><div class="gs-panelbody"><details id="inventory" class="inventory" open><summary id="inventoryTitle">Tasche</summary><ul id="inventoryItems"></ul></details></div></div></div>
+<div class="gp gs-owned gp-diario gs-panel" id="gsPanelDiario" role="dialog" aria-modal="true" aria-labelledby="gsTitleDiario" hidden><div class="gs-panelbox"><header><h2 id="gsTitleDiario">Diario</h2><button type="button" class="gs-back">Indietro</button></header><div class="gs-panelbody"><details class="journal"><summary id="journalTitle">Diario di viaggio</summary><ul id="log"></ul></details></div></div></div>
+<div class="gp gs-owned gp-mappa gs-panel" id="gsPanelMappa" role="dialog" aria-modal="true" aria-labelledby="gsTitleMappa" hidden><div class="gs-panelbox"><header><h2 id="gsTitleMappa">Mappa</h2><button type="button" class="gs-back">Indietro</button></header><div class="gs-panelbody"><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
 <details id="surpriseHint">
@@ -112,7 +120,12 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <img id="campusReference" alt="Planimetria di Viale Romania con ingresso, Aula Chiesa, The Dome e Via Panama">
 <p><a href="https://ecpr.eu/Filestore/CustomContent/Standing%20Groups/SGEU%20-%20Conference/Campus_Map_Luiss_Rome_Updated.pdf" target="_blank" rel="noopener">Planimetria ECPR</a> · <a href="https://earth.google.com/web/@41.9245095,12.4939844,70a,520d,35y,0h,0t,0r" target="_blank" rel="noopener">Vista Google Earth</a></p>
 </details>
-<details><summary>Ambienti e attività</summary><ol id="campusMap" class="hint"></ol></details></details><details class="journal"><summary id="journalTitle">Diario di viaggio</summary><ul id="log"></ul></details></section>
+<details><summary>Ambienti e attività</summary><ol id="campusMap" class="hint"></ol></details></details></div></div></div>
+<div class="gp gs-owned gp-opzioni gs-panel" id="gsPanelOpzioni" role="dialog" aria-modal="true" aria-labelledby="gsTitleOpzioni" hidden><div class="gs-panelbox"><header><h2 id="gsTitleOpzioni">Opzioni</h2><button type="button" class="gs-back">Indietro</button></header><div class="gs-panelbody" id="gsOptionsBody"><div class="gs-lang" role="group" aria-label="Lingua"><span id="gsLangLabel">Lingua</span><button type="button" id="gsLangIt" lang="it" aria-pressed="true">Italiano</button><button type="button" id="gsLangEn" lang="en" aria-pressed="false">English</button></div><details id="controlGuide" class="control-guide" open>
+<summary>Guida ai comandi</summary>
+<p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa. <kbd>Esc</kbd> apre il menu.</p>
+</details></div></div></div>
+</div></section>
 <dialog id="campusSurprise" class="campus-surprise" aria-labelledby="surpriseTitle">
 <div class="surprise-face" aria-hidden="true"></div>
 <h2 id="surpriseTitle">GUAGLIÒ!</h2>
