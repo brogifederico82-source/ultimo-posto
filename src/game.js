@@ -73,7 +73,7 @@ const options = {
   meta:["Passare l’esame","Salvare la media","Trovare una presa","Evitare il gruppo WhatsApp"]
 };
 const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
-const totalSecrets=14;
+const totalSecrets=16;
 const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Texas Hold’em",cavalli:"Cavalli virtuali",virtuali:"Virtuali · Calcio",calcetto:"Calcetto · The Dome 2",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
 const won=id=>Boolean(state?.wins[id]);
@@ -149,7 +149,7 @@ function updateHomeActions(){
 function show(next){
   if(minigame)closeChallenge();
   if(next!=="game"&&cigarette)stopSmoking();
-  keys.clear();controls.clear();screen=next;
+  clearCampusInputs();screen=next;
   for(const id of ["home","creator","game","editor"]) $(id).hidden=id!==next;
   $("homeButton").hidden=next==="home"||testMode;
   $("testBack").hidden=!testMode||next!=="game";
@@ -343,7 +343,7 @@ function interact(){
   if(!exploringCampus())return;
   const spot=nearby();
   if(!spot){sound("error","interface");return;}
-  keys.clear();controls.clear();
+  clearCampusInputs();
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
     sound("gate","map");
@@ -519,8 +519,7 @@ function polaParty(){
   if(!polaAuthorized())return scene("Pola · Accesso",
     "La festa è nel cortile riservato agli invitati. Completa il seminario e l’abilitazione Green Mobility per arrivare con la tua tessera.");
   if(has("Festa a Pola"))return scene("Pola · Dopo il brindisi",
-    "Dalla fontana arriva il rumore dell’acqua. La villa è chiusa. Viola è al tutorato, la professoressa Serra in Aula Chiesa e Tommaso a Radio Luiss. Puoi tornare a trovarli.",
-    ["Torna a esplorare",()=>{activeScene=null;state.chatTopic=null;}]);
+    "Dalla fontana arriva il rumore dell’acqua. La villa è chiusa. Viola è al tutorato, la professoressa Serra in Aula Chiesa e Tommaso a Radio Luiss. Puoi tornare a trovarli.");
   if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
     "Mostri la tessera all’accesso della festa. La villa resta chiusa. In giardino, Chiara ti indica la fontana e una scatola di sedie pieghevoli. «Mi dai una mano prima del discorso?»",
     ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
@@ -824,12 +823,8 @@ function renderScene(){
     };
     $("choices").append(button);
   }
-  if(activeScene && !state.ending){
-    const close=document.createElement("button");close.textContent=tr("Torna a esplorare");
-    close.setAttribute("aria-keyshortcuts","Escape");
-    close.onclick=closeScene;
-    $("choices").append(close);
-  }
+  $("closeConversation").hidden=!activeScene||Boolean(state.ending);
+  $("closeConversationLabel").textContent=local("Torna al campus","Back to campus");
   $("log").replaceChildren();
   for(const entry of state.log){const li=document.createElement("li");li.textContent=tr(entry);$("log").append(li);}
   const pockets=document.createElement("li");

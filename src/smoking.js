@@ -17,7 +17,7 @@ function updateSmokingUI(){
     cigarette?.phase==="lit"?local("Tieni premuto per aspirare","Hold to inhale"):local("Fuma","Smoke");
   button.setAttribute("aria-disabled",String(!smokingAllowed()||(!left&&!cigarette)));
   $("smokingLabel").textContent=local("Mostra il comando Fuma","Show the Smoke command");
-  $("smokingTools").hidden=!smokingOption.checked;
+  $("smokingTools").hidden=!smokingOption.checked||(!left&&!cigarette);
   $("smokingAsh").hidden=cigarette?.phase!=="lit";
   $("smokingEnd").hidden=!cigarette;
   $("smokingAsh").textContent=local("Fai cadere la cenere","Tap off ash");
@@ -88,7 +88,12 @@ function endSmokingAtBin(){
 }
 function tickSmoking(now){
   if(!cigarette)return;
-  if(!smokingAllowed()){stopSmoking();return;}
+  if(!smokingAllowed()){
+    if(cigarette.phase==="ready"&&activeScene&&smokingOutdoors.has(state.zone)&&!minigame&&!state.ending){
+      smokingHold=null;return;
+    }
+    stopSmoking();return;
+  }
   if(smokingHold===null)return;
   if(cigarette.phase==="ready"&&now-smokingHold>=560){
     cigarette.phase="lit";smokingHold=null;

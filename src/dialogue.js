@@ -198,15 +198,22 @@ const nativeConversations={
   "ospite":[["Com’è il panel?","«Doveva durare un’ora. Siamo ancora alle presentazioni, ma ci danno il caffè.»"]],
   "silenzio":[["Come hai trovato questo posto?","«Sono salita finché ho smesso di sentire gente dire “mandami il file”.»"]]
 };
-const conversationFor=o=>Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
+function conversationFor(o){
+  const profile=Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
+  if(o.uid!=="cerca-sigaretta"||!has("Biglietto del 360 bis"))return profile;
+  return [local("Andrea controlla l’orologio. «Vedi? Anche oggi il 360 bis è perfettamente in ritardo.»",
+    "Andrea checks his watch. “See? The 360 bis is perfectly late again today.”"),...profile.slice(1)];
+}
 function speechChoice(o,prompt,reply){
   return [prompt,()=>{state.chatTopic={uid:o.uid,prompt,reply};}];
 }
 function addConversation(scene,o,profile){
   const [intro,...topics]=profile??[scene.text,...localTopics];
   const turn=state.chatTopic?.uid===o.uid?state.chatTopic:null;
+  const otherTopics=topics.filter(([prompt])=>prompt!==turn?.prompt);
   return {...scene,text:turn?.reply??intro,playerLine:turn?.prompt,
-    choices:[...scene.choices,...topics.map(([prompt,reply])=>speechChoice(o,prompt,reply))]};
+    choices:[...scene.choices,...otherTopics.map(([prompt,reply])=>speechChoice(o,prompt,reply)),
+      ...(turn?[[local("Torna all’inizio del dialogo","Back to the start of the conversation"),()=>{state.chatTopic=null;}]]:[])]};
 }
 
 
@@ -218,7 +225,11 @@ const campusEpilogue={
 const campusSmallStories={
   "mensa-ada":["Leggi il cartellino del cucchiaio","Sotto il porta-posate c’è scritto: «Cucchiaio di riserva. In caso di esame, rompere il vetro». Il vetro è un tovagliolo."],
   "portico-reader":["Controlla il segnaposto","Sul tavolo c’è un biglietto: «Torno tra cinque minuti». Sotto, a matita: «Anno accademico da definire»."],
-  "courtyard-foos":["Guarda sotto il segnapunti","Un foglietto recita: «La stecca che cigola ha diritto a un appello straordinario». Qualcuno ha aggiunto «con riserva»."]
+  "courtyard-foos":["Guarda sotto il segnapunti","Un foglietto recita: «La stecca che cigola ha diritto a un appello straordinario». Qualcuno ha aggiunto «con riserva»."],
+  "viale-ingresso-guardia":["Chiedi dove porta il vialetto","«Per il tutorato segui il vialetto verso il Dome. Prima fammi vedere il badge, altrimenti il percorso finisce qui.»"],
+  "tutor-viola":["Chiedi come non perdere il filo","«Scrivi la prossima cosa da fare, una sola. Poi apri la pianta. La fila per il caffè è lunga, ma il semestre lo è di più.»"],
+  "prof-storia":["Chiedi cosa succede dopo la lezione","«Se devi consegnare il lavoro al LOFT, esci sul corridoio del secondo piano e continua a salire. Almeno lì la data di scadenza è una sola.»"],
+  "giardiniera-nora":["Chiedi chi ha piantato i cartelli","«Gli studenti. Quello con scritto “basilico” cresce che è una bellezza. Il basilico, per ora, si è riservato di decidere.»"]
 };
 const radioTapeStops=[
   {uid:"giardiniera-nora",label:["Registra il rubinetto dell’orto","Record the garden tap"],
@@ -271,7 +282,53 @@ function radioTapeChoice(o){
     chime(stop.notes,.12);
   }];
 }
+function andreaChoice(o){
+  const ticket="Biglietto del 360 bis",stamp="Tessera della corsa fantasma";
+  if(o.uid==="cerca-sigaretta"){
+    if(has(stamp))return speechChoice(o,local("Gli mostri la tessera obliterata","Show him the punched ticket"),
+      local("«Vedi il buco a forma di tazza? La linea è sospesa ogni volta che manca il caffè.»",
+        "“See the coffee-cup punch? The route gets suspended whenever they run out of coffee.”"));
+    if(has(ticket))return speechChoice(o,local("Gli chiedi dove si timbra","Ask where to punch the ticket"),
+      local("«Alla fermata del 360, fuori dal tornello. Guarda sotto la panchina.»",
+        "“At the 360 stop, outside the gate. Look under the bench.”"));
+    const inHand=cigarette?.phase==="ready";
+    if(testMode||(!inHand&&!cigarettesLeft()))return null;
+    const label=inHand?local("Gli passi la sigaretta che hai in mano","Hand him the cigarette you’re holding"):
+      local("Gli offri una sigaretta dal pacchetto","Offer him a cigarette from the pack");
+    return [label,()=>{
+      if(has(ticket)||(!inHand&&!cigarettesLeft()))return;
+      if(inHand)stopSmoking();else state.cigarettes=cigarettesLeft()-1;
+      carry(ticket);
+      record(local("Andrea · Ti ha dato il biglietto del 360 bis. Cerca sotto la panchina della fermata, fuori dal tornello.",
+        "Andrea · He gave you the 360 bis ticket. Look under the bus-stop bench outside the gate."));
+      state.chatTopic={uid:o.uid,prompt:label,reply:local(
+        "«Tieni. Un biglietto per il 360 bis. Dicono che faccia una sola corsa, quando tutto il campus è in ritardo. Per timbrarlo, guarda sotto la panchina alla fermata fuori dal tornello.»",
+        "“Here. A ticket for the 360 bis. They say it only runs once, when the whole campus is late. Look under the bus-stop bench outside the gate to get it punched.”")};
+    }];
+  }
+  if(o.uid==="radio-tommaso"&&has(stamp)){
+    const label=local("Fagli leggere l’orario del 360 bis","Show him the 360 bis timetable");
+    return [label,()=>{
+      discover("annuncio-360","L’annuncio mai andato in onda");
+      state.chatTopic={uid:o.uid,prompt:label,reply:local(
+        "Tommaso accende il microfono. «Il prossimo autobus partirà appena finisce la registrazione.» Poi spegne tutto. «No, mi sa che abbiamo appena perso anche questo.»",
+        "Tommaso switches on the mic. “The next bus will leave as soon as recording ends.” He switches it off again. “Nope, I think we’ve missed that one too.”")};
+    }];
+  }
+  if(!["bus-360-stop","viale-bus-360-stop"].includes(o.uid)||!has(ticket))return null;
+  const label=local("Controlli sotto la panchina","Look under the bench");
+  const reply=local("Sotto la panchina trovi un’obliteratrice fatta con una pinzatrice. Sul tabellone c’è scritto «360 bis · Capolinea: Ultimo Posto». Una nota avvisa: «Il conducente è già a lezione».",
+    "You find a stapler rigged up as a ticket punch. The sign says “360 bis · Terminus: Last Seat”. A note reads “The driver is already in class”.");
+  if(has(stamp))return speechChoice(o,label,reply);
+  return [label,()=>{
+    if(has(stamp))return;
+    carry(stamp);discover("corsa-fantasma","La corsa fantasma del 360");awardCoins(2);
+    state.chatTopic={uid:o.uid,prompt:label,reply};
+  }];
+}
 function campusOptionalScene(sceneData,o){
+  const andrea=andreaChoice(o);
+  if(andrea)sceneData.choices.unshift(andrea);
   const tapeChoice=radioTapeChoice(o);
   if(tapeChoice)sceneData.choices.push(tapeChoice);
   const optional=campusSmallStories[o.uid];
@@ -360,10 +417,13 @@ function focusScene(){
 function closeScene(){
   const shouldSave=Boolean(resumableScene(activeScene));
   activeScene=null;state.chatTopic=null;state.freeMoment=null;
-  keys.clear();controls.clear();
+  clearCampusInputs();
   if(shouldSave)save();
-  renderScene();focusScene();
+  renderScene();
+  if(window.matchMedia?.("(max-width: 760px)")?.matches)$("stage").scrollIntoView({block:"start"});
+  $("interact").focus({preventScroll:true});
 }
+$("closeConversation").onclick=closeScene;
 let stageInteraction=null;
 $("stage").onclick=event=>{
   if(!exploringCampus()||!stageInteraction)return;
@@ -405,10 +465,11 @@ function draw(now){
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
+  const minimap=z.width>20||z.height>12?paintMinimap(z,waypoint,drawX,drawY):null;
   if(waypoint&&!activeScene){
     const px=((waypoint.x+waypoint.w/2)*16-cameraX)*zoom;
     const py=((waypoint.y-.5)*16-cameraY)*zoom;
-    paintWaypointOnStage(stage,px,py,z.width>20||z.height>12);
+    paintWaypointOnStage(stage,px,py,minimap);
   }
   const nearest=nearby();
   stageInteraction=null;
@@ -426,39 +487,59 @@ function draw(now){
       [sx-width/2-4,sy-4,sx+width/2+4,sy+15],[left-7,top-13,right+7,bottom+6]
     ]};
   }
-  if(z.width>20||z.height>12){
-    const scale=Math.min(79/z.width,52/z.height);
-    const mx=x=>235+x*scale,my=y=>8+y*scale;
-    stage.drawImage(minimapBase(z,scale),231,4);
-    const {vehicles,actions,landmarks}=zoneObjects(z);
-    for(const o of vehicles){
-      const vehicle=positionOf(o,trafficClock,z.width);
-      rect(stage,"#ff976a",mx(vehicle.x+.5),my(vehicle.y+.5),2,2);
-    }
-    for(const o of actions)rect(stage,gateLocked(o.gate)?"#ad7868":"#e2b875",mx(o.x),my(o.y),2,2);
-    stage.font="bold 6px monospace";stage.textAlign="center";stage.fillStyle="#fff1b8";
-    for(const [id,label] of [["dome","D"],["caffe","B"],["terra","E"],["uscita","R"]]){
-      const point=landmarks.get(id);
-      if(point)stage.fillText(label,mx(point.x)+1,my(point.y)-2);
-    }
-    if(waypoint)paintCampusWaypoint(stage,mx(waypoint.x+.5),my(waypoint.y+.5));
-    rect(stage,"#f5f7d9",mx(drawX),my(drawY),3,3);
-  }
 }
-function minimapBase(zone,scale){
+function minimapBase(zone){
   const cached=minimapCache.get(zone);
   if(cached)return cached;
+  const padding=3,scale=Math.min(79/zone.width,53/zone.height);
+  const mapWidth=zone.width*scale,mapHeight=zone.height*scale;
+  const width=Math.ceil(mapWidth)+padding*2,height=Math.ceil(mapHeight)+padding*2;
   const layer=document.createElement("canvas");
-  layer.width=85;layer.height=59;
+  layer.width=width*2;layer.height=height*2;
   const c=layer.getContext("2d");
-  rect(c,"#d0a46d",0,0,85,59);rect(c,"#273b3b",1,1,83,57);
-  for(const o of zone.objects){
-    const x=4+o.x*scale,y=4+o.y*scale,type=kindLayer(o);
-    if(type==="terreno"&&o.kind!=="grass")rect(c,o.kind==="road"?"#586167":"#7a846e",x,y,scale,scale);
-    if(type==="edifici"&&o.solid)rect(c,"#795a51",x,y,o.w*scale,o.h*scale);
+  c.scale(2,2);
+  rect(c,"#0e1924",0,0,width,height);
+  c.strokeStyle="#c99d67";c.lineWidth=1;c.strokeRect(.5,.5,width-1,height-1);
+  c.save();c.translate(padding,padding);c.beginPath();c.rect(0,0,mapWidth,mapHeight);c.clip();c.scale(scale,scale);
+  const palette={grass:"#35584a",floor:"#65514e",paving:"#a4937d",path:"#9c8d69",road:"#596878"};
+  const tiles=terrainCache.get(zone)??terrainMap(zone);
+  rect(c,palette[zone.ground],0,0,zone.width,zone.height);
+  for(const [key,tile] of tiles){
+    if(tile.kind!==zone.ground)rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
   }
-  minimapCache.set(zone,layer);
-  return layer;
+  const panama=zoneObjects(zone).byId.get("entry-from-panama");
+  if(zone===campus.zones.giardino&&zone.width===144&&panama?.x===72&&panama.y===47){
+    c.save();c.scale(1/16,1/16);paintRomaniaEdges(c);c.restore();
+  }
+  for(const o of zoneObjects(zone).solid){
+    if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);
+  }
+  c.restore();
+  const map={layer,scale,padding,width,height,x:315-width,y:5};
+  minimapCache.set(zone,map);
+  return map;
+}
+function paintMinimap(zone,waypoint,playerX,playerY){
+  const map=minimapBase(zone);
+  const {layer,scale,padding,width,height,x,y}=map;
+  const mx=value=>x+padding+value*scale,my=value=>y+padding+value*scale;
+  stage.drawImage(layer,x,y,width,height);
+  stage.save();stage.beginPath();stage.rect(x+1,y+1,width-2,height-2);stage.clip();
+  const {vehicles,actions}=zoneObjects(zone);
+  for(const o of vehicles){
+    const vehicle=positionOf(o,trafficClock,zone.width);
+    rect(stage,"#eb986e",mx(vehicle.x+vehicle.w/2)-.8,my(vehicle.y+vehicle.h/2)-.8,1.6,1.6);
+  }
+  for(const o of actions){
+    if(!doorDestination(o))continue;
+    rect(stage,"#eed4a7",mx(o.x+o.w/2)-.7,my(o.y+o.h/2)-.7,1.4,1.4);
+  }
+  if(waypoint)paintCampusWaypoint(stage,mx(waypoint.x+waypoint.w/2),my(waypoint.y+waypoint.h/2),.7);
+  const px=mx(playerX+.5),py=my(playerY+.5);
+  rect(stage,"#172331",px-2,py-2,4,4);
+  rect(stage,"#fff9de",px-1.25,py-1.25,2.5,2.5);
+  stage.restore();
+  return map;
 }
 
 const campusLandmarks=[
@@ -570,7 +651,10 @@ const moves=[
   {control:"up",keys:["w","arrowup"],dx:0,dy:-1},
   {control:"down",keys:["s","arrowdown"],dx:0,dy:1}
 ];
-let movementPriority=[...moves],nextWalkSave=0;
+let movementPriority=[...moves],nextWalkSave=0,queuedTap=null;
+function clearCampusInputs(){
+  keys.clear();controls.clear();queuedTap=null;
+}
 function prioritizeMove(move){
   movementPriority=movementPriority.filter(item=>item!==move);
   movementPriority.unshift(move);
@@ -586,8 +670,12 @@ function frame(now){
     trafficImpact();
     nearbyTrafficSound(now);
     tickSmoking(now);
-    const move=exploringCampus()&&movementPriority.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
+    if(!exploringCampus())queuedTap=null;
+    const move=exploringCampus()&&(
+      movementPriority.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)))??queuedTap
+    );
     if(move&&now-lastWalk>=walkInterval){
+      queuedTap=null;
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
       if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
@@ -783,7 +871,7 @@ window.addEventListener("keydown",event=>{
 });
 window.addEventListener("keyup",event=>keys.delete(event.key.toLowerCase()));
 function releaseCampusControls(){
-  keys.clear();controls.clear();
+  clearCampusInputs();
   if(dirty){save();dirty=false;}
 }
 window.addEventListener("blur",releaseCampusControls);
@@ -793,16 +881,20 @@ for(const button of document.querySelectorAll("[data-move]")){
   const move=moves.find(item=>item.control===direction);
   function holdDirection(){
     controls.add(direction);
+    queuedTap=move;
     prioritizeMove(move);
   }
   button.onpointerdown=event=>{
-    if(!exploringCampus())return;
+    if(event.button!==0||!exploringCampus())return;
     button.setPointerCapture(event.pointerId);
     holdDirection();
   };
   button.onlostpointercapture=()=>controls.delete(direction);
   button.onpointerup=()=>controls.delete(direction);
-  button.onpointercancel=()=>controls.delete(direction);
+  button.onpointercancel=()=>{
+    controls.delete(direction);
+    if(queuedTap===move)queuedTap=null;
+  };
   button.onkeydown=event=>{
     if(event.key!==" "&&event.key!=="Enter")return;
     event.preventDefault();

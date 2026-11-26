@@ -61,12 +61,13 @@ function updateStoryWaypointHint(){
   if(hint.textContent!==label)hint.textContent=label;
   hint.hidden=!label;
 }
-function paintWaypointOnStage(context,px,py,withMinimap){
+function paintWaypointOnStage(context,px,py,minimap){
   const x=clamp(px,10,310);
   const y=clamp(py,10,182);
-  if(x===px&&y===py){paintCampusWaypoint(context,x,y);return;}
+  const underneath=minimap&&x>=minimap.x-6&&y<=minimap.y+minimap.height+6;
+  if(x===px&&y===py&&!underneath){paintCampusWaypoint(context,x,y);return;}
   context.save();
-  context.translate(x,withMinimap&&x>=224&&y<67?67:y);
+  context.translate(x,underneath?minimap.y+minimap.height+7:y);
   context.rotate(Math.atan2(py-96,px-160));
   context.beginPath();
   context.moveTo(6,0);context.lineTo(-4,-4);context.lineTo(-2,0);context.lineTo(-4,4);context.closePath();
@@ -76,9 +77,10 @@ function paintWaypointOnStage(context,px,py,withMinimap){
   context.fill();context.stroke();
   context.restore();
 }
-function paintCampusWaypoint(context,x,y){
+function paintCampusWaypoint(context,x,y,size=1){
   context.save();
   context.translate(x,y);
+  if(size!==1)context.scale(size,size);
   context.beginPath();
   context.moveTo(0,-5);
   context.lineTo(4,0);
