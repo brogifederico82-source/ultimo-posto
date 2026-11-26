@@ -1075,18 +1075,22 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   foreground.sort((a,b)=>a.row-b.row).forEach(o=>o.draw());
   const effect=editing?null:vialeEncounterEffect;
   if(effect?.zone===id){
-    const progress=(performance.now()-effect.start)/700;
+    const progress=(performance.now()-effect.start)/1050;
     if(progress>=1)vialeEncounterEffect=null;
     else{
-      const elapsed=reducedMotion ? .45 : progress;
       const originX=(effect.x+.5)*16,originY=(effect.y+.5)*16;
+      const spread=[.64,.90,.50,1.0][effect.style];
       c.save();
-      c.globalAlpha=1-progress;
-      for(let i=0;i<9;i++){
-        const angle=(i-4)*.15;
-        const distance=(18+i*2)*elapsed;
-        rect(c,"#fff",originX+Math.sin(angle)*distance,
-          originY-Math.cos(angle)*distance+22*elapsed*elapsed,i%2?2:3,2);
+      for(let i=0;i<26;i++){
+        const age=reducedMotion ? .35 : (progress-i%6*.018)/.87;
+        if(age<0||age>=1)continue;
+        const angle=((i*13%27)/26-.5)*spread;
+        const speed=42+i*19%73;
+        const x=originX+Math.sin(angle)*speed*age;
+        const y=originY-Math.cos(angle)*speed*age+95*age*age;
+        const size=Math.max(.8,(2+i%3)*(1-age*.63));
+        c.globalAlpha=(1-age)**1.4*(reducedMotion?1-progress:1);
+        rect(c,i%3?"#fff":"#dddff7",x,y,size,size);
       }
       c.restore();
     }

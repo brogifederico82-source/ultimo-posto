@@ -717,12 +717,19 @@ function polaParty(){
 
 let vialeEncounterEffect=null;
 let vialeGesture=null;
+let vialeSelection=null;
+const vialeOptions=[
+  ["mouth","Bocca","Mouth"],
+  ["hands","Mani","Hands"],
+  ["feet","Piedi","Feet"],
+  ["pecorella","Pecorella","From behind"]
+];
 function vialeEncounterScene(npc){
   const purse=wallet(),cost=5;
   const nadia=npc.uid==="viale-nadia";
   const offer=nadia
-    ?local("«Bocca, mani o piedi? Cinque monete, scegli tu.»","“Mouth, hands, or feet? Five coins. Your choice.”")
-    :local("«Come preferisci, con la bocca, con le mani o con i piedi? Sempre cinque monete.»","“What's your preference: mouth, hands, or feet? It's five coins either way.”");
+    ?local("«Bocca, mani, piedi o pecorella? Cinque monete, scegli tu.»","“Mouth, hands, feet, or from behind? Five coins. Your choice.”")
+    :local("«Come preferisci, con la bocca, con le mani, con i piedi o a pecorella? Sempre cinque monete.»","“What's your preference: mouth, hands, feet, or from behind? It's five coins either way.”");
   const topics=[
     [local("Saluta","Say hello"),nadia
       ?local("Nadia alza la mano. «Ciao. Ti ho già visto rincorrere il 360?»","Nadia waves. “Hi. Have I seen you chasing the 360 before?”")
@@ -741,32 +748,41 @@ function vialeEncounterScene(npc){
   const balance=local("Saldo: ","Balance: ")+purse.coins;
   if(purse.coins<cost)return scene(npc.name,offer+" "+balance+" · "+
     local("Ti servono 5 monete.","You need 5 coins."),...choices);
-  const pay=()=>{
-    if(currentObject()?.uid!==npc.uid||wallet().coins<cost)return;
-    wallet().coins-=cost;
-    vialeEncounterEffect={zone:state.zone,x:state.x,y:state.y,start:performance.now()};
-    sound("buy","map");
-    activeScene=null;
-  };
-  return scene(npc.name,offer+" "+balance,...choices,
-    [local("Bocca · 5 monete","Mouth · 5 coins"),pay],
-    [local("Mani · 5 monete","Hands · 5 coins"),pay],
-    [local("Piedi · 5 monete","Feet · 5 coins"),pay]);
+  const selected=vialeSelection?.npc===npc&&vialeSelection.profile===state?vialeSelection:null;
+  const options=vialeOptions.map(([id,it,en])=>[local(it,en)+" · "+cost+local(" monete"," coins"),()=>{
+    vialeSelection={npc,profile:state,id,label:local(it,en),start:performance.now()};
+  }]);
+  if(!selected)return scene(npc.name,offer+" "+balance,...choices,...options);
+  return scene(npc.name,local("Hai scelto: ","You chose: ")+selected.label+" · "+balance,
+    [local("Schizzo · 5 monete","Splash · 5 coins"),()=>{
+      if(vialeSelection!==selected||currentObject()!==npc||wallet().coins<cost)return;
+      vialeSelection=null;
+      wallet().coins-=cost;
+      vialeEncounterEffect={zone:state.zone,x:state.x,y:state.y,start:performance.now(),
+        style:vialeOptions.findIndex(([id])=>id===selected.id)};
+      sound("buy","map");
+      activeScene=null;
+    }],
+    [local("Cambia scelta","Change choice"),()=>{vialeSelection=null;}]);
 }
 
 // The same cigarette cycle is drawn at map and portrait scale.
 function drawVialeCigarette(c,npc,x,y,scale,now){
   const nadia=npc.uid==="viale-nadia";
   const phase=reducedMotion||!now?0:((now+(nadia?700:2400))%4200)/4200;
-  const raised=phase>.20&&phase<.49;
-  const handX=x+(raised?2:5)*scale,handY=y+(raised?0:4)*scale;
+  const ease=t=>{const p=Math.max(0,Math.min(1,t));return p*p*(3-2*p);};
+  const lift=ease((phase-.13)/.17)*(1-ease((phase-.43)/.20));
+  const handX=x+(5-3*lift)*scale,handY=y+(4-4*lift)*scale;
   rect(c,"#f1e9dd",handX,handY,2*scale,scale);
   rect(c,"#f58c59",handX+2*scale,handY,scale,scale);
-  if(phase>.49){
-    const drift=(phase-.49)*12;
-    rect(c,"#f2e9de8c",x+(4+drift*.6)*scale,y-drift*scale,2*scale,scale);
-    rect(c,"#f2e9de48",x+(5+drift)*scale,y-(2+drift)*scale,2*scale,scale);
+  c.save();
+  for(let i=0;i<3;i++){
+    const age=(phase-.43-i*.055)/.37;
+    if(age<=0||age>=1)continue;
+    c.globalAlpha=.58*Math.sin(Math.PI*age);
+    rect(c,"#f2e9de",handX+(3+age*6)*scale,handY-age*9*scale,(1+age*2)*scale,scale);
   }
+  c.restore();
 }
 
 function nativeScene(id){
@@ -1053,13 +1069,19 @@ function paintSpeaker(now){
   const reacting=elapsed>=0&&elapsed<950;
   const reaction=reacting?vialeGesture.kind:null;
   const bounce=!reducedMotion&&reaction==="laugh"?Math.abs(Math.sin(elapsed/65))*3:0;
+  const selection=vialeSelection?.npc===o&&vialeSelection.profile===state?vialeSelection:null;
+  const motion=selection&&!reducedMotion?Math.min(1,Math.max(0,(now-selection.start)/750)):0;
+  const arc=Math.sin(motion*Math.PI);
+  const pose=selection?vialeOptions.findIndex(([id])=>id===selection.id):0;
+  const lean=(pose===3?-8:pose===1?4:pose===2?-4:2)*arc;
+  const breath=vialeNpc&&!reducedMotion?Math.sin(now/360+(o.uid==="viale-nadia"?0:2))*1.4:0;
   const gesture=moving?[0,-9,4,9][beat]:o.kind==="professor"&&beat===1?2:0;
   const scale=Math.min(width/28,height/22);
   const bustBaseline=height+scale*9.5;
-  sprite(c,a,middle+gesture,bustBaseline-(moving&&beat%2?5:0)-bounce,moving?beat%3:0,
+  sprite(c,a,middle+gesture+lean,bustBaseline-(moving&&beat%2?5:0)-bounce-breath-arc*(pose===2?6:3),moving?beat%3:0,
     reaction==="point"?"left":"down",scale,characterCoat(o));
   if(vialeNpc){
-    drawVialeCigarette(c,o,middle,height*.50-bounce,scale*.72,now);
+    drawVialeCigarette(c,o,middle+lean,height*.50-bounce-breath-arc*(pose===2?6:3),scale*.72,now);
     if(reaction==="wave"||reaction==="point"){
       const point=reaction==="point";
       const handX=middle+(point?-9:7)*scale;

@@ -555,6 +555,7 @@ function focusScene(){
   $(exploringCampus()?"interact":"sceneTitle").focus();
 }
 function closeScene(){
+  vialeSelection=null;
   const shouldSave=Boolean(resumableScene(activeScene));
   activeScene=null;state.chatTopic=null;state.freeMoment=null;
   clearCampusInputs();
@@ -830,7 +831,8 @@ function frame(now){
   if(screen==="game"){
     if(exploringCampus())trafficClock+=delta;
     if(polaThrowAt!==null&&now-polaThrowAt<=1400)paintPolaCeremony(now);
-    if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
+    if(!reducedMotion&&!$("speakerPortrait").hidden&&
+      (currentObject()?.native==="incontro-viale"||Math.floor(now/85)!==Math.floor((now-delta)/85)))paintSpeaker(now);
     trafficImpact();
     tickVillaAda(now);
     tickIdee(now);
