@@ -48,5 +48,34 @@ function furnishCampusInteriors(map){
     add(loft,"loft-proiezione","board","Sala cinema",19,10,{w:4,action:"dialog",text:"La sala proiezioni è dall’altro lato della vetrata. Qui vicino trovi il cabinato."});
     add(loft,"loft-tappeto","paving","Zona di lavoro",6,6,{w:10,h:4,color:"#77748a"});
   }
+  if(loft?.objects.some(o=>o.uid==="loft-coding")&&!loft.objects.some(o=>o.uid==="loft-coding-chair")){
+    add(loft,"loft-coding-chair","chair","Seduta della postazione coding",12,3,{color:"#486d87",solid:true});
+    add(loft,"loft-lab-chair","chair","Seduta del laboratorio",18,3,{color:"#527e72",solid:true});
+    add(loft,"loft-projection-seat-left","sofa","Seduta per la proiezione",16,12,{w:3,color:"#586688",solid:true});
+    add(loft,"loft-projection-seat-right","sofa","Seduta per la proiezione",20,12,{w:3,color:"#586688",solid:true});
+  }
+  return map;
+}
+
+function improveDome2Entrance(map){
+  if(map.zones.td2?.objects.some(o=>o.uid==="td2-student"&&o.native==="calcetto")){
+    delete map.zones.td2;
+    const corridor=map.zones.terra;
+    if(corridor)corridor.objects=corridor.objects.filter(o=>o.uid!=="terra-td2"&&o.uid!=="terra-td2-arrival");
+  }
+  const garden=map.zones.giardino;
+  const door=garden?.objects.find(o=>o.uid==="dome2-door");
+  if(!door||door.x!==20||door.y!==64||garden.width<26||garden.height<74)return map;
+  const add=(uid,kind,name,x,y,extra={})=>{
+    if(garden.objects.some(o=>o.uid===uid))return;
+    garden.objects.push({uid,kind,name,x,y,w:1,h:1,rotation:0,variant:0,color:"#758685",
+      solid:false,action:"",native:"",text:"",target:"",gate:"",missionTarget:"",auto:false,
+      behavior:"idle",speed:1.7,route:[],...extra});
+  };
+  add("dome2-forecourt","paving","Piazzetta The Dome 2",20,65,{w:5,h:2,color:"#b9ac95"});
+  add("dome2-walk-edge","paving","Bordo del vialetto",21,67,{w:3,h:6,color:"#a89d8d"});
+  add("dome2-walk-center","paving","Vialetto The Dome 2",22,67,{w:1,h:7,color:"#c7bba4"});
+  add("dome2-calcetto","student","Matteo · Calcetto",22,65,
+    {color:"#3f84a8",solid:true,action:"native",native:"calcetto"});
   return map;
 }

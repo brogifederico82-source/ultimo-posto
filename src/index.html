@@ -4,7 +4,24 @@
 </style>
 <main>
 <header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><span id="audioFeedback" class="hint" role="status" hidden></span><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
-<section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1 class="arcade-title"><span>Ultimo</span><br><span>Posto</span></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
+<section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1 class="arcade-title" aria-label="Ultimo Posto"><svg viewBox="0 0 347 118" aria-hidden="true" focusable="false">
+<defs><path id="ultimo-posto-lettering" d="
+M14 12V36Q14 46 24 46H36Q46 46 46 36V12
+M72 12V40Q72 46 78 46H102
+M119 12H155M137 12V46
+M181 12V46
+M208 46V12H214L230 29L246 12H252V46
+M282 12H306Q316 12 316 22V36Q316 46 306 46H282Q272 46 272 36V22Q272 12 282 12Z
+M14 103V69H37Q46 69 46 78Q46 87 37 87H14
+M82 69H98Q108 69 108 79V93Q108 103 98 103H82Q72 103 72 93V79Q72 69 82 69Z
+M168 69H143Q134 69 134 77Q134 85 143 85H159Q168 85 168 94Q168 103 159 103H134
+M194 69H230M212 69V103
+M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69Z"/></defs>
+<use href="#ultimo-posto-lettering" class="wordmark-shadow" transform="translate(2 5)"/>
+<use href="#ultimo-posto-lettering" class="wordmark-edge"/>
+<use href="#ultimo-posto-lettering" class="wordmark-blue"/>
+<use href="#ultimo-posto-lettering" class="wordmark-line"/>
+</svg></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
 <section id="creator" hidden>
 <div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
 <div class="grid creator-grid">
@@ -107,7 +124,10 @@
 <div id="cardHand" class="actions hand" aria-label="Le tue carte"></div>
 </div>
 <section id="racePanel" hidden>
+<div class="race-marquee">
 <p id="raceSignal" class="race-signal"></p>
+<p id="raceLeader" class="race-leader"></p>
+</div>
 <div id="raceHorses" class="race-horses"></div>
 <div class="actions">
 <label id="raceStakeLabel"><span id="raceStakeText"></span> <input id="raceStake" type="number" min="0" max="5" value="0" step="1"></label>
@@ -115,10 +135,20 @@
 <output id="raceReturn"></output>
 </div>
 </section>
+<section id="virtualPanel" hidden>
+<p id="virtualScore" class="race-signal"></p>
+<div id="virtualMarkets" class="virtual-markets"></div>
+<div class="actions" id="virtualTicket">
+<label><span id="virtualStakeText"></span> <input id="virtualStake" type="number" min="0" max="5" step="1" value="0"></label>
+<button id="virtualStart" class="primary"></button>
+<output id="virtualReturn"></output>
+</div>
+<ol id="virtualGoals" class="virtual-goals"></ol>
+</section>
 <p id="challengeStatus" class="challenge-result" role="status" tabindex="-1"></p>
 <div class="actions challenge-controls">
 <button id="challengeLeft" aria-label="Sposta a sinistra">←</button><button id="challengeRight" aria-label="Sposta a destra">→</button>
-<button id="challengeShot">Tira</button><button id="challengeReplay" class="primary" hidden>Rivincita</button>
+<button id="calcettoJump" hidden>Salta</button><button id="challengeShot">Tira</button><button id="challengeReplay" class="primary" hidden>Rivincita</button>
 </div></dialog>
 <section id="editor" class="map-editor" hidden>
 <header class="editor-head"><div><h2>Editor del campus</h2><small id="edStatus" role="status">Mappa originale</small></div><div class="actions"><button id="edTest" class="primary">Prova il gioco</button><button id="edJson">Esporta JSON</button><button id="edImport">Importa JSON</button><button id="edHtml">Esporta HTML</button><input type="file" id="edFile" accept=".json,application/json" hidden></div></header>

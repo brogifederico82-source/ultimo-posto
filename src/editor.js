@@ -531,7 +531,7 @@ $("edZone").onchange=()=>{
   es.zone=$("edZone").value;es.selection.clear();es.area=null;es.fit=true;es.cursor=null;refreshEditor();
 };
 $("edNewZone").onclick=()=>{
-  if(Object.keys(campus.zones).length>=32){updateEditorStatus("Hai raggiunto il limite di 32 ambienti.");return;}
+  if(Object.keys(campus.zones).length>=maxCampusZones){updateEditorStatus("Hai raggiunto il limite di "+maxCampusZones+" ambienti.");return;}
   const id="ambiente-"+mapId().slice(0,12);
   edit(()=>{
     campus.zones[id]={name:"Nuovo ambiente",width:24,height:16,ground:"floor",objects:[makeObject("entrance",2,2)],

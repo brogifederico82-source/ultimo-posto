@@ -56,6 +56,7 @@ function renderVialeRace(g){
   $("raceStart").disabled=false;
   $("raceSignal").textContent=local("Griglia di partenza","Starting grid");
   $("raceSignal").dataset.phase="grid";
+  $("raceLeader").textContent=local("Quattro cavalli in pista","Four horses on track");
   stake.oninput=()=>raceReturn(g);
   raceReturn(g);
   $("challengeScore").textContent=local("Monete disponibili: ","Coins available: ")+(testMode?0:wallet().coins);
@@ -112,6 +113,10 @@ function tickVialeRace(g,now){
   const ratio=progress*4-segment;
   const positions=g.paces.map(pace=>pace[segment]+(pace[segment+1]-pace[segment])*ratio);
   const standings=positions.map((_,index)=>index).sort((a,b)=>positions[b]-positions[a]);
+  if(progress>0&&(g.leader!==standings[0]||progress===1)){
+    g.leader=standings[0];
+    $("raceLeader").textContent=local(progress===1?"Vincitore · ":"In testa · ",progress===1?"Winner · ":"Leader · ")+vialeRunners[g.leader].name;
+  }
   for(const [index,lane] of g.lanes.entries()){
     if(!reducedMotion||progress===1)lane.token.style.left=(positions[index]*100)+"%";
     lane.row.classList.toggle("race-leading",progress>0&&standings[0]===index);
