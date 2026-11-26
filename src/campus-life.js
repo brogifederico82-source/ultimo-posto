@@ -370,6 +370,7 @@ function updateCampusPlaces(map){
   map.zones.dome.name="The Dome 2 · Sala studio";
   map.zones.dome2.name="Serra · Spazio polifunzionale";
   update("dome2-door",{name:"Entra nella Serra"});
+  update("polivalente",{name:"Serra · Padiglione ovest"});
   update("dome2-arrival",{name:"Accesso alla Serra"});
   update("dome2-forecourt",{name:"Piazzetta della Serra"});
   update("dome2-walk-center",{name:"Vialetto della Serra"});
@@ -412,7 +413,7 @@ function updateCampusPlaces(map){
   update("giardiniera-nora",{x:22,y:33});
   update("ada-gate",{name:"Villa Ada · Entra nel parco"});
   update("ca-verso-ada",{name:"Villa Ada ←"});
-  add("romania-ada-direzione","sign","Villa Ada ↑",15,56,{action:"dialog",text:"Per Villa Ada segui il vialetto lungo il muro ovest. Il cancello è oltre la piazzetta della Serra."});
+  add("romania-ada-direzione","sign","Villa Ada ↑",16,59,{action:"dialog",text:"Per Villa Ada segui il vialetto lungo il muro ovest. Il cancello è oltre la piazzetta della Serra."});
 }
 const campusPlanting={
   giardino:{
