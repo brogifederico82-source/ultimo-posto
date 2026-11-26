@@ -90,7 +90,7 @@ h1 em { color: var(--gold); }
 .hero canvas {
   inset: 0;
   object-position: 65% center;
-  filter: saturate(1.2) contrast(1.08);
+  filter: saturate(1.38) contrast(1.08);
 }
 .hero-copy {
   background: linear-gradient(90deg, #111925 2%, #111925df 34%, #11192532 76%, transparent);
@@ -540,4 +540,10 @@ button, select, input { font-family: var(--interface); }
   #game.game-reading .scene #speakerPortrait {max-height:22dvh;width:auto;max-width:100%;object-fit:contain;}
   #game.game-reading .scene #polaCeremony {max-height:34dvh;object-fit:contain;}
   #game.game-reading :is(.hud,.journal,.control-guide,.gate-warning) {visibility:hidden;}
+}
+
+
+/* Keep the colour boost on game artwork, away from menus and dialogue text. */
+:is(#stage, #campusOverview, #portrait, #speakerPortrait, #challengeCourt, #virtualPitch) {
+  filter: saturate(1.34) contrast(1.035);
 }

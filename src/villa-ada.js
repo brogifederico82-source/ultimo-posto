@@ -187,101 +187,101 @@ function installVillaAda(map){
 // ---------------------------------------------------------------------------
 Object.assign(conversations,{
   "va-ettore":[
-    "Ettore regge un binocolo e un termos. «Benvenuto a Villa Ada. Io sono il guardaparco: la mia funzione è dire “ve l’avevo detto” con autorità.»",
-    ["Come scappo da un cinghiale?","«In linea retta e senza guardarlo negli occhi. Sono più lenti di te, ma non hanno scadenze. Se ti blocchi tra gli alberi, sei nei guai. Il campus, a ovest, è territorio sicuro: i cinghiali non passano il tornello. Non hanno il badge.»"],
-    ["A cosa servono le mele?","«A negoziare. Un cinghiale con una mela in bocca ha cose più importanti da fare che investirti. Ma sono due mele ogni albero, e solo se ti fermi a raccoglierle. Funziona una volta per mela.»"],
-    ["Perché ci sono i cinghiali?","«Dicono che arrivino dalla zona di Monte Antenne. Io ho una teoria meno scientifica: hanno sentito parlare della mensa del Dome e non si sono più fermati.»"],
-    ["Posso dare da mangiare a Gigi?","«Gigi è l’unico a non averne bisogno. Ha il carattere di chi ha già fatto la tesi. Non attaccherebbe nemmeno se gli rubassi il posto sulla panchina.»"]
+    "Ettore infila il tappo del termos sul binocolo e se ne accorge solo quando provi a parlargli. «Trent’anni alle officine dei tram. In pensione pensavo che mi sarei stancato di alzarmi presto. A quest’ora il parco è tutto mio.»",
+    ["Come scappo da un cinghiale?","«Qui in gioco, tieniti sul sentiero e punta all’uscita per il campus. Il branco si ferma al cancello. Se entri fra gli alberi, ti basta un tronco davanti per perdere il vantaggio.»"],
+    ["A cosa servono le mele?","«Nel gioco puoi usare una mela per distrarre il cinghiale che ti insegue. Da ogni melo ne raccogli due. Là fuori i cartelli dicono di lasciare in pace gli animali.»"],
+    ["Perché ci sono i cinghiali?","«I primi che ricordo li vedevo al mattino, giù verso Monte Antenne. Una volta ho smesso di appuntarmi quanti erano e ho cominciato a segnare dove passavano. Il parco ha strade sue. Noi ne vediamo la metà.»"],
+    ["Posso dare da mangiare a Gigi?","«Lascia perdere. L’ho chiamato Gigi come il mio caporeparto. Tutti e due si fermavano appena sentivano una busta di carta. Tutti e due si offendevano se glielo facevi notare.»"]
   ],
   "va-gigi":[
-    "Gigi alza lo sguardo con la calma di chi ha letto Weber e non ne è rimasto colpito. Non carica. Annusa i tuoi appunti con interesse accademico.",
-    ["Provi a salutarlo","Gigi emette un grugnito basso, che nel linguaggio dei cinghiali sembra voler dire «sì, anche io avevo un esame, poi ho lasciato perdere». Riprende a rovistare in una zolla."],
-    ["Gli offri un appunto di sociologia","Gigi mastica la prima pagina, valuta il contenuto e restituisce la seconda. Sembra un giudizio equilibrato."],
-    ["Gli chiedi del branco","Gigi indica con il muso il sentiero a nord. Poi si sdraia, come per dire: «io lì non ci vado nemmeno per i punti bonus»."]
+    "Gigi sta al sole vicino a un ceppo. Ha terra sulle setole e una foglia incastrata sopra l’orecchio. Alza il muso al rumore delle tue scarpe, poi torna a grattarsi contro il legno.",
+    ["Provi a salutarlo","Gigi smette di grattarsi per un istante. Il naso gli trema. È la sola risposta che ottieni prima che ricominci."],
+    ["Gli offri un appunto di sociologia","Gigi annusa il bordo del foglio, sbuffa e si sposta di un passo. Lo rimetti nello zaino. Sotto la frase sul comportamento razionale è rimasta un’impronta bagnata."],
+    ["Gli chiedi del branco","Da nord arriva un colpo tra le foglie. Gigi alza un orecchio, osserva il sentiero per qualche secondo e si rimette al sole."]
   ],
   "va-ilaria":[
-    "Ilaria stringe un microfono con la spugnetta rossa. «Siamo in diretta su Radio Luiss da Villa Ada! Tra poco intervisto un cinghiale. Se vuoi farmi una domanda per gli ascoltatori, sono tutta orecchi e tutta tracolla.»",
-    ["Che programma è?","«“Fuori Campus, Dentro i Cespugli”. Ho dodici ascoltatori certificati e uno non identificato che chiama ogni lunedì alle 13 per chiedere la sigla di Luiss Weekend.»"],
-    ["Hai già intervistato un cinghiale?","«Uno. Ha risposto solo a una domanda su due, ma almeno ha mantenuto le distanze. Il mio fonico non ha avuto la stessa fortuna con il cavo del microfono.»"],
-    ["Come si entra in redazione?","«Se sai parlare e vuoi imparare ad ascoltare, ci sei già. Poi ti insegniamo a tagliare i silenzi senza far notare che li stavi riempiendo di niente.»"]
+    "Ilaria ha il nastro isolante intorno a una cuffia e un microfono con la spugna rossa. «Aspetta dieci secondi.» Fa cenno di tacere. Nel silenzio si sente una bicicletta sulla ghiaia. «Questo lo tengo. Il resto vediamo.»",
+    ["Che programma è?","«Fuori Campus. Ho cominciato perché mio fratello, quando si è trasferito, mi chiedeva come suonava Roma al mattino. Gli mandavo trenta secondi alla volta. Greta ha sentito l’audio del primo 360 e ci ha costruito una sigla.»"],
+    ["Hai già intervistato un cinghiale?","«Ho intervistato Ettore. A metà è passato un cinghiale. In montaggio avevo tagliato il punto in cui Ettore abbassava la voce. Greta mi ha fatto rimettere la pausa: diceva più di tutta la domanda.»"],
+    ["Come si entra in redazione?","«Porta una registrazione a Greta. Una cosa piccola, tipo dieci secondi fuori da un’aula quando è finita una lezione. Lì ho capito che chi resta indietro spesso ha più da dire di chi esce per primo.»"]
   ],
   "va-matteo":[
-    "Matteo sta accanto a una tenda canadese con un taccuino aperto. «Non sto campeggiando. Faccio osservazione partecipante. Il prof dice che per capire un gruppo devi viverci. Il gruppo è un branco di cinghiali.»",
-    ["Come procede la ricerca?","«Il capobranco è un attore sociale. Gli altri lo seguono con un rispetto che in aula non ho mai visto. L’unica cosa che non rientra nel metodo è che vorrebbero mangiare i miei appunti.»"],
-    ["Che cos’è l’osservazione partecipante?","«Stai nel posto, ascolti, scrivi. Impari a non giudicare subito. Il problema è quando il posto ti guarda a sua volta e inizia a scavare vicino ai tuoi piedi.»"],
-    ["Ti manca il campus?","«Moltissimo. Il barista mi ha scritto: “il tuo caffè ti aspetta”. Gli ho risposto che il mio campo di ricerca è questo. Ha risposto con un cuoricino triste.»"]
+    "Sul taccuino di Matteo ci sono due colonne, «visto» e «supposto». La seconda è piena. «Ferretti mi ha rimandato qua perché nella prima versione della tesina avevo attribuito intenzioni a tutto il branco. Anche a quello che dormiva.»",
+    ["Come procede la ricerca?","«Oggi ho scritto sei righe. Sono poche, però posso spiegare come ci sono arrivato. Per il primo semestre avrei inventato la settima piuttosto che lasciare mezza pagina bianca.»"],
+    ["Che cos’è l’osservazione partecipante?","«Passi tempo in un posto e provi a capire come cambia quando ci sei tu. Con i cinghiali, partecipare vuol dire soprattutto stare abbastanza lontano perché continuino a fare quello che facevano.»"],
+    ["Ti manca il campus?","«Mi manca sapere a che punto della giornata sono dal rumore della macchina del caffè. Stamattina il barista mi ha scritto che il mio tavolo era libero. Gli ho chiesto di lasciarlo a chi ne aveva bisogno.»"]
   ],
   "va-pina":[
-    "Pina tiene al guinzaglio un cane con l’espressione di un professore a metà esame. «Si chiama Durkheim. Morde solo se avverte un calo di coesione sociale.»",
-    ["Ha già incontrato un cinghiale?","«Tre volte. Durkheim li ha guardati e ha fatto finta di avere un impegno. Io non lo giudico: hanno le zanne, lui ha una pensione di anzianità.»"],
-    ["Perché Durkheim?","«Mio marito è sociologo. Io ho solo una vaga idea di cosa sia, ma il cane si è abituato al nome. Quando lo chiamo a casa, si siede e aspetta un saggio.»"],
-    ["Posso accarezzarlo?","«Solo se non parli di anomia. Gli fa venire il nervoso.»"]
+    "Pina ha una piega precisa nei pantaloni e un guinzaglio avvolto due volte al polso. Il cane si chiama Durkheim. «Il giro è lo stesso da vent’anni. Prima lo facevamo in tre. Lui adesso rallenta quando arriviamo alla panchina.»",
+    ["Ha già incontrato un cinghiale?","«Tre volte. La prima credevo che lui volesse fare l’eroe. Si è messo dietro le mie gambe. Ho pensato che, per una volta, avevamo avuto la stessa idea.»"],
+    ["Perché Durkheim?","«Mio marito voleva chiamarlo Emilio, così almeno in casa ne avrebbe avuto uno che lo ascoltava. Poi l’ha chiamato Durkheim davanti a un collega e da allora ci è toccato spiegarlo a ogni veterinario.»"],
+    ["Posso accarezzarlo?","«Chiedilo con la mano. Tienila ferma. Se viene lui, sì. Se si rimette a guardare quella panchina, aspettiamo.»"]
   ],
   "va-davide":[
-    "Davide corre sul posto senza perdere il ritmo. «Sono quaranta minuti che faccio lo stesso giro. Se mi fermo, mi raggiungono. Sto praticamente facendo un tapis roulant con paesaggio.»",
-    ["Da chi scappi?","«Dal branco. Mi hanno visto passare una volta e ora mi riconoscono. Credo di essere il loro programma preferito: “Il podista che non si ferma mai”.»"],
-    ["Ti serve qualcosa?","«Un cinghiale più lento. Oppure un’app che mi dica quanto mancano alla fine del bosco. O una mela. Se ne hai una, tienila per te: potresti averne bisogno più di me.»"],
-    ["Il tuo record?","«Quattro giri completi senza respirare. Ma ho un testimone: un merlo. Non è molto affidabile, però è l’unico che mi ha applaudito.»"]
+    "Davide ferma il cronometro e appoggia un piede sul bordo del sentiero. La scarpa sinistra ha il laccio nuovo. «Quattro mesi fa facevo dieci chilometri. Oggi torno a fare il giro intero. Al mio ginocchio il concetto di progresso piace più che a me.»",
+    ["Da chi scappi?","«Dalla tabella che mi ero fatto a gennaio. Ruggero me l’ha tolta di mano. Glielo rinfaccio ancora, anche se da quando ci alleniamo insieme salgo le scale senza cercare il corrimano.»"],
+    ["Ti serve qualcosa?","«Se torni al campus e incontri Ruggero, digli che mi sono fermato prima che mi facesse male. Gli avevo promesso di provare, non di fare l’eroe.»"],
+    ["Il tuo record?","«La prima volta che ho corso con mio padre mi ha lasciato vincere. Oggi ci credo ancora per quasi metà del giro, soprattutto nel punto in cui mi ha fatto passare.»"]
   ],
   "va-ferretti":[
-    "Il professor Ferretti osserva il bosco con un taccuino. «Studio la dinamica del gruppo. Il capobranco, qui, è quello che tutti guardano prima di decidere se avere paura.»",
-    ["È una lezione di sociologia?","«Una lezione di come si comportano gli individui quando sono in tanti. Nelle assemblee di corso si osserva lo stesso fenomeno, con la differenza che qui nessuno chiede di mettere a verbale.»"],
-    ["Posso citarla all’esame?","«Se mi cita, citi anche i cinghiali. Hanno contribuito di più dei miei assistenti. Ma segni anche che non ho potuto intervistare nessuno: al primo “buongiorno” sono scappati.»"],
-    ["Cosa le ha insegnato Villa Ada?","«Che il campo di ricerca è un’idea. Il vero campo di ricerca è dove nessuno ti ha dato il permesso. Ma consiglio di portare scarpe comode.»"]
+    "Ferretti prende appunti a matita con i polsini rimboccati. Ogni tanto cancella una parola e lascia il resto. «Avevo quasi scritto che si erano coordinati. In realtà, in quel momento erano tutti rivolti verso lo stesso rumore.»",
+    ["È una lezione di sociologia?","«Lo diventa quando sa distinguere ciò che è successo da ciò che avrebbe voluto vedere succedere. A un mio studente l’ho fatto scrivere a due colonne. Oggi provo a farlo anch’io.»"],
+    ["Posso citarla all’esame?","«Citi quello che ha osservato. Se si ricorda solo il mio nome, mi faccia una domanda. È il modo migliore per non trasformarmi in una nota a piè di pagina.»"],
+    ["Cosa le ha insegnato Villa Ada?","«A riconoscere il momento in cui voglio troppo una conclusione. È più facile accorgersene qui. In ufficio, quando mi succede, apro un altro documento.»"]
   ],
   "va-brown":[
-    "Mr Brown regge una mappa del Colosseo capovolta. «Excuse me, is this the Colosseum? A man told me the Colosseum was near a lot of green and some wild boars.»",
-    ["This is Villa Ada","«Ah. And the pizza?» Si ferma, guarda il bosco. «I think I misread the map. The man was selling it to me as an authentic roman experience.»"],
-    ["Where did you meet him?","«Near a tree with a red tag. He had an apple and a very sincere expression. I gave him five euros. He gave me the apple. Now I am confused and slightly hungry.»"],
-    ["Do you want to walk back?","«Yes, please. But if we meet a boar, you go first. I am a tourist, you are a student. It is only fair.»"]
+    "Mr Brown unfolds a paper map along the same worn creases. A street in red ink ends in the middle of a park. «My daughter drew this when she studied in Rome. I asked for the Colosseum this morning and walked here instead. That might be the better day out.»",
+    ["This is Villa Ada","«Villa Ada. Of course. She came here after classes when she wanted to walk without meeting anybody she knew. I used to take that personally when she called home. I think I understand it now.»"],
+    ["Where did you meet him?","«By the entrance. The man who pointed me this way asked which part of Rome my daughter missed most. I said the food. He said, “Walk a little today and ask her again tonight.”»"],
+    ["Do you want to walk back?","«In a minute. I’d like to take a photograph of this bit, so she knows I found it. Could you put the campus entrance on my map? I seem to remember it being a small gate.»"]
   ],
   "ca-pasquale":[
-    "Pasquale ti infila un volantino in mano. «Gruppo di studio che studia solo il giorno prima! Aperto a tutti, prenotazione a scelta. Se ti fermi a leggere, hai già fatto metà del programma.»",
-    ["A che ora ci si trova?","«Alle sette di mattina del giorno dell’esame. Ma senza fretta: alle sette e un quarto cominciamo a decidere cosa portare, alle otto ci rendiamo conto che manca il programma, alle nove siamo in aula.»"],
-    ["Funziona?","«Il novantadue per cento di chi viene prende almeno ventidue. L’altro otto per cento ci dice che era a una festa. È tutto statisticamente significativo, se non ci pensi troppo.»"],
-    ["Posso portare un amico?","«Portane tre. Se siamo in dieci, la responsabilità si diluisce e nessuno controlla chi ha fatto il riassunto.»"]
+    "Pasquale piega il volantino in quattro per fartelo entrare in tasca. «La prima volta a Roma mi sono presentato all’appello senza sapere dove fosse l’aula. Mo’ sul volantino metto prima il posto e poi la materia.»",
+    ["A che ora ci si trova?","«Alle sette del mattino dell’esame. Io arrivo coi cornetti. Se arrivi alle otto ti facciamo posto lo stesso. Una volta hanno aspettato me.»"],
+    ["Funziona?","«A volte passi l’esame, a volte capisci perché l’hai preparato male. La regola è che, se uno esce per ultimo, qualcuno resta fuori ad aspettarlo.»"],
+    ["Posso portare un amico?","«Portalo. E al primo giro fallo parlare. Quello che arriva nuovo di solito ha la domanda che tutti gli altri si vergognano di fare.»"]
   ],
   "ca-greta":[
-    "Greta regola il volume di un mixer immaginario. «Regia di Radio Luiss. Se sentite un fischio improvviso, è il microfono. Se sentite il silenzio, è il tecnico che si è addormentato.»",
-    ["Cosa fai di preciso?","«Tengo insieme il programma. Dico: “tre, due, uno” e poi nessuno ricorda il resto. Il mio lavoro è far sembrare tutto improvvisato quando in realtà è improvvisato davvero.»"],
-    ["Hai una sigla preferita?","«Quella di Luiss Weekend: tre note al sintetizzatore e una porta che sbatte. Ogni volta che la sento, il barista mi guarda con aria complice.»"],
-    ["Posso fare un annuncio in diretta?","«Se mi dai tre secondi di pace e una frase sensata, sì. Ma con l’intera lista degli ospiti non ci riesco: ho già dimenticato come si fa.»"]
+    "Greta riavvolge il cavo delle cuffie senza guardare le mani. «Ho lavorato due anni al call center. So riconoscere una persona che sta per riattaccare dal modo in cui inspira. Con gli ospiti viene comodo.»",
+    ["Cosa fai di preciso?","«Mi accorgo di quando smettono di rispondere come a un esame. Quello è il pezzo che mando in onda. Ilaria una volta me ne ha portato uno di quattro secondi, quasi tutto silenzio.»"],
+    ["Hai una sigla preferita?","«Luiss Weekend. Il rumore in fondo è la porta del 360. Edo voleva una batteria. Gli ho chiesto di aspettare il bus con me cinque minuti.»"],
+    ["Posso fare un annuncio in diretta?","«Sì. Dimmelo prima come lo diresti a una persona sola. Poi lo rifacciamo al microfono. Ti prometto che se ti si spezza la voce, aspettiamo.»"]
   ],
   "ca-mameli":[
-    "La professoressa Mameli sistema gli occhiali sul naso. «Sociologia significa osservare quello che fate quando pensate che nessuno vi guardi. Per esempio, adesso state fingendo di leggere la bacheca.»",
-    ["Che cosa le interessa di più?","«Le piccole abitudini. La fila al bar, il posto che ognuno occupa a lezione, il modo in cui qualcuno saluta e qualcuno no. Dietro ogni gesto c’è una regola non scritta. Quasi sempre è più rigida di quelle scritte.»"],
-    ["Mi consiglia un libro?","«Parta da un classico: Goffman, “La vita quotidiana come rappresentazione”. Poi legga qualcosa che la metta a disagio. Se non la mette a disagio, ha letto la sintesi.»"],
-    ["Che cos’è un fatto sociale?","«Una cosa che esiste perché la pensiamo in molti. Come il posto in prima fila che nessuno occupa e tutti rispettano. Provi a sedersi: capirà cos’è un fatto sociale in meno di un minuto.»"]
+    "La professoressa Mameli ha un segnalibro in un quaderno senza più copertina. «È il mio primo taccuino di ricerca. Mi serve quando mi viene voglia di pensare di aver sempre saputo fare domande.»",
+    ["Che cosa le interessa di più?","«Chi sa che può chiedere una cosa e chi chiede scusa prima ancora di parlare. All’inizio mi interessava la fila al bar. Poi ho notato chi, pur essendo in fila, non riusciva a ordinare.»"],
+    ["Mi consiglia un libro?","«Goffman, La vita quotidiana come rappresentazione. Cominci dalle prime dieci pagine, poi guardi una persona tenere aperta una porta. Torni quando sa raccontarmi perché ha aspettato proprio quello che veniva dopo.»"],
+    ["Che cos’è un fatto sociale?","«Per esempio, il posto in prima fila lasciato libero per una persona che non c’è più. Nessuno ha scritto la regola. Eppure se si siede lì, qualcuno le dirà che è occupato.»"]
   ],
   "ca-rocco":[
-    "Rocco regge una sedia sotto ogni braccio. «Collezione di sedie del campus. Ne ho trovate sei da quando sono arrivato. Cinque appartengono all’Aula Chiesa. La sesta è un mistero.»",
-    ["Perché collezioni sedie?","«Perché ogni sedia ha una storia. Su questa qui, per esempio, si è seduto qualcuno che ha fatto tutto l’anno senza prendere un appunto e ha preso trenta. Ci vorrebbe una targa.»"],
-    ["Posso sedermi?","«Solo se mi dici il programma di diritto pubblico. Altrimenti è una sedia di tutti, e non mi piace che sia di tutti.»"],
-    ["Dove le tieni?","«In garage. Mia madre pensa che faccia l’antiquario. Mio padre pensa che stia studiando ingegneria dei materiali. La verità è nel mezzo, e ha quattro gambe.»"]
+    "Rocco ha una sedia capovolta sulle ginocchia e stringe una vite. «A casa mio padre ripara quelle del circolo. Qui stavano buttando via questa perché ballava un po’. Mi sono fatto lasciare la brugola.»",
+    ["Perché collezioni sedie?","«Tengo quelle che stanno per uscire dal campus. È cominciata dopo un seminario: erano tutti seduti tranne uno che non conosceva nessuno. Io avevo una sedia libera, occupata dallo zaino.»"],
+    ["Posso sedermi?","«Sì. Però dimmi se balla ancora, che a forza di provarla ho iniziato a compensare io.»"],
+    ["Dove le tieni?","«A casa ormai ne ho due. Le altre le lascio nei punti in cui la gente aspetta. Ne avevo messa una vicino al bar, ma qualcuno ce l’ha riportata con un biglietto: “grazie del prestito”.»"]
   ],
   "ca-camilla":[
-    "Camilla agita un cartello con scritto «RIPETIZIONI DI MICRO, PRIMA LEZIONE GRATIS, SECONDA A PREZZO DI MERCATO». Ti guarda come se fossi un bene Giffen.",
-    ["Quanto costa la seconda lezione?","«Dipende dall’elasticità della domanda. Se piangi un po’, scende. Se mi dici che ti serve entro domani, sale. Sono una buona economista e una pessima benefattrice.»"],
-    ["Funziona davvero?","«Quasi tutti i miei studenti passano. Quelli che non passano mi dicono che il professore ha cambiato il programma. È la tragedia dei beni comuni.»"],
-    ["Hai un consiglio gratis?","«Disegna sempre i grafici. Anche quando non servono. Il professore ti guarderà e penserà: questo ragiona per immagini. Poi, se ti va male, hai almeno un bel disegno.»"]
+    "Camilla tiene il cartello delle ripetizioni girato verso il muro mentre rifà un grafico. «Ho preso diciotto al primo appello. In famiglia mi chiamavano quella brava in matematica. Avevo paura di dovergli spiegare che era comunque un voto.»",
+    ["Quanto costa la seconda lezione?","«La seconda la paghi. Se la prima ti serviva solo per capire dove ti eri bloccato, va bene così. Portami la foto di un esercizio sbagliato: da lì capiamo quanto ci vuole.»"],
+    ["Funziona davvero?","«Funziona quando, a metà, inizi a correggere me. Alla fine dell’anno scorso una ragazza ha trovato un errore su una dispensa. Da allora le faccio vedere i grafici prima di usarli.»"],
+    ["Hai un consiglio gratis?","«Sul grafico scrivi prima cosa misurano gli assi. Se non sai come chiamarli, torna al testo. Saltare quel passaggio mi è costato sei punti e un taccuino intero di curve bellissime.»"]
   ],
   "ca-ruggero":[
-    "Ruggero porta un fischietto al collo e uno sguardo da mister. «Sono l’allenatore. Non della squadra del campus: di un’altra squadra. Non l’ho ancora trovata, ma stasera dovrebbe uscire un annuncio.»",
-    ["Che modulo giochi?","«Il modulo è un’attitudine. Quattro-quattro-due se c’è bel tempo, tre-cinque-due se c’è lezione alle nove. Ma senza il pallone, non è un modulo: è un’idea.»"],
-    ["Hai mai allenato qualcuno?","«Una volta ho allenato un cinghiale. Alla terza partita ha capito il fuorigioco, ma poi ha attaccato l’arbitro. Ora non lo chiamano più.»"],
-    ["Mi alleneresti?","«Se mi porti dodici compagni e una porta con le reti, sì. Altrimenti ti insegno a scappare. Alla fine, in un campus, è la skill più utile.»"]
+    "Ruggero ha un fischietto in tasca e una borsa di palloni sgonfi ai piedi. «Allenavo i ragazzini il sabato. Da quando ho smesso di giocare ho scoperto che riesco ancora a capire quando uno sta per farsi male. Lo facevo anch’io, quel passo.»",
+    ["Che modulo giochi?","«Dipende da chi viene. A un terzino che non ha mai toccato palla serve un compagno disposto a ridargliela. Il modulo lo disegno dopo.»"],
+    ["Hai mai allenato qualcuno?","«Sto aiutando Davide a riprendere a correre. La prima volta gli ho chiesto di tornare dopo cinque minuti. Ha fatto quaranta metri e mi ha detto che preferiva così. Da lì siamo partiti davvero.»"],
+    ["Mi alleneresti?","«Sabato porta le scarpe. Se siamo pochi, facciamo due tocchi. Se siamo troppi, la prima squadra la facciamo con chi di solito si sceglie per ultimo.»"]
   ],
   "ca-lucia":[
-    "Lucia spinge un carrello con una torre di libri. «Biblioteca itinerante. Se un libro ti sceglie, non puoi dire di no. Se non ti sceglie, puoi sempre provare a convincerlo.»",
-    ["Che libro mi dai?","«Quello che stai evitando. Di solito è quello giusto. Se non sai quale, guarda quello su cui hai appoggiato il caffè: ha già dimostrato di sopportarti.»"],
-    ["Quanto posso tenerlo?","«Fino a quando non lo capisci. Poi lo restituisci con un biglietto: “mi ha cambiato la vita” oppure “mi ha tolto il sonno”. Le due frasi hanno quasi lo stesso valore.»"],
-    ["Hai un posto preferito?","«Il Matroneo. Si sente anche il cursore. Una volta ho sentito un file Excel andare in errore: mi sono emozionata.»"]
+    "Lucia tiene un carrello di libri con le coste tutte dalla stessa parte. Una raccolta di poesie ha la copertina riparata con il nastro da pacchi. «A casa non avevamo una libreria. I libri stavano nel mobile dei piatti. Ti doveva venire voglia di uno anche apparecchiando.»",
+    ["Che libro mi dai?","«Mi racconti l’ultima cosa che hai letto per conto tuo? Anche la guida del telefono. Se in cambio mi chiedi cosa dovresti leggere, finisce che ti do un libro per il Luissino che penso tu sia.»"],
+    ["Quanto posso tenerlo?","«Una settimana. Se sfori, torna lo stesso. Una persona ha tenuto per sei mesi il mio preferito perché si vergognava del ritardo. L’ho saputo quando ha lasciato il campus.»"],
+    ["Hai un posto preferito?","«Il Matroneo prima delle nove. Ogni tanto vado lì a leggere una cosa mia prima di aprire il carrello. Mi piace ricordarmi il motivo per cui l’ho riempito.»"]
   ],
   "ca-elio":[
-    "Elio fissa il distributore come un custode con una missione. «Sorveglio il distributore dalle otto. Per ora ha restituito il resto una volta sola, ma era in monete da due centesimi.»",
-    ["Perché lo sorvegli?","«Perché ogni tanto sparisce un pacco di patatine. Il sospetto è un cinghiale che entra da Via Panama. Io non ci credo, ma la teoria ha il suo fascino.»"],
-    ["Cosa vende?","«Caffè freddo, caffè caldo, caffè con panna e una cosa chiamata “sorpresa”. L’ultima volta era un tè al limone. Il giorno prima, un minestrone.»"],
-    ["Posso offrirti qualcosa?","«Accetto solo monete da un euro. Il distributore ha un carattere molto selettivo. Come il professore di Statistica.»"]
+    "Elio si è segnato su un foglio i tasti difettosi del distributore. Accanto al B4 c’è scritto «due colpi». «Il tecnico arriva dopo le undici. Quelli che iniziano alle otto ci sono già.»",
+    ["Perché lo sorvegli?","«Una mattina una ragazza ci ha lasciato dentro l’ultimo euro. Doveva stare fino alle sei. Ho aperto la mia borsa e avevo solo un panino. Il giorno dopo me ne ha portato uno uguale.»"],
+    ["Cosa vende?","«Il tè non è male. Quelli che sostengono di voler prendere il caffè nero schiacciano il B4 quando pensano che non li veda.»"],
+    ["Posso offrirti qualcosa?","«Se vai al bar, un bicchiere d’acqua. Non trovo mai il tempo di salire quando sento tutte queste monetine cadere.»"]
   ]
 });
 

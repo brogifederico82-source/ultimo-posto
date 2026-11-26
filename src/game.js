@@ -221,86 +221,218 @@ function avatar(){
 function rect(c,color,x,y,w,h){
   c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);
 }
-function sprite(c,a,x,y,step=0,look="down",size=1,coatOverride){
-  c.save();c.translate(Math.round(x),Math.round(y));c.scale(size,size);
-  const skin=["#f9d3a3","#dc9f62","#ae6e4d","#744432"][a.pelle];
+const spriteFrames=new Map();
+const spriteCanvas={width:48,height:64,anchorX:24,anchorY:60};
+const spriteFields=["pelle","abito","tinta","occhi","corpo","volto","pantaloni","scarpe","zaino",
+  "taglio","dettaglio","motivo","capelli","espressione","baffi","accessorio","lenti","uniforme"];
+function spriteTone(hex,amount){
+  const color=Number.parseInt(hex.slice(1),16);
+  const channels=[16,8,0].map(shift=>Math.round(clamp(((color>>shift)&255)+amount,0,255)));
+  return "#"+channels.map(value=>value.toString(16).padStart(2,"0")).join("");
+}
+function createSpriteFrame(a,step,look,coatOverride){
+  const canvas=document.createElement("canvas");
+  const {width,height,anchorX,anchorY}=spriteCanvas;
+  canvas.width=width;canvas.height=height;
+  const c=canvas.getContext("2d");
+  c.translate(anchorX,anchorY);
+  const block=(color,x,y,w,h)=>rect(c,color,x,y,w,h);
+  const contour=(color,points)=>{
+    c.fillStyle=color;c.beginPath();c.moveTo(...points[0]);
+    for(const point of points.slice(1))c.lineTo(...point);
+    c.closePath();c.fill();
+  };
+  const facing=look==="left"||look==="right",behind=look==="up";
+  const side=facing?1:0;
+  const faceShift=side*4;
+  const skin=["#edbc94","#c98b60","#a26950","#744936"][a.pelle]??"#c98b60";
   const coat=coatOverride??["#b85052","#63946e","#5476a3","#c18c43","#202f51"][a.abito]??"#5476a3";
-  const hair=["#5b352a","#252331","#a34e36","#b8aeb3","#754261"][a.tinta??0];
-  const iris=["#774b32","#507950","#608bab","#c58938"][a.occhi];
-  const ink="#222131",bodyWidth=[10,8,12][a.corpo],headWidth=[10,12,12][a.volto];
-  const shift=look==="left"?-2:look==="right"?2:0;
-  const height=a.corpo===0?1:a.corpo===1?-1:0;
-  rect(c,"#20243177",-8,-1,16,3);
-  rect(c,ink,-5,-5+(step===1?-1:0),4,5);rect(c,ink,1,-5+(step===2?-1:0),4,5);
-  rect(c,ink,-bodyWidth/2-2,-12,bodyWidth+4,8);
-  rect(c,coat,-bodyWidth/2,-12,bodyWidth,7);
+  const hair=["#5b352a","#2e2938","#954933","#9c919b","#754261"][a.tinta]??"#5b352a";
+  const iris=["#633c2c","#436249","#3d617b","#965c31"][a.occhi]??"#633c2c";
   const trousers=["#343845","#415a78","#a89170","#586c54"][a.pantaloni]??"#343845";
-  const shoes=["#222131","#e8dfca","#77472e"][a.scarpe]??"#222131";
-  for(const [leg,lift] of [[-5,step===1?1:0],[1,step===2?1:0]]){
-    rect(c,trousers,leg,-5-lift,4,3);rect(c,shoes,leg,-2-lift,4,2);
+  const shoes=["#29313a","#e8dfca","#77472e"][a.scarpe]??"#29313a";
+  const skinShade=spriteTone(skin,-28),skinLight=spriteTone(skin,29);
+  const coatShade=spriteTone(coat,-23),coatLight=spriteTone(coat,26);
+  const hairShade=spriteTone(hair,-24),hairLight=spriteTone(hair,28);
+  const ink="#252737";
+  const shoulders=([10,8,12][a.corpo]??10)-side;
+  const face=([10,9,11][a.volto]??10)-side;
+  const heightShift=[-2,1,0][a.corpo]??0;
+  const bob=step===0?0:-1;
+  const top=-48+heightShift+bob;
+
+  c.fillStyle="#172b314b";c.beginPath();c.ellipse(0,-1,16,2.6,0,0,Math.PI*2);c.fill();
+  if(look==="left")c.scale(-1,1);
+
+  for(const [leg,offset] of [[-7,step===1?-2:0],[2,step===2?-2:0]]){
+    const reach=facing?(offset?-2:2):0;
+    contour(ink,[[leg-1,-16],[leg+6,-16],[leg+5+reach,-7+offset],[leg+8+reach,-3+offset],
+      [leg+8+reach,offset],[leg-2+reach,offset],[leg-2+reach,-4+offset],[leg,-7+offset]]);
+    contour(trousers,[[leg,-15],[leg+5,-15],[leg+4+reach,-7+offset],[leg+5+reach,-4+offset],[leg+reach,-4+offset]]);
+    block(spriteTone(trousers,26),leg+reach,-8+offset,2,3);
+    block(shoes,leg-1+reach,-3+offset,8,2);
+    block(spriteTone(shoes,36),leg+3+reach,-3+offset,3,1);
+    block("#d2c5ab",leg-1+reach,-1+offset,8,1);
   }
-  if(a.zaino)rect(c,["","#b28b58","#303849","#e3d2a3"][a.zaino],bodyWidth/2,-12,a.zaino===3?3:2,7);
-  if(a.taglio===1){rect(c,ink,-3,-13,6,2);rect(c,"#efdbb7",-2,-11,1,3);rect(c,"#efdbb7",1,-11,1,3);}
-  if(a.taglio===2){rect(c,"#e5d8bf",-3,-12,6,2);rect(c,ink,0,-10,1,5);}
-  if(a.taglio===3){rect(c,"#eddbb5",-bodyWidth/2,-11,2,5);rect(c,"#eddbb5",bodyWidth/2-2,-11,2,5);}
-  rect(c,"#fff1ca30",-bodyWidth/2+1,-7,bodyWidth-2,1);
-  if(a.dettaglio===1)rect(c,"#f0be75",2,-10,2,2);
-  if(a.dettaglio===2){rect(c,"#192736",-4,-10,3,3);rect(c,"#f0be75",-3,-9,1,1);}
-  if(a.dettaglio===3){rect(c,"#ebaa65",0,-12,1,4);rect(c,"#f0e4cf",-1,-9,3,3);}
-  rect(c,skin,-bodyWidth/2-2,-8,2,2);rect(c,skin,bodyWidth/2,-8,2,2);
-  for(let i=-3;i<=3;i+=3){
-    if(a.motivo===1)rect(c,"#e4be8766",i,-11,1,5);
-    if(a.motivo===2)rect(c,"#f7d1a1",i,-8-i%2,1,1);
-  }
-  const top=-23-height;
-  rect(c,ink,-headWidth/2-1,top+1,headWidth+2,10);
-  rect(c,ink,-headWidth/2+(a.volto===2?0:1),top,headWidth-(a.volto===2?0:2),12);
-  rect(c,look==="up"&&a.capelli!==3?hair:skin,-headWidth/2,top+2,headWidth,8);
   if(a.capelli===4||a.capelli===6){
-    const length=a.capelli===6?12:8;
-    rect(c,hair,-headWidth/2-1,top+2,2,length);
-    rect(c,hair,headWidth/2-1,top+2,2,length);
+    const tip=top+(a.capelli===6?33:27);
+    contour(ink,[[-face-2,top+9],[face+2,top+7],[face+3,tip-4],[face,tip],[-face-2,tip-1],[-face-4,tip-6]]);
+    contour(hairShade,[[-face-1,top+10],[face+1,top+9],[face+1,tip-3],[face-2,tip-1],[-face-1,tip-3]]);
+    block(hairLight,-face-2,top+14,2,Math.max(3,tip-top-17));
   }
-  if(a.capelli===5||a.capelli===7)rect(c,hair,2,top-3,a.capelli===5?4:5,a.capelli===5?6:3);
+  if(a.zaino){
+    const bag=["#876849","#51435e","#303849","#dfca9b"][a.zaino]??"#51435e";
+    const left=behind?-8:facing?-13:shoulders-1;
+    contour(ink,[[left,-27+bob],[left+10,-27+bob],[left+13,-23+bob],[left+13,-12],[left+10,-9],[left,-9],[left-2,-13],[left-2,-23+bob]]);
+    block(bag,left,-25+bob,11,14);
+    block(spriteTone(bag,30),left+2,-17+bob,7,4);
+    block(spriteTone(bag,-29),left+2,-16+bob,7,1);
+  }
+  const y=-28+heightShift+bob;
+  contour(ink,[[-6,y], [5,y], [shoulders+1,y+3],[shoulders+5,y+8],[shoulders+4,y+16],
+    [shoulders+1,y+18],[-shoulders-1,y+18],[-shoulders-5,y+16],[-shoulders-5,y+8],[-shoulders-2,y+3]]);
+  contour(coatShade,[[-6,y+1],[5,y+1],[shoulders,y+4],[shoulders+3,y+8],
+    [shoulders+2,y+15],[-shoulders-3,y+15],[-shoulders-4,y+8],[-shoulders-1,y+4]]);
+  contour(coat,[[-6,y+1],[5,y+1],[shoulders-1,y+4],[shoulders-1,y+12],
+    [shoulders,y+16],[-shoulders,y+16],[-shoulders+1,y+7],[-shoulders+1,y+4]]);
+  contour(coatLight,[[-7,y+3],[-4,y+4],[-6,y+9],[-shoulders+1,y+13],[-shoulders+2,y+6]]);
+  block(coatShade,-shoulders+1,y+15,shoulders*2-2,1);
+  for(const hand of [-shoulders-4,shoulders]){
+    block(skinShade,hand,y+11,4,5);block(skin,hand+1,y+11,2,4);
+    block(coatLight,hand,y+10,4,1);
+  }
+  if(!behind){
+    const mid=facing?3:0;
+    block(skinShade,mid-3,y-4,6,5);
+    if(a.taglio===1){
+      contour(coatShade,[[mid-6,y],[mid+7,y],[mid+4,y+4],[mid-3,y+4]]);
+      block("#e7d4ad",mid-3,y+3,1,6);block("#e7d4ad",mid+3,y+3,1,5);
+    }else if(a.taglio===2){
+      contour("#e5d9bc",[[mid-5,y],[mid+5,y],[mid+2,y+7],[mid-1,y+7]]);
+      block(ink,mid,y+7,1,9);block(coatLight,mid-4,y+4,2,5);
+    }else if(a.taglio===3){
+      block(coatLight,-shoulders+1,y+3,3,9);block(coatLight,shoulders-4,y+3,3,9);
+    }else block(coatShade,mid-5,y,10,2);
+    if(a.motivo===1)for(const stripe of [-5,0,5])block(coatLight,stripe,y+7,1,6);
+    if(a.motivo===2)for(const stripe of [-5,0,5])block("#e7c68f",stripe,y+9+(stripe?2:0),1,1);
+    if(a.zaino&&!facing)block(coatShade,-shoulders+1,y+3,2,9);
+    if(a.dettaglio===1)block("#f0be75",mid+4,y+5,3,2);
+    if(a.dettaglio===2){block("#192736",mid-7,y+5,4,3);block("#f0be75",mid-6,y+5,2,1);}
+    if(a.dettaglio===3){
+      contour("#c79977",[[mid-4,y],[mid+4,y],[mid+1,y+9],[mid-1,y+9]]);
+      block("#f0e4cf",mid-2,y+8,4,4);block("#7a8e8d",mid-1,y+9,2,1);
+    }
+    if(a.accessorio===2)block("#ffd184",mid-3,y+2,6,1);
+    if(a.accessorio===5){
+      block("#b73d58",mid-6,y,13,3);block("#df646d",mid-5,y,11,1);
+      block("#ca4c5b",mid-4,y+3,3,6);block("#ef8a7d",mid-3,y+8,2,1);
+    }
+  }else if(a.zaino){
+    const bag=["#876849","#51435e","#303849","#dfca9b"][a.zaino]??"#51435e";
+    contour(ink,[[-6,y+1],[6,y+1],[9,y+5],[9,y+13],[6,y+16],[-7,y+16],[-9,y+13],[-9,y+4]]);
+    block(bag,-7,y+4,14,10);block(spriteTone(bag,26),-6,y+5,12,2);block(spriteTone(bag,-23),-5,y+10,10,3);
+  }
+
+  const cx=faceShift;
+  const jaw=a.volto===1?4:6;
+  if(a.capelli===5||a.capelli===7){
+    contour(ink,[[cx+1,top+1],[cx+3,top-4],[cx+7,top-6],[cx+11,top-4],[cx+12,top+1],[cx+9,top+6]]);
+    contour(hair,[[cx+3,top+1],[cx+5,top-4],[cx+9,top-4],[cx+11,top],[cx+8,top+4]]);
+    block(hairLight,cx+5,top-3,4,1);
+  }
+  contour(ink,[[cx-face+3,top],[cx+face-3,top],[cx+face+1,top+3],[cx+face+2,top+9],
+    [cx+face+2,top+14],[cx+face-1,top+19],[cx+jaw,top+22],[cx-jaw,top+22],
+    [cx-face+1,top+19],[cx-face-2,top+14],[cx-face-2,top+7],[cx-face,top+3]]);
+  contour(skinShade,[[cx-face+3,top+1],[cx+face-4,top+1],[cx+face,top+4],[cx+face+1,top+13],
+    [cx+face-2,top+18],[cx+jaw-1,top+21],[cx-jaw+1,top+21],[cx-face+2,top+18],[cx-face-1,top+13],[cx-face,top+5]]);
+  contour(skin,[[cx-face+4,top+2],[cx+face-4,top+2],[cx+face-1,top+6],[cx+face-2,top+14],
+    [cx+jaw-1,top+19],[cx-jaw+1,top+20],[cx-face+1,top+15],[cx-face,top+7]]);
+  block(skin,cx-face-1,top+11,2,4);block(skinLight,cx-face-1,top+11,1,2);
+
   if(a.capelli!==3){
-    rect(c,hair,-headWidth/2,top+1,headWidth,3);
-    rect(c,hair,a.capelli===1?1:-headWidth/2,top+(a.capelli===2?-1:0),5,5);
-    if(a.capelli===2)rect(c,hair,2,top,3,4);
-  }
-  if(look!=="up"){
-    rect(c,"#743c3936",-headWidth/2+1,top+8,2,1);
-    rect(c,"#743c3936",headWidth/2-3,top+8,2,1);
-    rect(c,"#fff1ca50",-1,top+6,2,2);
-    for(const ex of [-3,2]){
-      rect(c,"#fff2d4",ex+shift,top+5,2,2);rect(c,iris,ex+shift+1,top+5,1,2);
+    if(behind){
+      contour(hairShade,[[-face+3,top+1],[face-3,top+1],[face+1,top+6],[face,top+15],[5,top+20],
+        [-5,top+20],[-face,top+15],[-face-1,top+6]]);
+      contour(hair,[[-face+3,top+2],[face-3,top+2],[face,top+6],[face-2,top+12],[3,top+16],[-5,top+16],[-face+1,top+11]]);
+    }else{
+      const part=a.capelli===1?2:a.capelli===2?-2:0;
+      contour(hairShade,[[cx-face+3,top],[cx+face-2,top],[cx+face,top+4],[cx+face,top+9],[cx+face-3,top+10],
+        [cx+part+3,top+5],[cx+part-2,top+7],[cx-face+1,top+12],[cx-face-1,top+8],[cx-face,top+4]]);
+      contour(hair,[[cx-face+4,top+1],[cx+face-3,top+1],[cx+face-1,top+4],[cx+face-2,top+7],
+        [cx+part+2,top+4],[cx+part-2,top+6],[cx-face+2,top+9],[cx-face,top+6]]);
     }
-    rect(c,"#81493f",shift-1,top+(a.espressione===1?9:8),a.espressione===2?2:3,1);
-    if(a.baffi)rect(c,hair,shift-(a.baffi===3?1:3),top+(a.baffi===3?10:7),a.baffi===3?3:7,a.baffi===1?2:1);
-    if(a.accessorio===6){
-      const lens=["#6bd5da","#e99f50","#ab91de"][a.lenti??0];
-      rect(c,ink,-6+shift,top+4,12,4);
-      rect(c,lens,-5+shift,top+4,10,3);
-      rect(c,"#f0e1c98a",-3+shift,top+4,3,1);
-      rect(c,ink,-1+shift,top+7,2,1);
+    for(const [dx,dy,length] of [[-6,3,4],[-2,2,5],[3,3,3]]){
+      block(hairLight,cx+dx,top+dy,length,1);
+      if(a.capelli===2)block(hairShade,cx+dx+1,top+dy+2,2,1);
     }
-    if(a.accessorio===3 || a.accessorio===4){
-      rect(c,"#ebbf6b",shift+1,top+4,4,1);
-      if(a.accessorio===3)rect(c,"#ebbf6b",shift-4,top+4,4,1);
+  }else block(skinLight,cx-4,top+4,7,2);
+
+  if(!behind){
+    const eyes=facing?[cx+2]:[cx-5,cx+4];
+    for(const ex of eyes){
+      block(hairShade,ex-1,top+9,4,1);
+      block("#f2dfc9",ex-1,top+11,4,2);block(iris,ex+side,top+11,2,2);
+      block("#fff2db",ex+side,top+11,1,1);
+    }
+    block(skinLight,cx+side*2,top+12,2+side,3);
+    block(skinShade,cx+side*3+1,top+15,2,1);
+    block("#be755f70",cx-face+3,top+15,3,1);
+    if(!facing)block("#be755f70",cx+face-5,top+15,3,1);
+    block("#784744",cx+side-2,top+17+(a.espressione===1?1:0),a.espressione===2?3:5,1);
+    if(a.espressione===1)block("#f4cfb3",cx+side-1,top+17,3,1);
+    if(a.baffi===1||a.baffi===2)block(hairShade,cx+side-3,top+16,7,a.baffi===1?1:2);
+    if(a.baffi===3)block(hair,cx+side-2,top+19,4,2);
+    if(a.accessorio===3||a.accessorio===4||a.accessorio===6){
+      const sporty=a.accessorio===6;
+      const frame=sporty?ink:"#9b704c";
+      const lens=["#66c7ca","#d39252","#9889bc"][a.lenti]??"#66c7ca";
+      const lenses=a.accessorio===4?eyes.slice(-1):eyes;
+      for(const ex of lenses){
+        block(frame,ex-2,top+10,6,1);block(frame,ex-2,top+13,6,1);
+        block(frame,ex-2,top+11,1,2);block(frame,ex+3,top+11,1,2);
+        if(sporty){block(lens,ex-1,top+11,4,2);block("#d9ebdf",ex-1,top+11,2,1);}
+      }
+      if(lenses.length===2)block(frame,cx-1,top+11,3,1);
     }
   }
-  if(a.accessorio===1){
-    rect(c,"#573d63",-5,top-4,10,5);rect(c,"#9a6b83",-8,top,16,2);
+  if(a.uniforme){
+    contour(ink,[[cx-11,top+2],[cx-9,top-4],[cx-4,top-6],[cx+7,top-6],
+      [cx+10,top-3],[cx+11,top+1],[cx+13,top+3],[cx+7,top+5],[cx-9,top+4]]);
+    block("#39475e",cx-8,top-4,16,5);
+    block("#64718a",cx-7,top-4,13,1);
+    block("#1b2637",cx-10,top+1,21,2);
+    block("#d0b17c",cx-1,top-3,3,3);
+    block("#f0d89d",cx,top-3,1,2);
+  }else if(a.accessorio===1){
+    contour(ink,[[cx-9,top+1],[cx-7,top-6],[cx+6,top-6],[cx+9,top+1],[cx+13,top+2],[cx+11,top+5],[cx-11,top+5],[cx-13,top+3]]);
+    block("#694c68",cx-6,top-5,12,6);block("#a07790",cx-11,top+2,22,2);
+    block("#c398a2",cx-6,top-5,9,1);block("#433a55",cx-7,top,14,1);
   }
-  if(a.accessorio===2)rect(c,"#ffd184",-3,-12,6,2);
-  if(a.accessorio===5){rect(c,"#ed6373",-6,-13,12,2);rect(c,"#ed6373",-4,-11,3,5);}
+  return canvas;
+}
+function sprite(c,a,x,y,step=0,look="down",size=1,coatOverride){
+  const key=[...spriteFields.map(field=>a[field]),step,look,coatOverride].join("/");
+  let frame=spriteFrames.get(key);
+  if(!frame){
+    frame=createSpriteFrame(a,step,look,coatOverride);
+    if(spriteFrames.size>=384)spriteFrames.delete(spriteFrames.keys().next().value);
+    spriteFrames.set(key,frame);
+  }
+  const {width,height,anchorX,anchorY}=spriteCanvas;
+  const scale=size/2;
+  c.save();c.imageSmoothingEnabled=false;
+  c.drawImage(frame,Math.round(x)-anchorX*scale,Math.round(y)-anchorY*scale,width*scale,height*scale);
   c.restore();
 }
 function preview(){
   const c=$("portrait").getContext("2d"), a=avatar();
-  rect(c,"#142337",0,0,240,144);
-  c.fillStyle="#29405a";c.beginPath();c.ellipse(120,69,63,55,0,0,Math.PI*2);c.fill();
-  rect(c,"#101b2a",74,128,92,3);
-  sprite(c,a,120,126,0,"down",4.7);
+  const backdrop=c.createLinearGradient(0,0,240,144);
+  backdrop.addColorStop(0,"#192b42");backdrop.addColorStop(1,"#4b5769");
+  c.fillStyle=backdrop;c.fillRect(0,0,240,144);
+  c.fillStyle="#d1b28542";c.beginPath();c.ellipse(120,70,61,55,0,0,Math.PI*2);c.fill();
+  rect(c,"#d1b28552",45,11,150,1);rect(c,"#d1b28552",45,133,150,1);
+  rect(c,"#172534",80,127,80,3);
+  sprite(c,a,120,123,0,"down",4.15);
   $("ticket").textContent=badgeName();
   $("ticketNumber").textContent=local("Matricola di gioco ","Game student ID ")+draftMatricola;
 }
@@ -486,13 +618,13 @@ function parenzoSeminar(){
     return scene("Parenzo · Esito del seminario",text+" La tappa resta completata e Green Mobility è disponibile a Romania.",reset);
   }
   if(!attempt.prep)return scene("Parenzo · Preparazione",
-    "Via Parenzo 11. In T02 il docente riapre il caso della bici concordata in chat. Consegna un foglio a testa. «Avete cinque minuti. Da dove iniziate?»",
+    "A Parenzo il docente posa sul tavolo la stampa di una chat. Una bici, un prezzo e un ultimo «ci sentiamo». «Al mio primo tirocinio ho consigliato a un cliente di firmare prima di leggere l’ultima riga. Oggi quella riga la leggiamo insieme. Da dove iniziate?»",
     ...Object.entries(seminarPrep).map(([id,option])=>[option.label,()=>seminarChoice("prep",id,option)]));
   if(!attempt.response)return scene("Parenzo · L’obiezione di Dario",
     (attempt.prep==="timeline"?"Hai segnato l’ordine dei messaggi. ":"Hai annotato le differenze fra i due racconti. ")+
-    "Dario, uno studente al tavolo, indica il telefono. «Aspetta. Che il prezzo fosse chiaro non vuol dire che si fossero già messi d’accordo.»",
+    "Dario volta la stampa e indica l’ultimo messaggio. «Al banco del mercatino di mio padre si concordava il prezzo anche solo per tenere da parte una bici. Qui come facciamo a sapere che intendessero già venderla?»",
     ...Object.entries(seminarResponses).map(([id,option])=>[option.label,()=>seminarChoice("response",id,option)]));
-  return scene("Parenzo · Presentazione","Il docente ti passa il pennarello. Dario resta al tavolo ad ascoltare. Hai una frase per la tesi e una per il dubbio.",
+  return scene("Parenzo · Presentazione","Il docente ti passa il pennarello. Dario sposta la sedia verso la lavagna e ti lascia finire. Hai una frase per la tesi e una per il punto su cui lui ti ha fatto cambiare idea, o su cui continui a dissentire.",
     ["Presenta il caso",()=>{
       attempt.outcome=attempt.prep==="timeline"&&attempt.response==="prove"?"A":attempt.response==="ascolto"?"B":"C";
       const result=seminarOutcomes[attempt.outcome];
@@ -520,7 +652,7 @@ function polaParty(){
   if(!polaAuthorized())return scene("Pola · Accesso",
     "La festa è nel cortile riservato agli invitati. Completa il seminario e l’abilitazione Green Mobility per arrivare con la tua tessera.");
   if(has("Festa a Pola"))return scene("Pola · Dopo il brindisi",
-    "Gli invitati applaudono davanti al Tinello Alberoni. La villa resta chiusa. Viola, Serra e Tommaso ti aspettano ancora a Romania.",
+    "Davanti al Tinello Alberoni Chiara ripiega la lista degli invitati. «Ora ci siamo tutti.» Tommaso ha lasciato il registratore acceso un momento in più: sul nastro, dopo il discorso, si sente una sedia che qualcuno avvicina al tavolo. Viola, Serra e Tommaso ti aspettano a Romania.",
     [local(state.polaCapThrown?"Rilancia il tocco":"Lancia il tocco",state.polaCapThrown?"Throw the cap again":"Throw your graduation cap"),()=>{
       if(!state.polaCapThrown)record("Pola · Hai lanciato il tocco tra gli applausi.");
       state.polaCapThrown=true;
@@ -528,7 +660,7 @@ function polaParty(){
       chime([60,64,67,76],.085);
     }]);
   if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
-    "Mostri la tessera all’accesso della festa. La villa resta chiusa. In giardino, Chiara ti indica la fontana e una scatola di sedie pieghevoli. «Mi dai una mano prima del discorso?»",
+    "Nel cortile Chiara conta le sedie pieghevoli e ne rimette una in fila. «Alla laurea di mia sorella sono arrivata quando stavano già sparecchiando. Da allora chiedo sempre chi deve ancora arrivare.» Ti porge la lista degli invitati. «Mi dai una mano prima del discorso?»",
     ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
       state.graduationSpeech=choice.speech;state.polaPreparation=id;record("Pola · "+choice.line);
     }]));
@@ -734,10 +866,16 @@ const campusPortraits={
   "prof-storia":{capelli:4,tinta:2,pelle:0,occhi:1,volto:0,accessorio:3,taglio:2,abito:4},
   "tutor-viola":{capelli:7,tinta:1,pelle:2,occhi:0,volto:1,accessorio:5,taglio:1,abito:1},
   "giardiniera-nora":{capelli:5,tinta:0,pelle:1,occhi:2,volto:0,accessorio:1,taglio:1,abito:1},
-  "radio-tommaso":{capelli:1,tinta:2,pelle:0,occhi:2,volto:2,accessorio:0,taglio:3,abito:3},
   gymbro:{capelli:3,pelle:2,corpo:2,volto:2,occhi:0,accessorio:0,taglio:1,abito:0},
   "parenzo-interno-npc":{capelli:1,tinta:3,pelle:1,occhi:0,volto:2,accessorio:3,taglio:2,abito:4},
-  "pola-cortile-npc":{capelli:6,tinta:0,pelle:3,occhi:3,volto:1,accessorio:0,taglio:2,abito:0}
+  "pola-cortile-npc":{capelli:6,tinta:0,pelle:3,occhi:3,volto:1,accessorio:0,taglio:2,abito:0},
+  "radio-tommaso":{capelli:1,tinta:2,pelle:0,occhi:2,volto:2,accessorio:0,taglio:3,abito:3,zaino:2,dettaglio:2},
+  "ca-greta":{capelli:4,tinta:4,pelle:1,occhi:3,volto:1,accessorio:3,taglio:1,abito:2,dettaglio:2},
+  "ca-mameli":{capelli:6,tinta:3,pelle:2,occhi:0,volto:0,accessorio:5,taglio:0,abito:1,motivo:1},
+  "giardino-lidia":{capelli:5,tinta:1,pelle:1,occhi:0,volto:2,accessorio:0,taglio:2,abito:0,dettaglio:1},
+  "dome2-calcetto":{capelli:3,tinta:1,pelle:2,occhi:3,volto:2,corpo:2,accessorio:0,taglio:3,abito:4,scarpe:1},
+  "giardini-vivi-marta":{capelli:7,tinta:3,pelle:1,occhi:1,volto:0,accessorio:1,taglio:0,abito:1,dettaglio:1},
+  "pola-cortile-foto":{capelli:2,tinta:4,pelle:3,occhi:0,volto:1,accessorio:3,taglio:0,abito:4,zaino:2}
 };
 function characterSeed(uid){
   let hash=2166136261;
@@ -747,7 +885,9 @@ function characterSeed(uid){
 function characterAppearance(o){
   const seed=characterSeed(o.uid);
   const role=o.kind;
-  if(role==="guard")return {...guard,taglio:2,dettaglio:3,pantaloni:0};
+  if(role==="guard")return {...guard,uniforme:true,taglio:2,dettaglio:3,pantaloni:0,abito:4,
+    pelle:(seed>>>8)%4,volto:(seed>>>20)%3,occhi:(seed>>>11)%4,tinta:(seed>>>18)%4,
+    baffi:seed%3===0?2:0,espressione:1};
   const professor=role==="professor";
   return {...student,capelli:(seed>>>3)%8,pelle:(seed>>>8)%4,occhi:(seed>>>11)%4,
     tinta:professor&&seed%3===0?3:(seed>>>18)%5,volto:(seed>>>20)%3,
@@ -755,6 +895,8 @@ function characterAppearance(o){
     accessorio:role==="sportGlasses"?6:professor&&seed%2===0?3:(seed>>>16)%6,
     taglio:professor?2:(seed>>>23)%4,pantaloni:(seed>>>26)%4,
     scarpe:(seed>>>28)%3,zaino:professor?0:(seed>>>26)%4,lenti:o.variant,
+    espressione:(seed>>>17)%3,baffi:seed%11===0?3:0,
+    motivo:seed%7===0?2:seed%5===0?1:0,dettaglio:professor?0:seed%4,
     ...campusPortraits[o.uid]};
 }
 function characterCoat(o){
@@ -773,14 +915,23 @@ function paintSpeaker(now){
   const moving=o.native==="trend";
   const a=characterAppearance(o);
   const {width,height}=canvas;
-  const middle=width/2, baseline=height-17;
-  c.fillStyle="#172331";c.fillRect(0,0,width,height);
-  c.fillStyle=colors[seed%4];c.beginPath();c.ellipse(middle,height*.45,76,55,0,0,Math.PI*2);c.fill();
-  c.fillStyle="#23364a";c.fillRect(0,baseline-17,width,34);
-  c.fillStyle="#101923";c.beginPath();c.ellipse(middle,baseline+4,64,10,0,0,Math.PI*2);c.fill();
-  const gesture=moving?[0,-10,4,10][beat]:o.kind==="professor"&&beat===1?2:0;
-  sprite(c,a,middle+gesture,baseline-(moving&&beat%2?6:0),moving?beat%3:0,"down",4.55,
-    characterCoat(o));
+  const middle=width/2;
+  const backdrop=c.createLinearGradient(0,0,width,height);
+  backdrop.addColorStop(0,"#172638");backdrop.addColorStop(1,colors[seed%4]);
+  c.fillStyle=backdrop;c.fillRect(0,0,width,height);
+  const panelWidth=width*.72;
+  rect(c,"#e4c49736",middle-panelWidth/2,10,panelWidth,height-14);
+  rect(c,"#192b3a85",middle-panelWidth/2+3,13,panelWidth-6,height-20);
+  for(const offset of [-1,1]){
+    rect(c,"#e7c69356",middle+offset*panelWidth/2-(offset===1?1:0),11,1,height-18);
+    rect(c,"#efe1be30",middle+offset*(panelWidth/2-8),15,2,height-28);
+  }
+  const gesture=moving?[0,-9,4,9][beat]:o.kind==="professor"&&beat===1?2:0;
+  const scale=Math.min(width/28,height/22);
+  const bustBaseline=height+scale*9.5;
+  sprite(c,a,middle+gesture,bustBaseline-(moving&&beat%2?5:0),moving?beat%3:0,"down",scale,characterCoat(o));
+  rect(c,"#d5b481",middle-panelWidth/2,height-9,panelWidth,1);
+  rect(c,"#172331",0,height-8,width,8);
 }
 let polaThrowAt=null;
 function paintPolaCeremony(now){
@@ -803,7 +954,8 @@ function paintPolaCeremony(now){
   for(let row=0;row<2;row++)for(let i=0;i<8;i++){
     const x=53+i*52+(row?10:0),y=168+row*30;
     rect(c,"#655047",x-10,y-5,20,9);
-    sprite(c,{...student,capelli:i%4,pelle:(i+row)%4,abito:(i+row)%5},x,y,launched&&!reducedMotion&&t<1?Math.floor(now/110)%3:0,"up",1.5);
+    const guest=characterAppearance({uid:"pola-invitato-"+row+"-"+i,kind:"student",variant:0});
+    sprite(c,guest,x,y,launched&&!reducedMotion&&t<1?Math.floor(now/110)%3:0,"up",1.5);
   }
   sprite(c,state.avatar,240,127,0,"down",2.1);
   const capX=240+86*t,capY=91-190*t*(1-t)+31*t;
