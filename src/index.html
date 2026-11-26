@@ -1,5 +1,45 @@
 <!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Viale Romania · Ultimo posto</title>
 <meta name="game-release" content="<!-- BUILD_RELEASE -->">
+<script>
+// Rete di sicurezza: se il gioco va in errore all'avvio mostra cosa è successo (e permette di svuotare la cache).
+(function(){
+  var shown=false;
+  function box(text){
+    if(shown||!document.body){return false;}
+    shown=true;
+    var el=document.createElement("div");
+    el.setAttribute("role","alert");
+    el.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:2147483647;background:#7a1f1f;color:#fff;font:14px/1.45 system-ui,sans-serif;padding:12px 14px;box-shadow:0 -4px 18px rgba(0,0,0,.5);max-height:45vh;overflow:auto";
+    var msg=document.createElement("div");msg.textContent=text;msg.style.cssText="margin-bottom:10px;word-break:break-word";
+    var row=document.createElement("div");row.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+    function btn(label,fn){var b=document.createElement("button");b.type="button";b.textContent=label;b.style.cssText="min-height:44px;padding:8px 14px;font:700 14px system-ui,sans-serif;background:#fff3d6;color:#3a1010;border:0;border-radius:6px";b.onclick=fn;row.appendChild(b);}
+    btn("Svuota la cache e riavvia",function(){
+      var done=function(){location.reload();};
+      var work=[];
+      if(navigator.serviceWorker&&navigator.serviceWorker.getRegistrations)work.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));
+      if(window.caches&&caches.keys)work.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));
+      Promise.all(work).then(done,done);
+    });
+    btn("Copia l'errore",function(){try{navigator.clipboard.writeText(text);}catch(e){}});
+    btn("Chiudi",function(){el.remove();});
+    el.appendChild(msg);el.appendChild(row);document.body.appendChild(el);
+    return true;
+  }
+  function report(kind,message,where){
+    var meta=document.querySelector('meta[name="game-release"]');
+    var text="Il gioco ha avuto un problema ("+kind+"): "+message+(where?" · "+where:"")+" · versione "+(meta?meta.content:"?")+" · "+navigator.userAgent;
+    (window.__erroriAvvio=window.__erroriAvvio||[]).push(text);
+    if(!box(text)){document.addEventListener("DOMContentLoaded",function(){box(text);});}
+  }
+  window.addEventListener("error",function(e){
+    if(!e||!e.message||/ResizeObserver loop/.test(e.message))return;
+    report("errore",e.message,(e.filename?e.filename.split("/").pop():"")+":"+e.lineno+":"+e.colno);
+  });
+  window.addEventListener("unhandledrejection",function(e){
+    var r=e&&e.reason;(window.__erroriAvvio=window.__erroriAvvio||[]).push("promessa rifiutata: "+(r&&r.message?r.message:String(r)));
+  });
+})();
+</script>
 <meta name="theme-color" content="#182725"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 <!-- BUILD_STYLES -->
