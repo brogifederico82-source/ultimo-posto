@@ -105,7 +105,7 @@ const conversations={
   "prof-vitali":[
     "La professoressa Vitali cammina verso The Dome con una cartellina sotto il braccio. «Mi manca un’aula e ho già trovato tre studenti che mi chiedono se l’esame sarà corto.»",
     ["Posso chiederle una cosa sul commerciale?","«Certo. Se mi cita un articolo, però, poi le chiedo di farmi un esempio.»"],
-    ["Sa dov’è la mensa?","«Dal cortile dell’edificio principale. Se mi vede più tardi, probabilmente sto cercando lo stesso ingresso.»"]
+    ["Sa dov’è la mensa?","«Dal cortile dell’edificio principale entri nell’atrio centrale. Per la mensa chieda al personale.»"]
   ],
   "prof-leone":[
     "Il professor Leone guarda il marciapiede. «Sto contando quanti studenti arrivano dalla navetta con il quaderno già aperto. Per ora il campione è minuscolo.»",
@@ -119,7 +119,7 @@ const conversations={
   ],
   "panama-nico":[
     "«Mi hanno detto “facciamo un giro corto”. Siamo già alla seconda panchina e abbiamo saltato il ritorno.»",
-    ["Come si torna a Viale Romania?","«Dal vialetto interno gira verso la mensa, poi costeggia l’edificio principale fino al cancello.»"],
+    ["Come si torna a Viale Romania?","«Dal vialetto interno gira verso l’atrio, poi costeggia l’edificio principale fino al cancello.»"],
     ["Dove trovi un posto tranquillo?","«Vicino alle aiuole, finché non arrivano quelli che ripetono in viva voce.»"]
   ],
   "giardino-lidia":[
@@ -553,16 +553,10 @@ function minimapBase(zone){
   rect(c,palette[zone.ground],0,0,zone.width,zone.height);
   if(zone===campus.zones.giardino&&zone.width===144){
     rect(c,"#53595b",0,0,zone.width,zone.height);
-    c.beginPath();campusOutline.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
+    c.beginPath();campusOutlineFor(zone).forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
   }
   for(const [key,tile] of tiles){
     if(tile.kind!==zone.ground)rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
-  }
-  const panama=zoneObjects(zone).byId.get("entry-from-panama");
-  if(zone===campus.zones.giardino&&zone.width===144&&panama?.x===72&&panama.y===47){
-    c.save();c.scale(1/16,1/16);paintRomaniaEdges(c);
-    if(hasIntegratedEntrance())paintVialeRoad(c,0,zone.width);
-    c.restore();
   }
   for(const o of zoneObjects(zone).solid){
     if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);
@@ -599,15 +593,19 @@ const campusLandmarks=[
   ["giardino-uscita","Viale Romania · Ingresso","Viale Romania · Entrance"],
   ["giardino-evento","A200 · Aula Chiesa","A200 · Aula Chiesa"],
   ["giardino-terra","Edificio principale","Main building"],
-  ["giardino-dome","The Dome 1","The Dome 1"],
-  ["dome2-door","The Dome 2","The Dome 2"],
+  ["giardino-dome","The Dome 2","The Dome 2"],
+  ["dome2-door","Serra","Greenhouse"],
   ["polivalente-door","Aula Polivalente","Multipurpose hall"],
   ["giardino-caffe","Bar e terrazza giochi","Café and games terrace"],
   ["giardino-lettura","Pergola di lettura","Reading pergola"],
   ["campus-extra-1027","Ingresso di Via Panama","Via Panama entrance"],
   ["loft-entry","Aula studio · Portico","Study room · Portico"],
   ["navetta-sign","Piazzola navetta LUISS","LUISS shuttle stop"],
-  ["giardino-mensa","Mensa","Cafeteria"],
+  ["giardino-mensa","Atrio centrale","Central atrium"],
+  ["viale-luiss-shop","LUISS Shop","LUISS Shop"],
+  ["ada-gate","Villa Ada","Villa Ada"],
+  ["radio-luiss-van","Furgone Radio Luiss","Radio Luiss van"],
+  ["orto-luiss","Orto Luiss","Luiss garden"],
   ["panama-promenade","Vialetto interno di Via Panama","Via Panama inner path"],
   ["quartiere-sud","Giardino delle panchine","Garden benches"],
   ["bosco-studio","Tavoli sotto i pini","Tables under the pines"],
