@@ -7,8 +7,8 @@ const catalog={
   "Campus LUISS":[["domeHall","Padiglione metallico","edifici","#52616a",7,4,true],["chapel","Aula Chiesa","edifici","#ad6c51",6,5,true],["faculty","Edificio in cotto","edifici","#ae6b50",8,4,true],["court","Campo sportivo","decori","#527d72",7,4]],
   "Viale Romania":[["shelter","Pensilina","edifici","#466e7a",4,2,true],["pillar","Pilastro con urna","edifici","#e9e4d3",1,3,true],["booth","Guardiola","edifici","#ddc4a0",3,3,true],["pine","Pino marittimo","decori","#526d49",3,3],["cypress","Cipresso","decori","#355246",1,2],["luiss","Scritta LUISS","decori","#325988",5,2],["zebra","Strisce pedonali","decori","#e4deca",1,3],["bus","Autobus ATAC 360","persone","#a84a45",5,1],["shuttle","Navetta LUISS","persone","#e4e5da",4,1,true],["car","Auto","persone","#b96054",2,1],["scooter","Motorino","persone","#e8bc45"]],
   "Architettura":[["wall","Muro","edifici","#887870",1,1,true],["door","Porta","edifici","#ac754d"],["window","Finestra","edifici","#78a5a5"],["stairs","Scale","edifici","#a09b88"],["roof","Edificio","edifici","#ab6654",4,3,true]],
-  "Terreno":[["grass","Prato","terreno","#476f4d"],["road","Asfalto","terreno","#687078"],["paving","Pavimentazione","terreno","#a59a87"],["path","Sentiero","terreno","#b3a18a"],["floor","Pavimento interno","terreno","#806a65"]],
-  "Vegetazione":[["orangeTree","Arancio","decori","#38674a",2,2,true],["roseBed","Roseto","decori","#c85c76",2,1],["flowerMeadow","Aiuola mista","decori","#dbab73",2,1],["tree","Albero","decori","#4c7553",1,1,true],["hedge","Siepe","decori","#557c4e",1,1,true],["bush","Cespuglio","decori","#648052"],["flowers","Fiori","decori","#d8a86f"]],
+  "Terreno":[["grass","Prato","terreno","#42774e"],["road","Asfalto","terreno","#687078"],["paving","Pavimentazione","terreno","#a59a87"],["path","Sentiero","terreno","#b3a18a"],["floor","Pavimento interno","terreno","#806a65"]],
+  "Vegetazione":[["orangeTree","Arancio","decori","#34754b",2,2,true],["roseBed","Roseto","decori","#d75f81",2,1],["flowerMeadow","Aiuola mista","decori","#eab266",2,1],["tree","Albero","decori","#4c7553",1,1,true],["hedge","Siepe","decori","#557c4e",1,1,true],["bush","Cespuglio","decori","#648052"],["flowers","Fiori","decori","#d8a86f"]],
   "Arredamento":[["radioVan","Furgone di Radio Luiss","arredi","#ad3039",3,2,true],["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
   "Università":[["classroom","Aula","edifici","#a67762",3,2,true],["board","Lavagna","arredi","#487062"],["vending","Distributore","arredi","#9b6456",1,1,true],["turnstile","Tornello","edifici","#84958a"],["library","Biblioteca","edifici","#897460",3,2,true]],
   "Intrattenimento":[["foos","Biliardino","arredi","#48866d",2,1,true],["ping","Ping pong","arredi","#397d82",2,1,true],["bris","Tavolo da briscola","arredi","#80694b",2,1,true],["poker","Tavolo da poker","arredi","#33725e",2,1,true]],
@@ -423,7 +423,7 @@ function groundTile(c,kind,x,y,hex,variant=0){
   if(kind!=="grass"&&kind!=="path"&&(x+y)%2===0)rect(c,"#151d2014",x*16,y*16,16,16);
   if(kind==="grass"){
     const patch=Math.sin(x*.38+y*.19)+Math.cos(y*.41-x*.12);
-    rect(c,patch>0?"#a9af5820":"#244d4020",x*16,y*16,16,16);
+    rect(c,patch>0?"#acd45125":"#174f4227",x*16,y*16,16,16);
     rect(c,"#d5df9b31",x*16+(x*5+y*3)%13,y*16+5,2,1);
     rect(c,"#17372d48",x*16+4,y*16+12,3,2);
   }else if(kind==="path"){
@@ -441,9 +441,9 @@ function groundTile(c,kind,x,y,hex,variant=0){
   }
 }
 const vialeShopFronts={
-  rosticceria:{sign:"ROSTICCERIA",roof:"#a7654d",trim:"#723d34",stucco:"#b99775",cloth:"#a54e42",light:"#f8cf8b",display:"#a66a46"},
-  cavalli:{sign:"CORSE 360",roof:"#62536d",trim:"#292649",stucco:"#7d707e",cloth:"#665392",light:"#eed4fa",display:"#394665"},
-  tabaccheria:{sign:"TABACCHI",roof:"#5b7670",trim:"#294643",stucco:"#95a193",cloth:"#415d58",light:"#e9edd4",display:"#4c6461"}
+  rosticceria:{sign:"ROSTICCERIA",roof:"#b96546",trim:"#773b33",stucco:"#c49b73",cloth:"#b74f43",light:"#f8cf8b",display:"#a66a46"},
+  cavalli:{sign:"CORSE 360",roof:"#735a8e",trim:"#32284d",stucco:"#877795",cloth:"#7352a2",light:"#eed4fa",display:"#394665"},
+  tabaccheria:{sign:"TABACCHI",roof:"#4a7c70",trim:"#224e49",stucco:"#92b09b",cloth:"#357062",light:"#e9edd4",display:"#4c6461"}
 };
 function paintVialeShop(c,o,w,h,now){
   const theme=vialeShopFronts[o.native];
@@ -627,13 +627,13 @@ function drawObject(c,o,now=0,editing=false){
         crown(color,7.5,6,6.3,5.3);
         crown("#527d4c",5.6,4.5,3.6,3.4);
         crown("#426d49",10.3,6.5,4,3.9);
-        crown("#638854",4.7,3.7,2.4,1.65);
+        crown("#79a356",4.7,3.7,2.4,1.65);
         crown("#385b43",8.2,9.2,4.1,2.55);
         for(const [x,y] of [[3,5],[5,8],[7,4],[9,6],[11,5],[13,8],[7,11]]){
           box("#6f9255",x,y,2,1);box("#4c7749",x+1,y+1,1,1);
         }
         for(const [x,y] of [[4,4],[7,2],[10,4],[6,7],[12,7],[8,10],[3,8]]){
-          box("#b97039",x,y,2,2);box("#e9a44d",x,y,2,1);box("#ffd079",x,y,1,1);
+          box("#c26a2f",x,y,2,2);box("#f6a23b",x,y,2,1);box("#ffd278",x,y,1,1);
         }
         break;
       }
@@ -646,7 +646,7 @@ function drawObject(c,o,now=0,editing=false){
         for(const [i,[x,y]] of [[2,7],[4,4],[6,8],[8,5],[10,7],[12,4],[13,9]].entries()){
           box("#4c7551",x,y+1,2,4);
           box("#73905d",x-1,y+2,2,1);
-          const bloom=roses?(i%3===0?"#a34058":color):[color,"#d9ccaf","#a490bd"][i%3];
+          const bloom=roses?(i%3===0?"#b23858":color):[color,"#f0dfaa","#ae89ca"][i%3];
           box(bloom,x-1,y,3,2);
           if(roses){box(bloom,x,y-1,2,1);box("#f1a3a6",x,y,1,1);}
           else{box(bloom,x,y-1,1,4);box("#f1d690",x,y+1,1,1);}
