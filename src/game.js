@@ -148,6 +148,7 @@ function updateHomeActions(){
   $("edOpen").textContent=local("Editor del campus","Campus editor");
 }
 function show(next){
+  const prevScreen=screen;
   if(minigame)closeChallenge();
   if(next!=="game"&&cigarette)stopSmoking();
   clearCampusInputs();screen=next;
@@ -165,6 +166,7 @@ function show(next){
     window.scrollTo(0,0);
   }
   if(next!=="editor")refreshLanguage();
+  if(typeof transizioneSchermata==="function")transizioneSchermata(prevScreen,next);
   syncBackgroundMusic();
 }
 const studentNames=[
@@ -459,16 +461,22 @@ function nearby(){
 }
 function travel(zone,entry){
   if(!Object.hasOwn(campus.zones,zone))return;
+  const fromZone=state.zone;
   [state.x,state.y]=reachEntry(zone,entry??state.zone);
   state.zone=zone;state.look="down";state.chatTopic=null;state.freeMoment=null;activeScene=null;
+  if(typeof transizioneZona==="function")transizioneZona(fromZone,zone);
   syncBackgroundMusic();
 }
 function discover(id,description){
   if(state.secrets.includes(id))return;
   state.secrets.push(id);record("Scoperta · "+description);chime([60,64,67,71]);
+  if(typeof toastOggetto==="function"&&!testMode)toastOggetto("Traguardo","Traguardo: "+description,{suono:false});
 }
 function carry(item){
-  if(!state.pockets.includes(item))state.pockets.push(item);
+  if(!state.pockets.includes(item)){
+    state.pockets.push(item);
+    if(typeof toastOggetto==="function"&&!testMode)toastOggetto(item);
+  }
 }
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
@@ -1115,6 +1123,7 @@ function renderScene(){
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
   ambienteScena();
   ideeRender();
+  if(typeof transizioniScena==="function")transizioniScena();
 }
 const stage=$("stage").getContext("2d");
 const cover=$("cover").getContext("2d");
