@@ -478,7 +478,7 @@ function getScene(){
   if(state.ending?.boar)return villaAdaEndingScene();
   if(state.ending?.traffic)return scene("Game Over",state.ending.text,[atViale(state)?"Riprova dall’ingresso":local("Riprova dal giardino","Retry from the garden"),()=>{
     state.ending=null;[state.x,state.y]=reachEntry(state.zone,atViale(state)&&hasIntegratedEntrance()?"viale":state.zone==="giardino"?"ingresso":undefined);
-    keys.clear();controls.clear();activeScene=null;
+    clearCampusInputs();activeScene=null;
   }]);
   if(state.ending)return scene(state.ending.title,state.ending.text+(has("Festa a Pola")&&!testMode?"\n\n"+ideeRecap():""),
     testMode?["Torna all’editor",()=>leaveTest()]:["Continua il percorso",()=>{state.ending=null;activeScene=null;}]);
@@ -867,6 +867,7 @@ function frame(now){
       if(minigame?.kind==="cavalli")tickVialeRace(minigame,now);
     }
     if(state.ending?.guard)paintGuardOutcome(now);
+    if(impactAnimation&&!impactAnimation.done&&impactAnimation.ending===state.ending)paintImpactOutcome(now);
     else if(!minigame)draw(now);
   }
   requestAnimationFrame(frame);

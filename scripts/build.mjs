@@ -1,3 +1,4 @@
+import { packageGame } from "./package.mjs";
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 
@@ -39,4 +40,5 @@ for (const [name, contents] of Object.entries(sections)) {
 
 await mkdir(output, { recursive: true });
 await writeFile(new URL('index.html', output), html);
+await packageGame(output, html);
 console.log('Built dist/index.html');

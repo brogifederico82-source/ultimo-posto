@@ -1,4 +1,5 @@
 <!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Viale Romania · Ultimo posto</title>
+<meta name="theme-color" content="#182725"><link rel="manifest" href="./manifest.webmanifest"><link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 <!-- BUILD_STYLES -->
 </style>
@@ -22,7 +23,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <use href="#ultimo-posto-lettering" class="wordmark-edge"/>
 <use href="#ultimo-posto-lettering" class="wordmark-blue"/>
 <use href="#ultimo-posto-lettering" class="wordmark-line"/>
-</svg></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
+</svg></h1><p>Hai un esame domani. Ti servono un tavolo, una presa e dieci minuti di silenzio. Il campus considera queste tre richieste separatamente.</p><div class="actions home-actions"><button id="start" class="primary">Inizia la storia</button><button id="free">Esplora il campus</button><button id="installGame" type="button" hidden>Installa il gioco</button><a id="downloadGame" href="./Ultimo-Posto.zip" download hidden>Scarica il pacchetto</a></div><div class="actions home-tools"><button id="resume" hidden>Nuova storia</button><button id="edOpen">Editor del campus</button></div><div class="actions home-language"><button id="langIt" lang="it" aria-pressed="true">Italiano</button><button id="langEn" lang="en" aria-pressed="false">English</button></div></div></section>
 <section id="creator" hidden>
 <div class="creator-heading"><h1>Crea il tuo personaggio</h1><p>Il badge è pronto. Manca solo chi lo porta.</p></div>
 <div class="grid creator-grid">
@@ -38,7 +39,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
 <button id="play" class="primary">Entra a Viale Romania</button></section>
 </div></div></section>
-<section id="game" hidden><div class="map-status"><span class="zone" id="zone"></span><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span></div><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong><small id="storyWaypointHint" aria-live="polite" hidden></small><small id="radioTapeHint" class="hint" hidden></small></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
+<section id="game" hidden><div class="map-status"><span class="zone" id="zone"></span><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span><details id="inventory" class="inventory"><summary id="inventoryTitle">Tasche</summary><ul id="inventoryItems"></ul></details></div><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong><small id="storyWaypointHint" aria-live="polite" hidden></small><small id="radioTapeHint" class="hint" hidden></small></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
 <div class="direction-pad" role="group" aria-label="Movimento">
 <button data-move="up" aria-label="Cammina in alto">↑</button>
 <button data-move="left" aria-label="Cammina a sinistra">←</button>
@@ -52,7 +53,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa.</p>
 </details>
 <p id="gateWarning" class="gate-warning" role="status" hidden>Guardia: «Fermati alla linea gialla. Mostrami il badge, poi passa dal tornello.»</p>
-<section class="panel scene" aria-live="polite"><div class="scene-toolbar"><button id="closeConversation" type="button" aria-keyshortcuts="Escape" hidden><span aria-hidden="true">‹ </span><span id="closeConversationLabel">Torna al campus</span> <kbd>Esc</kbd></button></div><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><div id="tobaccoCounter" class="tobacco-counter" hidden aria-hidden="true"><i></i><span id="tobaccoHandoff"></span></div><canvas id="polaCeremony" width="480" height="224" role="img" aria-label="Cerimonia nel giardino di Villa Alberoni con gli invitati" hidden></canvas><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<section class="panel scene" aria-live="polite"><div class="scene-toolbar"><button id="closeConversation" type="button" aria-keyshortcuts="Escape" hidden><span aria-hidden="true">‹ </span><span id="closeConversationLabel">Torna al campus</span> <kbd>Esc</kbd></button></div><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><canvas id="impactOutcome" width="320" height="144" aria-hidden="true" hidden></canvas><div id="tobaccoCounter" class="tobacco-counter" hidden aria-hidden="true"><i></i><span id="tobaccoHandoff"></span></div><canvas id="polaCeremony" width="480" height="224" role="img" aria-label="Cerimonia nel giardino di Villa Alberoni con gli invitati" hidden></canvas><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
 <details id="surpriseHint">
@@ -227,3 +228,28 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <script>
 <!-- BUILD_GAME -->
 </script></html>
+
+<script>
+if (location.protocol === "https:" || location.hostname === "localhost") {
+  const install = document.getElementById("installGame");
+  const download = document.getElementById("downloadGame");
+  let promptEvent;
+  download.hidden = false;
+  if (!matchMedia("(display-mode: standalone)").matches && !navigator.standalone) install.hidden = false;
+  window.addEventListener("beforeinstallprompt", event => {
+    event.preventDefault();
+    promptEvent = event;
+  });
+  window.addEventListener("appinstalled", () => { install.hidden = true; });
+  install.onclick = async () => {
+    if (promptEvent) {
+      const event = promptEvent;
+      promptEvent = undefined;
+      await event.prompt();
+      return;
+    }
+    alert("Su iPhone, apri in Safari e scegli Condividi → Aggiungi alla schermata Home → Apri come app web. Su Android e computer, cerca Installa app o Aggiungi alla schermata Home nel menu del browser.");
+  };
+  navigator.serviceWorker?.register("./sw.js").catch(error => console.warn("Offline non disponibile", error));
+}
+</script>

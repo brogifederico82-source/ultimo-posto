@@ -1033,8 +1033,9 @@ function trafficImpact(){
     return insideObject(at,x,y);
   });
   if(!hit)return;
-  state.ending={traffic:true,title:"Game Over",text:hit.kind==="bus"?"Il 360 ti ha sorpreso mentre attraversavi Viale Romania.":hit.kind==="car"?"Ti ha colpito un’auto su Viale Romania.":state.zone==="giardino"?"Ti ha colpito un motorino in cerca di parcheggio.":"Ti ha colpito un motorino su Viale Romania."};
-  activeScene=null;keys.clear();controls.clear();chime([46,38]);save();renderScene();
+  state.ending={traffic:true,title:"Game Over",vehicle:hit.kind,color:hit.color,direction:positionOf(hit,trafficClock,zone.width).look,text:hit.kind==="bus"?"Il 360 ti ha sorpreso mentre attraversavi Viale Romania.":hit.kind==="car"?"Ti ha colpito un’auto su Viale Romania.":state.zone==="giardino"?"Ti ha colpito un motorino in cerca di parcheggio.":"Ti ha colpito un motorino su Viale Romania."};
+  startImpactAnimation();
+  activeScene=null;clearCampusInputs();chime([46,38]);save();renderScene();
 }
 function openingScene(){
   if(state.prologue===1)return scene("Domani, ore 9:00","Il telefono vibra sul marciapiede di Viale Romania. Il gruppo del corso manda l’ultimo messaggio: «Domani alle 9. Portate il documento». Hai un portatile quasi scarico, gli appunti a metà e un pomeriggio per rimediare.",

@@ -936,6 +936,77 @@ function paintSpeaker(now){
   rect(c,"#172331",0,height-8,width,8);
 }
 let polaThrowAt=null;
+const impactLength=800;
+let impactAnimation=null;
+function startImpactAnimation(){
+  impactAnimation={ending:state.ending,start:performance.now()};
+}
+function paintImpactOutcome(now){
+  const canvas=$("impactOutcome"),ending=state.ending;
+  canvas.hidden=!ending?.boar&&!ending?.traffic;
+  if(canvas.hidden)return;
+  const progress=reducedMotion||impactAnimation?.ending!==ending
+    ?1:clamp((now-impactAnimation.start)/impactLength,0,1);
+  const hit=clamp((progress-.29)/.71,0,1);
+  if(progress===1&&impactAnimation?.ending===ending)impactAnimation.done=true;
+  const c=canvas.getContext("2d"), forest=Boolean(ending.boar);
+  const {width,height}=canvas;
+  const sky=c.createLinearGradient(0,0,0,height);
+  sky.addColorStop(0,forest?"#20392e":"#1b2840");
+  sky.addColorStop(1,forest?"#819d62":"#8f6472");
+  c.fillStyle=sky;c.fillRect(0,0,width,height);
+  for(let i=0;i<9;i++){
+    const x=i*42-16,y=40+(i*13%19);
+    if(forest){
+      rect(c,"#233c30",x+12,y,5,56);
+      c.fillStyle=i%2?"#345643":"#41644b";
+      c.beginPath();c.ellipse(x+15,y,21,18,0,0,Math.PI*2);c.fill();
+    }else{
+      rect(c,i%2?"#45465c":"#565061",x,y,34,56);
+      for(let col=0;col<3;col++)rect(c,"#d9b78365",x+5+col*9,y+10,4,11);
+    }
+  }
+  rect(c,forest?"#53614a":"#435060",0,92,width,52);
+  rect(c,forest?"#7b7853":"#b7aa94",0,91,width,3);
+  for(let i=0;i<12;i++){
+    const x=i*29,y=103+(i*7%32);
+    rect(c,forest?"#b9a271":"#6d7981",x,y,forest?5:14,2);
+  }
+  const impactX=151,impactY=117;
+  const source=ending.direction;
+  const side=source==="left"?-1:1;
+  const objectX=impactX+side*(-95+90*Math.min(1,progress/.29)+110*hit);
+  if(forest){
+    c.save();c.translate(objectX-24,78);c.scale(3.3,3.3);
+    drawBoarShape(c,side<0?"left":"right","charge",progress*impactLength,0);
+    c.restore();
+  }else{
+    const kind=["bus","car","scooter","shuttle"].includes(ending.vehicle)?ending.vehicle:"car";
+    const large=kind==="bus"||kind==="shuttle";
+    drawObject(c,{uid:"impact-vehicle",kind,x:(objectX-(large?48:25))/16,y:78/16,
+      w:large?6:kind==="scooter"?2:3.2,h:2.6,rotation:0,variant:0,
+      color:/^#[0-9a-f]{6}$/i.test(ending.color??"")?ending.color:assets[kind][3],look:side<0?"left":"right"});
+  }
+  c.save();
+  c.translate(impactX+side*(8+hit*25),impactY);
+  c.rotate(side*.12*hit);
+  c.scale(1+hit*.52,1-hit*.72);
+  sprite(c,state.avatar,0,0,0,"down",1.85);
+  c.restore();
+  if(progress<.29)return;
+  for(let i=0;i<16;i++){
+    const angle=i*Math.PI/8,radius=11+hit*(i%2?56:37);
+    const x=impactX+Math.cos(angle)*radius;
+    const y=impactY-22+Math.sin(angle)*radius*.62;
+    rect(c,[forest?"#f0ca7b":"#7fdad8","#f7e1a8","#f6a061"][i%3],x,y,i%2?2:4,i%2?2:4);
+  }
+  c.save();c.translate(162,57);c.rotate(-.12);
+  c.font="900 32px monospace";c.textAlign="center";c.textBaseline="middle";c.lineJoin="round";
+  c.lineWidth=7;c.strokeStyle="#202434";c.strokeText("SPLAT!",0,4);
+  c.fillStyle=forest?"#ffcc76":"#a9f2e7";c.fillText("SPLAT!",0,0);
+  c.restore();
+}
+
 function paintPolaCeremony(now){
   const panel=$("polaCeremony");
   if(panel.hidden)return;
@@ -992,7 +1063,7 @@ function renderScene(){
   const access=isFree()?[]:Object.keys(unlocks).filter(won).map(id=>unlocks[id]);
   refreshWallet();
   $("status").textContent=state.name+" · "+(state.matricola?state.matricola+" · ":"")+tr(options.passato[state.avatar.passato])+(access.length?local(" · Accessi: "," · Unlocked: ")+access.map(tr).join(", "):"");
-  $("journalTitle").textContent=local("Diario e tasche · ","Journal and inventory · ")+state.secrets.length+"/"+totalSecrets+local(" scoperte"," discoveries");
+  $("journalTitle").textContent=local("Diario · ","Journal · ")+state.secrets.length+"/"+totalSecrets+local(" scoperte"," discoveries");
   $("sceneTitle").textContent=tr(scene.title);
   const speaker=currentObject();
   $("polaCeremony").hidden=speaker?.native!=="pola-festa"||(!state.graduationSpeech&&!has("Festa a Pola"))||Boolean(state.ending);
@@ -1001,10 +1072,10 @@ function renderScene(){
   const conversation=Boolean($("polaCeremony").hidden&&speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
   $("speakerPortrait").hidden=!conversation;
   $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
-  $("game").classList.toggle("game-conversation",conversation||!$("polaCeremony").hidden||Boolean(state.ending?.guard));
+  $("game").classList.toggle("game-conversation",conversation||!$("polaCeremony").hidden||Boolean(state.ending?.guard||state.ending?.traffic||state.ending?.boar));
   $("game").classList.toggle("game-reading",Boolean(activeScene||state.prologue||state.ending));
   $("guardOutcome").hidden=!state.ending?.guard;
-  refreshGateWarning();paintGuardOutcome(performance.now());
+  refreshGateWarning();paintGuardOutcome(performance.now());paintImpactOutcome(performance.now());
   paintSpeaker(performance.now());
   showCaption(tr(scene.text),Boolean(activeScene||state.prologue));
   $("playerLine").hidden=!scene.playerLine;
@@ -1031,9 +1102,16 @@ function renderScene(){
   $("closeConversationLabel").textContent=local("Torna al campus","Back to campus");
   $("log").replaceChildren();
   for(const entry of state.log){const li=document.createElement("li");li.textContent=tr(entry);$("log").append(li);}
-  const pockets=document.createElement("li");
-  pockets.textContent=local("In tasca: ","Inventory: ")+(state.pockets.map(item=>item==="Sigarette"?local("Sigarette","Cigarettes")+" ("+cigarettesLeft()+"/10)":tr(item)).join(", ")||local("solo il badge e un programma d’esame.","just your badge and an exam syllabus."));
-  $("log").append(pockets);
+  const pocketItems=state.pockets.map(item=>item==="Sigarette"
+    ?local("Sigarette","Cigarettes")+" ("+cigarettesLeft()+"/10)":tr(item));
+  const items=$("inventoryItems");
+  items.replaceChildren();
+  for(const label of [local("Badge LUISS","LUISS badge"),...pocketItems]){
+    const item=document.createElement("li");
+    item.textContent=label;
+    items.append(item);
+  }
+  $("inventoryTitle").textContent=local("Tasche","Pockets")+" · "+(pocketItems.length+1);
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
   ambienteScena();
   ideeRender();

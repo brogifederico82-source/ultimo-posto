@@ -331,7 +331,7 @@ function villaAdaEndingScene(){
     state.ending=null;state.villaMeli={};state.mele=0;
     villaBoars.length=0;villaHerdSpawned=false;
     [state.x,state.y]=reachEntry(villaZone,"ada-entry");
-    keys.clear();controls.clear();activeScene=null;save();
+    clearCampusInputs();activeScene=null;save();
   }]);
 }
 
@@ -440,7 +440,8 @@ function villaHit(b){
   const text=b.leader
     ?"Il capobranco non ha nemmeno rallentato. Hai fatto in tempo a pensare: «Non era nel programma d’esame». Poi il mondo ha girato, il cielo si è fatto di muschio e qualcuno ti ha messo davanti al cartello «Attenzione cinghiali». Avresti dovuto correre verso il campus, oppure lanciare una mela."
     :"Il cinghiale ti ha caricato a testa bassa. Un lampo di setole, un tonfo, un cielo pieno di foglie. Ti sei svegliato davanti al cartello «Attenzione cinghiali». Lui, con un solo sguardo, ti ha ricordato di averlo letto. Avresti dovuto correre verso il campus, oppure lanciare una mela.";
-  state.ending={boar:true,title:"Game Over · Villa Ada",text};
+  state.ending={boar:true,title:"Game Over · Villa Ada",text,direction:b.look};
+  startImpactAnimation();
   activeScene=null;keys.clear();controls.clear();
   chime([40,34],.1,.09);record("Game Over · Un cinghiale ti ha caricato a Villa Ada.");
   save();renderScene();
