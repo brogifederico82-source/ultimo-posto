@@ -607,6 +607,7 @@ function draw(now){
   paintVillaBoars(stage,state.zone,now);
   paintLore(stage,state.zone,time);
   ambienteMondo(stage,state.zone,cameraX,cameraY,viewWidth,viewHeight,now,state.x,state.y);
+  if(typeof realismoLuceMondo==="function"&&!testMode)realismoLuceMondo(stage,z,state.zone,cameraX,cameraY,viewWidth,viewHeight,now);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();

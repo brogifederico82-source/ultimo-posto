@@ -538,6 +538,7 @@ function opzioniCostruisci(){
   const rows=[
     [local("Sorprese","Surprises"),local("Incontri horror-comici nascosti nel campus. La voce segue l’audio del gioco.","Horror-comedy encounters hidden around campus. The voice follows the game audio."),schCheckbox("surpriseEnabled")],
     [local("Colori vivaci","Vivid colours"),local("Palette più calda e contrastata.","A warmer, higher-contrast palette."),{get:()=>vividOn,set:v=>{$("vividColors").checked=v;setVividColors(v);}}],
+    [local("Luce realistica","Realistic light"),local("Luce, ombre e lampioni seguono l’ora del tuo dispositivo.","Light, shadows and lamps follow your device clock."),{get:()=>realismoAttivo,set:v=>{realismoImposta(v);}}],
     [local("Movimento ridotto","Reduced motion"),local("Niente animazioni decorative. Il sistema può già chiederlo.","No decorative animation. Your system may already ask for this."),
       {get:()=>reducedMotion,set:v=>{
         reducedMotion=v;try{localStorage.setItem("ultimo-posto-movimento-ridotto",v?"on":"off");}catch{}

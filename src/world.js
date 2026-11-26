@@ -1013,6 +1013,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   }
   if(tiles)paintEntranceStreet(c,id,z,tiles,left,top,right,bottom);
   if(!editing&&visible.edifici)paintCampusBoundary(c,z,left,top,right,bottom);
+  if(!editing&&typeof realismoOmbre==="function")realismoOmbre(c,z,id,left,top,right,bottom);
   const foreground=[];
   for(const raw of editing?z.objects:continuousWalls(z)){
     const layer=kindLayer(raw);
