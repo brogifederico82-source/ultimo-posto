@@ -36,7 +36,9 @@ function gsLayout(){
   set("--uy",portrait?pt:fy);set("--uh",portrait?ah:fh);
   set("--bar",bar);
   g.classList.toggle("gs-portrait",portrait);
-  g.classList.toggle("gs-pix",scale>=1);
+  const canvas=gsEl("stage");
+  const density=Math.max(2,Math.min(6,Math.ceil(fw*(window.devicePixelRatio||1)/320)));
+  if(canvas.width!==320*density){canvas.width=320*density;canvas.height=192*density;}
   schermoMinimapSync();
 }
 function schermoMinimapSync(){

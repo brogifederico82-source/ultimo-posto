@@ -239,13 +239,23 @@ function spriteTone(hex,amount){
 function createSpriteFrame(a,step,look,coatOverride){
   const canvas=document.createElement("canvas");
   const {width,height,anchorX,anchorY}=spriteCanvas;
-  canvas.width=width;canvas.height=height;
+  canvas.width=width*3;canvas.height=height*3;
   const c=canvas.getContext("2d");
-  c.translate(anchorX,anchorY);
-  const block=(color,x,y,w,h)=>rect(c,color,x,y,w,h);
+  c.scale(3,3);c.translate(anchorX,anchorY);
+  const block=(color,x,y,w,h)=>{
+    c.fillStyle=color;c.beginPath();c.roundRect(x,y,w,h,Math.min(w,h)*.35);c.fill();
+  };
   const contour=(color,points)=>{
-    c.fillStyle=color;c.beginPath();c.moveTo(...points[0]);
-    for(const point of points.slice(1))c.lineTo(...point);
+    const ys=points.map(p=>p[1]),top=Math.min(...ys),bottom=Math.max(...ys);
+    const shade=c.createLinearGradient(0,top,3,bottom);
+    shade.addColorStop(0,spriteTone(color,12));shade.addColorStop(.58,color);shade.addColorStop(1,spriteTone(color,-11));
+    c.fillStyle=shade;c.beginPath();
+    const last=points.at(-1),first=points[0];
+    c.moveTo((last[0]+first[0])/2,(last[1]+first[1])/2);
+    for(let i=0;i<points.length;i++){
+      const [x,y]=points[i],[nx,ny]=points[(i+1)%points.length];
+      c.quadraticCurveTo(x,y,(x+nx)/2,(y+ny)/2);
+    }
     c.closePath();c.fill();
   };
   const facing=look==="left"||look==="right",behind=look==="up";
@@ -274,8 +284,8 @@ function createSpriteFrame(a,step,look,coatOverride){
     const reach=facing?(offset?-2:2):0;
     contour(ink,[[leg-1,-16],[leg+6,-16],[leg+5+reach,-7+offset],[leg+8+reach,-3+offset],
       [leg+8+reach,offset],[leg-2+reach,offset],[leg-2+reach,-4+offset],[leg,-7+offset]]);
-    contour(trousers,[[leg,-15],[leg+5,-15],[leg+4+reach,-7+offset],[leg+5+reach,-4+offset],[leg+reach,-4+offset]]);
-    block(spriteTone(trousers,26),leg+reach,-8+offset,2,3);
+    contour(a.lingerie?skin:trousers,[[leg,-15],[leg+5,-15],[leg+4+reach,-7+offset],[leg+5+reach,-4+offset],[leg+reach,-4+offset]]);
+    block(a.lingerie?skinLight:spriteTone(trousers,26),leg+reach,-8+offset,2,3);
     block(shoes,leg-1+reach,-3+offset,8,2);
     block(spriteTone(shoes,36),leg+3+reach,-3+offset,3,1);
     block("#d2c5ab",leg-1+reach,-1+offset,8,1);
@@ -295,48 +305,63 @@ function createSpriteFrame(a,step,look,coatOverride){
     block(spriteTone(bag,-29),left+2,-16+bob,7,1);
   }
   const y=-28+heightShift+bob;
-  contour(ink,[[-6,y], [5,y], [shoulders+1,y+3],[shoulders+5,y+8],[shoulders+4,y+16],
-    [shoulders+1,y+18],[-shoulders-1,y+18],[-shoulders-5,y+16],[-shoulders-5,y+8],[-shoulders-2,y+3]]);
-  contour(coatShade,[[-6,y+1],[5,y+1],[shoulders,y+4],[shoulders+3,y+8],
-    [shoulders+2,y+15],[-shoulders-3,y+15],[-shoulders-4,y+8],[-shoulders-1,y+4]]);
-  contour(coat,[[-6,y+1],[5,y+1],[shoulders-1,y+4],[shoulders-1,y+12],
-    [shoulders,y+16],[-shoulders,y+16],[-shoulders+1,y+7],[-shoulders+1,y+4]]);
-  contour(coatLight,[[-7,y+3],[-4,y+4],[-6,y+9],[-shoulders+1,y+13],[-shoulders+2,y+6]]);
-  block(coatShade,-shoulders+1,y+15,shoulders*2-2,1);
-  for(const hand of [-shoulders-4,shoulders]){
-    block(skinShade,hand,y+11,4,5);block(skin,hand+1,y+11,2,4);
-    block(coatLight,hand,y+10,4,1);
-  }
-  if(!behind){
+  if(a.lingerie){
+    const hue=a.lingerie;
+    const trim=spriteTone(hue,34);
     const mid=facing?3:0;
-    block(skinShade,mid-3,y-4,6,5);
-    if(a.taglio===1){
-      contour(coatShade,[[mid-6,y],[mid+7,y],[mid+4,y+4],[mid-3,y+4]]);
-      block("#e7d4ad",mid-3,y+3,1,6);block("#e7d4ad",mid+3,y+3,1,5);
-    }else if(a.taglio===2){
-      contour("#e5d9bc",[[mid-5,y],[mid+5,y],[mid+2,y+7],[mid-1,y+7]]);
-      block(ink,mid,y+7,1,9);block(coatLight,mid-4,y+4,2,5);
-    }else if(a.taglio===3){
-      block(coatLight,-shoulders+1,y+3,3,9);block(coatLight,shoulders-4,y+3,3,9);
-    }else block(coatShade,mid-5,y,10,2);
-    if(a.motivo===1)for(const stripe of [-5,0,5])block(coatLight,stripe,y+7,1,6);
-    if(a.motivo===2)for(const stripe of [-5,0,5])block("#e7c68f",stripe,y+9+(stripe?2:0),1,1);
-    if(a.zaino&&!facing)block(coatShade,-shoulders+1,y+3,2,9);
-    if(a.dettaglio===1)block("#f0be75",mid+4,y+5,3,2);
-    if(a.dettaglio===2){block("#192736",mid-7,y+5,4,3);block("#f0be75",mid-6,y+5,2,1);}
-    if(a.dettaglio===3){
-      contour("#c79977",[[mid-4,y],[mid+4,y],[mid+1,y+9],[mid-1,y+9]]);
-      block("#f0e4cf",mid-2,y+8,4,4);block("#7a8e8d",mid-1,y+9,2,1);
+    contour(ink,[[-5,y-2],[5,y-2],[shoulders,y+3],[shoulders+2,y+14],
+      [shoulders-1,y+17],[-shoulders+1,y+17],[-shoulders-2,y+14],[-shoulders,y+3]]);
+    contour(skin,[[-4,y-1],[4,y-1],[shoulders-1,y+3],[shoulders+1,y+13],
+      [shoulders-2,y+16],[-shoulders+2,y+16],[-shoulders-1,y+13],[-shoulders+1,y+3]]);
+    for(const strap of [mid-5,mid+4])block(hue,strap,y+1,1,6);
+    block(hue,-shoulders+2,y+7,shoulders*2-4,4);
+    block(trim,mid-5,y+7,10,1);
+    contour(hue,[[-shoulders+2,y+14],[shoulders-2,y+14],[5,y+18],[-5,y+18]]);
+    block(trim,-shoulders+3,y+14,shoulders*2-6,1);
+  }else{
+    contour(ink,[[-6,y], [5,y], [shoulders+1,y+3],[shoulders+5,y+8],[shoulders+4,y+16],
+      [shoulders+1,y+18],[-shoulders-1,y+18],[-shoulders-5,y+16],[-shoulders-5,y+8],[-shoulders-2,y+3]]);
+    contour(coatShade,[[-6,y+1],[5,y+1],[shoulders,y+4],[shoulders+3,y+8],
+      [shoulders+2,y+15],[-shoulders-3,y+15],[-shoulders-4,y+8],[-shoulders-1,y+4]]);
+    contour(coat,[[-6,y+1],[5,y+1],[shoulders-1,y+4],[shoulders-1,y+12],
+      [shoulders,y+16],[-shoulders,y+16],[-shoulders+1,y+7],[-shoulders+1,y+4]]);
+    contour(coatLight,[[-7,y+3],[-4,y+4],[-6,y+9],[-shoulders+1,y+13],[-shoulders+2,y+6]]);
+    block(coatShade,-shoulders+1,y+15,shoulders*2-2,1);
+    for(const hand of [-shoulders-4,shoulders]){
+      block(skinShade,hand,y+11,4,5);block(skin,hand+1,y+11,2,4);
+      block(coatLight,hand,y+10,4,1);
     }
-    if(a.accessorio===2)block("#ffd184",mid-3,y+2,6,1);
-    if(a.accessorio===5){
-      block("#b73d58",mid-6,y,13,3);block("#df646d",mid-5,y,11,1);
-      block("#ca4c5b",mid-4,y+3,3,6);block("#ef8a7d",mid-3,y+8,2,1);
+    if(!behind){
+      const mid=facing?3:0;
+      block(skinShade,mid-3,y-4,6,5);
+      if(a.taglio===1){
+        contour(coatShade,[[mid-6,y],[mid+7,y],[mid+4,y+4],[mid-3,y+4]]);
+        block("#e7d4ad",mid-3,y+3,1,6);block("#e7d4ad",mid+3,y+3,1,5);
+      }else if(a.taglio===2){
+        contour("#e5d9bc",[[mid-5,y],[mid+5,y],[mid+2,y+7],[mid-1,y+7]]);
+        block(ink,mid,y+7,1,9);block(coatLight,mid-4,y+4,2,5);
+      }else if(a.taglio===3){
+        block(coatLight,-shoulders+1,y+3,3,9);block(coatLight,shoulders-4,y+3,3,9);
+      }else block(coatShade,mid-5,y,10,2);
+      if(a.motivo===1)for(const stripe of [-5,0,5])block(coatLight,stripe,y+7,1,6);
+      if(a.motivo===2)for(const stripe of [-5,0,5])block("#e7c68f",stripe,y+9+(stripe?2:0),1,1);
+      if(a.zaino&&!facing)block(coatShade,-shoulders+1,y+3,2,9);
+      if(a.dettaglio===1)block("#f0be75",mid+4,y+5,3,2);
+      if(a.dettaglio===2){block("#192736",mid-7,y+5,4,3);block("#f0be75",mid-6,y+5,2,1);}
+      if(a.dettaglio===3){
+        contour("#c79977",[[mid-4,y],[mid+4,y],[mid+1,y+9],[mid-1,y+9]]);
+        block("#f0e4cf",mid-2,y+8,4,4);block("#7a8e8d",mid-1,y+9,2,1);
+      }
+      if(a.accessorio===2)block("#ffd184",mid-3,y+2,6,1);
+      if(a.accessorio===5){
+        block("#b73d58",mid-6,y,13,3);block("#df646d",mid-5,y,11,1);
+        block("#ca4c5b",mid-4,y+3,3,6);block("#ef8a7d",mid-3,y+8,2,1);
+      }
+    }else if(a.zaino){
+      const bag=["#876849","#51435e","#303849","#dfca9b"][a.zaino]??"#51435e";
+      contour(ink,[[-6,y+1],[6,y+1],[9,y+5],[9,y+13],[6,y+16],[-7,y+16],[-9,y+13],[-9,y+4]]);
+      block(bag,-7,y+4,14,10);block(spriteTone(bag,26),-6,y+5,12,2);block(spriteTone(bag,-23),-5,y+10,10,3);
     }
-  }else if(a.zaino){
-    const bag=["#876849","#51435e","#303849","#dfca9b"][a.zaino]??"#51435e";
-    contour(ink,[[-6,y+1],[6,y+1],[9,y+5],[9,y+13],[6,y+16],[-7,y+16],[-9,y+13],[-9,y+4]]);
-    block(bag,-7,y+4,14,10);block(spriteTone(bag,26),-6,y+5,12,2);block(spriteTone(bag,-23),-5,y+10,10,3);
   }
 
   const cx=faceShift;
@@ -368,7 +393,8 @@ function createSpriteFrame(a,step,look,coatOverride){
         [cx+part+2,top+4],[cx+part-2,top+6],[cx-face+2,top+9],[cx-face,top+6]]);
     }
     for(const [dx,dy,length] of [[-6,3,4],[-2,2,5],[3,3,3]]){
-      block(hairLight,cx+dx,top+dy,length,1);
+      c.strokeStyle=hairLight;c.lineWidth=.65;c.lineCap="round";c.beginPath();
+      c.moveTo(cx+dx,top+dy+1);c.quadraticCurveTo(cx+dx+1,top+dy-.6,cx+dx+length,top+dy);c.stroke();
       if(a.capelli===2)block(hairShade,cx+dx+1,top+dy+2,2,1);
     }
   }else block(skinLight,cx-4,top+4,7,2);
@@ -426,7 +452,7 @@ function sprite(c,a,x,y,step=0,look="down",size=1,coatOverride){
   }
   const {width,height,anchorX,anchorY}=spriteCanvas;
   const scale=size/2;
-  c.save();c.imageSmoothingEnabled=false;
+  c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";
   c.drawImage(frame,Math.round(x)-anchorX*scale,Math.round(y)-anchorY*scale,width*scale,height*scale);
   c.restore();
 }
@@ -689,6 +715,60 @@ function polaParty(){
     ["Torna ai preparativi",()=>{state.graduationSpeech=null;state.polaPreparation=null;}]);
 }
 
+let vialeEncounterEffect=null;
+let vialeGesture=null;
+function vialeEncounterScene(npc){
+  const purse=wallet(),cost=5;
+  const nadia=npc.uid==="viale-nadia";
+  const offer=nadia
+    ?local("«Bocca, mani o piedi? Cinque monete, scegli tu.»","“Mouth, hands, or feet? Five coins. Your choice.”")
+    :local("«Come preferisci, con la bocca, con le mani o con i piedi? Sempre cinque monete.»","“What's your preference: mouth, hands, or feet? It's five coins either way.”");
+  const topics=[
+    [local("Saluta","Say hello"),nadia
+      ?local("Nadia alza la mano. «Ciao. Ti ho già visto rincorrere il 360?»","Nadia waves. “Hi. Have I seen you chasing the 360 before?”")
+      :local("Mila sorride e ricambia il saluto. «Ciao, studente.»","Mila smiles and waves back. “Hi, student.”"),"wave"],
+    [local("Chiedi del 360","Ask about the 360"),nadia
+      ?local("«La fermata è verso l’ingresso della LUISS. Da qui lo vedi passare, ma non si ferma.»","“The stop is by the Luiss entrance. You can see it pass from here, but it doesn't stop.”")
+      :local("«Per la fermata, torna verso le strisce davanti alla LUISS.»","“For the stop, head back toward the crossing by Luiss.”"),"point"],
+    [local("Fai due chiacchiere","Make small talk"),nadia
+      ?local("Nadia ride. «Al tabacchi ormai mi tengono da parte l’accendino.»","Nadia laughs. “The tobacconist keeps a lighter aside for me now.”")
+      :local("Mila ride. «Il bello di stare qui? Sento tutte le scuse di chi ha perso il bus.»","Mila laughs. “Best thing about standing here? I get to hear every excuse for missing the bus.”"),"laugh"]
+  ];
+  const choices=topics.map(([prompt,reply,kind])=>[prompt,()=>{
+    state.chatTopic={uid:npc.uid,prompt,reply};
+    vialeGesture={uid:npc.uid,kind,start:performance.now()};
+  }]);
+  const balance=local("Saldo: ","Balance: ")+purse.coins;
+  if(purse.coins<cost)return scene(npc.name,offer+" "+balance+" · "+
+    local("Ti servono 5 monete.","You need 5 coins."),...choices);
+  const pay=()=>{
+    if(currentObject()?.uid!==npc.uid||wallet().coins<cost)return;
+    wallet().coins-=cost;
+    vialeEncounterEffect={zone:state.zone,x:state.x,y:state.y,start:performance.now()};
+    sound("buy","map");
+    activeScene=null;
+  };
+  return scene(npc.name,offer+" "+balance,...choices,
+    [local("Bocca · 5 monete","Mouth · 5 coins"),pay],
+    [local("Mani · 5 monete","Hands · 5 coins"),pay],
+    [local("Piedi · 5 monete","Feet · 5 coins"),pay]);
+}
+
+// The same cigarette cycle is drawn at map and portrait scale.
+function drawVialeCigarette(c,npc,x,y,scale,now){
+  const nadia=npc.uid==="viale-nadia";
+  const phase=reducedMotion||!now?0:((now+(nadia?700:2400))%4200)/4200;
+  const raised=phase>.20&&phase<.49;
+  const handX=x+(raised?2:5)*scale,handY=y+(raised?0:4)*scale;
+  rect(c,"#f1e9dd",handX,handY,2*scale,scale);
+  rect(c,"#f58c59",handX+2*scale,handY,scale,scale);
+  if(phase>.49){
+    const drift=(phase-.49)*12;
+    rect(c,"#f2e9de8c",x+(4+drift*.6)*scale,y-drift*scale,2*scale,scale);
+    rect(c,"#f2e9de48",x+(5+drift)*scale,y-(2+drift)*scale,2*scale,scale);
+  }
+}
+
 function nativeScene(id){
   const t=state.traits;
   if(nativeDoors[id])return scene(room(nativeDoors[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(nativeDoors[id])]);
@@ -798,6 +878,7 @@ function nativeScene(id){
       "“Up for a one-on-one? First to five goals. We can warm up first if you like.”"),
       [local("Gioca a calcetto","Play football"),()=>openChallenge("calcetto")],
       [local("Allenati","Practice"),()=>openChallenge("calcetto",true)]);
+    case "incontro-viale":return vialeEncounterScene(currentObject());
     case "tabaccheria":return tobaccoShopScene();
     case "rosticceria":return scene(local("Rosticceria · Viale Romania","Rotisserie · Viale Romania"),
       local("«Supplì appena fritti! Se esci dal campus tardi, ti tengo da parte l’ultimo.»",
@@ -902,6 +983,8 @@ function showCaption(text, animate){
   captionFrame=requestAnimationFrame(type);
 }
 const campusPortraits={
+  "viale-nadia":{lingerie:"#843056",pelle:0,capelli:7,tinta:2,occhi:1,abito:0,taglio:1,zaino:0,baffi:0,accessorio:0},
+  "viale-mila":{lingerie:"#32244a",pelle:0,capelli:4,tinta:1,occhi:2,abito:4,taglio:3,zaino:0,baffi:0,accessorio:5},
   "prof-storia":{capelli:4,tinta:2,pelle:0,occhi:1,volto:0,accessorio:3,taglio:2,abito:4},
   "tutor-viola":{capelli:7,tinta:1,pelle:2,occhi:0,volto:1,accessorio:5,taglio:1,abito:1},
   "giardiniera-nora":{capelli:5,tinta:0,pelle:1,occhi:2,volto:0,accessorio:1,taglio:1,abito:1},
@@ -965,10 +1048,25 @@ function paintSpeaker(now){
     rect(c,"#e7c69356",middle+offset*panelWidth/2-(offset===1?1:0),11,1,height-18);
     rect(c,"#efe1be30",middle+offset*(panelWidth/2-8),15,2,height-28);
   }
+  const vialeNpc=o.native==="incontro-viale";
+  const elapsed=vialeGesture?.uid===o.uid?now-vialeGesture.start:Infinity;
+  const reacting=elapsed>=0&&elapsed<950;
+  const reaction=reacting?vialeGesture.kind:null;
+  const bounce=!reducedMotion&&reaction==="laugh"?Math.abs(Math.sin(elapsed/65))*3:0;
   const gesture=moving?[0,-9,4,9][beat]:o.kind==="professor"&&beat===1?2:0;
   const scale=Math.min(width/28,height/22);
   const bustBaseline=height+scale*9.5;
-  sprite(c,a,middle+gesture,bustBaseline-(moving&&beat%2?5:0),moving?beat%3:0,"down",scale,characterCoat(o));
+  sprite(c,a,middle+gesture,bustBaseline-(moving&&beat%2?5:0)-bounce,moving?beat%3:0,
+    reaction==="point"?"left":"down",scale,characterCoat(o));
+  if(vialeNpc){
+    drawVialeCigarette(c,o,middle,height*.50-bounce,scale*.72,now);
+    if(reaction==="wave"||reaction==="point"){
+      const point=reaction==="point";
+      const handX=middle+(point?-9:7)*scale;
+      const handY=height*.61-(point||reducedMotion?0:Math.sin(elapsed/85)*2);
+      rect(c,"#edbc94",handX,handY,(point?5:2)*scale,2*scale);
+    }
+  }
   rect(c,"#d5b481",middle-panelWidth/2,height-9,panelWidth,1);
   rect(c,"#172331",0,height-8,width,8);
 }
