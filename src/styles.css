@@ -245,7 +245,7 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 .direction-pad{display:grid;grid-template-columns:repeat(3,minmax(36px,1fr));gap:4px}
 .direction-pad [data-move="up"]{grid-column:2}
 .direction-pad [data-move="left"]{grid-column:1}
-#game .touch .direction-pad button{min-height:36px;padding-block:4px}
+#game .touch .direction-pad button{min-height:44px;padding-block:4px}
 #game .touch #interact{min-height:46px}
 .game-conversation #speakerPortrait{width:min(100%,460px)}
 #surpriseHint{margin-block:12px}
@@ -435,6 +435,52 @@ button, select, input { font-family: var(--interface); }
 .race-photo { display: grid; gap: .2rem; margin-block: .45rem; padding-inline-start: 1.7rem; }
 .race-photo li { padding: .2rem .45rem; border-inline-start: 3px solid var(--runner-color); background: #13243c; }
 .race-photo li[data-winner] { color: #fff2bb; font-weight: bold; }
+
+/* Adattivo e accessibilità: bersagli da 44px, focus visibile, schermi piccoli e molto larghi */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.skip-link{position:absolute;left:8px;top:-60px;z-index:50;padding:10px 14px;background:#ffd27a;color:#1b1b1b;font-weight:700;text-decoration:none}
+.skip-link:focus{top:8px}
+:where(a,button,summary,select,input,textarea,canvas[tabindex],[tabindex]):focus-visible{outline:3px solid #ffd27a;outline-offset:2px;box-shadow:0 0 0 5px #131c1c}
+summary{padding-block:11px;cursor:pointer}
+.direction-pad{grid-template-columns:repeat(3,minmax(44px,1fr))}
+.direction-pad button,#game .touch button,.fields select,.fields button,select,input[type=text],input[type=number]{min-height:44px}
+input[type=range]{min-height:44px;touch-action:pan-y}
+label:has(>input[type=checkbox]){display:inline-flex;align-items:center;gap:8px;min-height:44px}
+input[type=checkbox]{width:22px;height:22px;flex:none}
+.campus-reference a,.journal a,.map-editor a{display:inline-block;padding-block:12px}
+.hint,small{color:#d4c7a4}
+@media (min-width:1600px){main{max-width:1320px}}
+@media (max-width:760px){
+  header{flex-wrap:wrap;row-gap:6px;padding-bottom:8px}
+  header .brand{flex:1 1 auto}
+  .soundbar{flex:0 1 auto;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .soundbar button{min-height:44px;padding-inline:10px;font-size:.9rem}
+}
+@media (max-width:420px){
+  #home .home-actions,#home .home-tools,#home .home-language{display:grid;grid-template-columns:1fr 1fr}
+  #home .home-actions button{grid-column:1/-1}
+  .map-editor select,.editor-bar select{max-width:100%}
+  .editor-bar label,.editor-bar button{max-width:100%}
+  .map-editor{overflow-x:hidden}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:1100px){
+  main{padding-block:8px}
+  header{padding-bottom:4px;flex-wrap:nowrap}
+  .soundbar button{min-height:44px}
+  #game .frame{margin-top:2px}
+  #stage{max-height:calc(100dvh - 64px);width:auto;max-width:100%;margin-inline:auto}
+  #game .frame{display:flex;justify-content:center}
+  body #game .touch{background:transparent;border:0;box-shadow:none;max-width:none;margin:0;pointer-events:none;grid-template-columns:auto 1fr auto;padding:0}
+  body #game .touch>*{pointer-events:auto}
+  body #game .touch .direction-pad{grid-column:1;grid-row:1/span 2;align-self:end}
+  body #game .touch .direction-pad button{background:#1d2a39d9}
+  body #game .touch #interact{grid-column:3;grid-row:1/span 2;align-self:end;width:132px;min-height:64px;background:#e5ad62ee}
+  body #game .touch #smokingTools{grid-column:2;grid-row:2;justify-self:center}
+  #game:not(.game-reading){padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+  #game.game-reading .scene{max-height:calc(100dvh - 16px);inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  #game.game-reading .scene #speakerPortrait{max-height:30dvh}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{scroll-behavior:auto!important}}
 
 /* Keep the essential controls within thumb reach without blocking page scroll. */
 @media (max-width:760px), (pointer:coarse) and (max-height:600px) {
