@@ -485,6 +485,7 @@ function carry(item){
 }
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
+function campusTurnstile(uid){return uid==="viale-ingresso-varco"||uid==="panama-varco";}
 function interact(){
   if(!exploringCampus())return;
   const spot=nearby();
@@ -492,7 +493,7 @@ function interact(){
   if(!spot){sound("error","interface");return;}
   ambienteInteragisci(spot);
   clearCampusInputs();
-  if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
+  if(campusTurnstile(spot.uid)&&(isFree()||has("Via libera")||state.campusGateOpen)){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
     sound("gate","map");
     state.campusGateOpen=true;activeScene=null;
@@ -525,7 +526,7 @@ function doorDestination(spot){
     return Object.hasOwn(campus.zones,destination[0])?destination:null;
   }
   if(spot.action!=="native")return null;
-  if(spot.uid!=="viale-ingresso-varco"&&spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
+  if(!campusTurnstile(spot.uid)&&spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
   if(spot.kind!=="door"&&spot.kind!=="stairs")return null;
   const destination=nativeDoors[spot.native];
   return destination&&Object.hasOwn(campus.zones,destination)?[destination]:null;
@@ -769,12 +770,16 @@ function nativeScene(id){
         ["Perché il Muro venne costruito?",()=>{state.historyAnswer="«Nel 1961 la Germania Est volle fermare l’esodo verso Ovest attraverso Berlino.»";}],
         ["Un’altra domanda",()=>{state.historyAnswer=null;}]);
     case "guardia":
+      if(activeScene==="panama-guardia")return scene("Guardia di Via Panama",
+        has("Via libera")?"«Puoi passare. Il lettore del tornello è fra i due pilastri.»":"«Buongiorno. Mi mostra il badge?»",
+        ...(has("Via libera")?[]:[["Mostra il badge",()=>badge("Via Panama · Badge verificato alla portineria.")]]));
       return scene("La guardia",has("Via libera")?"«Badge a posto. Il tornello è alla tua destra, accanto alla bacheca.»":"Ti scruta in silenzio. Poi scruta lo zaino. Lo zaino sembra più preparato di te.",
         ...(has("Via libera")?[]:[["Mostra il badge",()=>badge("La guardia approva il badge. Su di te si riserva. ")]]),
         ...(t.autocontrollo>=65||t.socialita>=65?[["Sostieni lo sguardo e saluta",()=>{badge("La guardia ricambia il saluto. Non succedeva dal 2018.");discover("sguardo","Vittoria ai punti");change("coraggio",4);}]]:[]));
     case "bacheca":return scene("Bacheca del campus","Tra un seminario sul futuro e un volantino per ripetizioni di micro c’è una nota sui posti al Dome.",
       ["Leggi il retro",()=>{carry("Nota del Dome");discover("bacheca","Il retro della locandina");}]);
     case "varco":
+      if(activeScene==="panama-varco")return scene("Tornello di Via Panama","Per entrare, mostra il badge alla guardia accanto al varco.");
       if(activeScene==="viale-ingresso-varco"&&!has("Via libera")&&!isFree())return gateConfrontation();
       return scene("Tornello",has("Via libera")||isFree()?"Badge riconosciuto. Il tornello è aperto.":"Presenta il badge alla guardia, a sinistra del tornello.",
         ...((isFree()||has("Via libera"))?[["Entra nel campus",()=>travel("giardino")]]:[]));

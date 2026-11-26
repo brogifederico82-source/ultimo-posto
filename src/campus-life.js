@@ -249,7 +249,7 @@ function traceRomaniaCampus(garden){
   move("campus-tree-1",17,24);
   move("campus-tree-2",19,20);
   move("campus-tree-43",80,55);
-  move("campus-pillar-2",73,44);
+
   move("campus-tree-34",36,75);
   move("romania-seduta-atrio",46,79);
   for(const [key,[x,y]] of walls){
@@ -296,8 +296,12 @@ function traceRomaniaCampus(garden){
       add("romania-panama-soglia-"+x+"-"+y,"paving","Passaggio di Via Panama",x,y,"#b5aa97");
     }
   }
-  add("romania-panama-stipite-n","pillar","Pilastro di Via Panama",78,45,"#dec9a9",true);
-  add("romania-panama-stipite-s","pillar","Pilastro di Via Panama",81,49,"#dec9a9",true);
+  add("romania-panama-stipite-n","pillar","Pilastro di Via Panama",78,46,"#dec9a9",true);
+  add("romania-panama-stipite-s","pillar","Pilastro di Via Panama",78,48,"#dec9a9",true);
+  add("panama-varco","turnstile","Tornello di Via Panama",78,47,"#769388",true);
+  add("panama-guardia","guard","Guardia di Via Panama",79,46,"#6089aa",true);
+  Object.assign(garden.objects.at(-2),{action:"native",native:"varco"});
+  Object.assign(garden.objects.at(-1),{action:"native",native:"guardia"});
 }
 function arrangeRomaniaSurfaces(garden){
   const paving="#a49a87";
@@ -565,7 +569,14 @@ function widenCampusWalks(garden){
     if(item)Object.assign(item,{x,y});
   }
   // Two oversized street pines from the former entrance occupied the shop footprint.
-  garden.objects=garden.objects.filter(o=>o.uid!=="viale-romania-258"&&o.uid!=="viale-romania-259");
+  const obsoleteScenery=new Set([
+    "viale-romania-258","viale-romania-259","viale-romania-253","viale-romania-254",
+    "campus-pillar-2","campus-pillar-3","campus-tree-26","campus-tree-31","campus-tree-52",
+    "campus-tree-54","viale-romania-261","campus-tree-24","campus-tree-25"
+  ]);
+  garden.objects=garden.objects.filter(o=>!obsoleteScenery.has(o.uid));
+  const entranceSign=garden.objects.find(o=>o.uid==="viale-romania-271");
+  if(entranceSign)Object.assign(entranceSign,{x:22,y:72,w:3,h:1});
   // Plant along the lawns, leaving the paved approaches to the café and the Dome clear.
   for(const [id,x,y] of [
     [0,12,49],[1,34,40],[4,10,46],[5,34,43],[6,32,44],[7,36,47],[8,48,30],
