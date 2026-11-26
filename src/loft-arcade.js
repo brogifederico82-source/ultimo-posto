@@ -26,14 +26,14 @@ function stepLoftBricks(g,dt){
   if(b.vy>0&&oldY<165&&b.y>=165&&Math.abs(b.x-g.x)<=24){
     b.y=164;b.vy=-Math.min(162,b.vy+3);
     b.vx=clamp((b.x-g.x)*4.2,-111,111);
-    chime([58]);
+    sound("bounce");
   }
   const hit=g.bricks.findIndex(o=>b.x>=o.x-2&&b.x<=o.x+32&&b.y>=o.y-2&&b.y<=o.y+12);
   if(hit>=0){
     const brick=g.bricks[hit];
     g.bricks.splice(hit,1);g.score++;
     if(oldY<brick.y||oldY>brick.y+10)b.vy*=-1;else b.vx*=-1;
-    chime([72+brick.row]);
+    sound("shot");
     if(!g.bricks.length)endChallenge(g,"win");
   }
   if(b.y>187){
@@ -52,10 +52,10 @@ function stepLoftTapes(g,dt){
     const tape=g.drops[i],oldY=tape.y;
     tape.y+=(77+g.score*3)*dt;
     if(oldY<=165&&tape.y>=165&&Math.abs(tape.x-g.x)<=25){
-      g.drops.splice(i,1);chime([72]);
+      g.drops.splice(i,1);sound("coin");
       if(++g.score===12){endChallenge(g,"win");return;}
     }else if(tape.y>185){
-      g.drops.splice(i,1);chime([43]);
+      g.drops.splice(i,1);sound("bounce");
       if(--g.lives===0){endChallenge(g,"loss");return;}
     }
   }
@@ -80,13 +80,19 @@ function paintLoftGame(g){
   if(g.id==="mattoni"){
     for(const brick of g.bricks){
       rect(c,["#d678a4","#ec9e69","#e6cc79","#69bfb5"][brick.row],brick.x,brick.y,30,10);
-      rect(c,"#fff3d480",brick.x+1,brick.y+1,28,1);
+      rect(c,"#0c132999",brick.x+1,brick.y+10,30,2);
+      rect(c,"#fff3d4b0",brick.x+1,brick.y+1,28,1);
+      rect(c,"#19213c77",brick.x+28,brick.y+2,1,7);
     }
+    if(!reducedMotion&&!g.ready)for(let i=3;i>0;i--)
+      rect(c,"#e5d2ff55",g.ball.x-g.ball.vx*i*.012-1,g.ball.y-g.ball.vy*i*.012-1,2,2);
     rect(c,"#f9efd4",g.ball.x-2,g.ball.y-2,4,4);
   }else for(const tape of g.drops){
+    rect(c,"#070d2477",tape.x-6,tape.y+3,16,4);
     rect(c,"#d284af",tape.x-8,tape.y-4,16,9);rect(c,"#253152",tape.x-5,tape.y-2,10,4);
     rect(c,"#f8cb80",tape.x-3,tape.y-1,2,2);rect(c,"#f8cb80",tape.x+2,tape.y-1,2,2);
   }
-  $("challengeScore").textContent=(g.id==="mattoni"?"Mattoni ":"Cassette ")+g.score+"/"+(g.id==="mattoni"?32:12)+" · Vite "+g.lives;
-  if(!g.result)$("challengeStatus").textContent=g.id==="mattoni"&&g.ready?"Spazio o Lancia":"";
+  $("challengeScore").textContent=(g.id==="mattoni"?local("Mattoni ","Bricks "):local("Cassette ","Tapes "))+
+    g.score+"/"+(g.id==="mattoni"?32:12)+local(" · Vite "," · Lives ")+g.lives;
+  if(!g.result)$("challengeStatus").textContent=g.id==="mattoni"&&g.ready?local("Spazio o Lancia","Space or Launch"):"";
 }

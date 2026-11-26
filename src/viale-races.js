@@ -19,7 +19,8 @@ function raceReturn(g){
 }
 function renderVialeRace(g){
   const rows=$("raceHorses");
-  rows.replaceChildren();
+  rows.replaceChildren();rows.classList.remove("race-running");
+  $("racePhotoFinish").hidden=true;
   g.lanes=[];
   for(const [index,horse] of vialeRunners.entries()){
     const row=document.createElement("div");
@@ -42,7 +43,8 @@ function renderVialeRace(g){
     const track=document.createElement("div");
     track.className="race-track";
     const token=document.createElement("span");
-    token.textContent="♞";token.setAttribute("aria-hidden","true");
+    token.className="race-runner";token.setAttribute("aria-hidden","true");
+    token.innerHTML='<i class="race-horse"></i><i class="race-rider"></i><i class="race-hooves"></i>';
     const place=document.createElement("span");
     place.className="race-place";place.hidden=true;
     track.append(token);row.append(button,track,place);rows.append(row);
@@ -107,8 +109,13 @@ function tickVialeRace(g,now){
     signal.textContent=phase==="finish"?local("Traguardo","Finish"):
       phase==="sprint"?local("Rettilineo finale","Final stretch"):
       phase==="race"?local("Via!","Go!"):phase;
-    if(phase!=="finish"&&phase!=="sprint")chime(phase==="race"?[65,72]:[55],.08);
+    if(phase==="race")sound("whistle");
+    else if(phase==="sprint")sound("crowd");
+    else if(phase==="finish")sound("finish");
+    else chime([55],.08);
+    $("raceHorses").classList.toggle("race-running",phase==="race"||phase==="sprint");
   }
+  if(progress>0&&progress<1&&Math.floor(progress*32)!==g.hoofBeat){g.hoofBeat=Math.floor(progress*32);sound("hoof");}
   const segment=Math.min(3,Math.floor(progress*4));
   const ratio=progress*4-segment;
   const positions=g.paces.map(pace=>pace[segment]+(pace[segment+1]-pace[segment])*ratio);
@@ -126,6 +133,16 @@ function tickVialeRace(g,now){
   }
   if(progress<1)return;
   g.result=g.winner===g.pick?"win":"loss";
+  const photo=$("racePhotoFinish");
+  photo.replaceChildren(...standings.map((index,place)=>{
+    const row=document.createElement("li");
+    row.textContent=vialeRunners[index].name;
+    row.style.setProperty("--runner-color",vialeRunners[index].color);
+    if(place===0)row.dataset.winner="true";
+    return row;
+  }));
+  photo.hidden=false;
+  $("raceSignal").textContent=local("Fotofinish","Photo finish");
   const result=local("Vince ","Winner: ")+vialeRunners[g.winner].name;
   const change=g.stake?(g.payout?local("Incasso: ","Payout: ")+g.payout:local("Puntata persa: ","Stake lost: ")+g.stake):local("Corsa gratuita","Free race");
   $("challengeStatus").textContent=result+" · "+change;

@@ -53,7 +53,7 @@ function resolveArmPush(g,hit){
   g.attempts++;
   g.leverage+=hit?1:-1;
   g.feedback=hit?"Presa salda.":"Riccardo prende vantaggio.";
-  if(hit)chime([65]);
+  sound(hit?"rhythm":"bounce");
   if(Math.abs(g.leverage)<2&&g.attempts<5)return;
   if(g.leverage>0)g.you++;
   else g.them++;
@@ -87,7 +87,10 @@ function paintArm(g,now){
   rect(c,"#dfb087",gripX-6,gripY-6,12,11);
   const left=48,width=224;
   rect(c,"#24332d",left,159,width,13);
-  rect(c,"#92bb82",left+round.left*width,160,(round.right-round.left)*width,11);
+  const zoneX=left+round.left*width,zoneW=(round.right-round.left)*width;
+  rect(c,"#92bb82",zoneX,160,zoneW,11);
+  rect(c,"#e2f4ac",zoneX,160,zoneW,1);
+  for(let n=0;n<5;n++)rect(c,n<g.attempts?"#5d8076":"#e6d7ac",139+n*9,178,6,2);
   if(!g.result&&now>=g.start){
     rect(c,pass>=g.attempts?"#fff0bd":"#909593",left+cursor*width-2,157,4,17);
   }
@@ -102,6 +105,7 @@ function renderDance(){
   $("danceCue").textContent=g.result?"":danceSymbols[g.steps[g.index]];
   $("challengeScore").textContent=local("Mosse riuscite: ","Moves landed: ")+g.score+" / "+g.steps.length;
   const sequence=$("danceSequence");sequence.replaceChildren();
+  $("danceCue").dataset.beat=g.hits.at(-1)===true?"hit":g.hits.at(-1)===false?"miss":"";
   for(const [index,step] of g.steps.entries()){
     const marker=document.createElement("span");
     marker.textContent=danceSymbols[step];
@@ -116,7 +120,8 @@ function danceInput(move){
   if(g?.kind!=="dance"||g.result||!g.deadline)return;
   const hit=move===g.steps[g.index]&&performance.now()<g.deadline;
   g.hits.push(hit);
-  if(hit){g.score++;chime([67]);}
+  if(hit){g.score++;sound("rhythm");}
+  else sound("bounce");
   g.index++;
   if(g.index===5){
     endChallenge(g,g.score>=4?"win":"loss");
@@ -133,13 +138,14 @@ function danceInput(move){
 function tickDance(now){
   const g=minigame;
   if(g.result)return;
-  if(!g.deadline){$("danceMeter").max=1450;g.deadline=now+1450;}
+  if(!g.deadline){$("danceMeter").max=1450;g.deadline=now+1450;sound("whistle");}
   $("danceMeter").value=Math.max(0,g.deadline-now);
   if(now>=g.deadline)danceInput(-1);
 }
 for(const [i,button] of [...$("dancePad").querySelectorAll("button")].entries())button.onclick=()=>danceInput(i);
 function openChallenge(id,practice=false){
   keys.clear();controls.clear();
+  $("challengeAudio").open=false;
   const isLoft=Object.hasOwn(loftGames,id);
   const isVirtual=id==="virtuali",isCalcetto=id==="calcetto",isRace=id==="cavalli",isScopa=id==="scopa",isPoker=id==="poker",isCards=id==="bris"||isScopa||isPoker,isDance=id==="dance",isArm=id==="arm";
   $("dancePad").hidden=!isDance;
@@ -177,6 +183,7 @@ function openChallenge(id,practice=false){
   );
   $("challengeReplay").textContent=tr("Rivincita");
   $("challengeReplay").hidden=true;
+  delete $("challenge").dataset.result;
   $("cardGame").hidden=!isCards;
   $("racePanel").hidden=!isRace;
   $("virtualPanel").hidden=!isVirtual;
@@ -209,6 +216,7 @@ function openChallenge(id,practice=false){
   $("challengeShot").textContent=tr(id==="mattoni"?"Lancia":isArm?"Spingi":id==="ping"?"Schiaccia":"Tira");
   $("challengeStatus").textContent="";
   if(!$("challenge").open)$("challenge").showModal();
+  if(isCards)sound("deal");
   if(isPoker)advanceHoldem(minigame);
   if(isDance){renderDance();$("dancePad").querySelector("button").focus();}
   else if(isScopa)renderScopa(true);
@@ -218,6 +226,15 @@ function openChallenge(id,practice=false){
   else if(isCalcetto){paintCalcetto(minigame);court.focus();}
   else if(isCards)renderBriscola(true);
   else{if(isArm)paintArm(minigame,performance.now());else if(isLoft)paintLoftGame(minigame);else paintCourt(minigame);court.focus();}
+}
+function scheduleChallenge(g,run,delay){
+  clearTimeout(g.timer);
+  g.pendingMove={run,ends:performance.now()+delay};
+  g.timer=setTimeout(()=>{
+    if(g!==minigame)return;
+    g.pendingMove=null;
+    run();
+  },delay);
 }
 function closeChallenge(){
   if(!minigame)return;
@@ -250,6 +267,7 @@ court.onlostpointercapture=()=>{if(minigame)minigame.pointerAim=null;};
 
 function endChallenge(g,result){
   g.result=result;
+  $("challenge").dataset.result=result;
   if(g.practice){
     $("challengeStatus").textContent=result==="win"?local("Allenamento vinto. Premi Rivincita per riprovare.","Practice won. Select Rematch to play again."):local("Allenamento concluso. Premi Rivincita per riprovare.","Practice finished. Select Rematch to play again.");
     $("challengeReplay").hidden=false;
@@ -315,7 +333,7 @@ function arcadePoint(g,player){
     g.ball.vx=0;g.ball.vy=0;
     endChallenge(g,player?"win":"loss");
   }else{
-    chime(player?[67,72]:[48]);
+    sound(g.id==="foos"?"goal":"finish");
     serve(g,g.id==="foos"||player);
   }
 }
@@ -382,7 +400,7 @@ function stepFoos(g,dt){
     if(g.kick===0)g.kick=-.16;
   }else if(g.kick<0)g.kick=Math.min(0,g.kick+dt);
   b.x+=b.vx*dt;b.y+=b.vy*dt;
-  if(b.x<bounds.left||b.x>bounds.right){b.x=reflectCourt(b.x);b.vx*=-1;}
+  if(b.x<bounds.left||b.x>bounds.right){b.x=reflectCourt(b.x);b.vx*=-1;sound("bounce");}
   if(b.vy>0){
     for(const [row,rod,defender] of [[foosRows.attack,g.player,false],[foosRows.defense,g.guardX,true]]){
       const offset=meetRow(g,row,previousY,rod,defender?10:12);
@@ -411,7 +429,7 @@ function stepFoos(g,dt){
   if(b.y<bounds.top||b.y>bounds.bottom){
     if(Math.abs(b.x-160)<=goalHalf){arcadePoint(g,b.y<bounds.top);return;}
     b.y=b.y<bounds.top?bounds.top+(bounds.top-b.y):bounds.bottom-(b.y-bounds.bottom);
-    b.vy*=-1;
+    b.vy*=-1;sound("post");
     b.vx=clamp(b.vx+(160-b.x)*.20,-170,170);
   }
 }
@@ -444,7 +462,7 @@ function stepPingBall(g,dt){
   const target=rivalCanRead?pingIntercept(b,bounds.rival)+error:160;
   g.rival=approach(g.rival,clamp(target,56,264),(rivalCanRead?(g.practice?88:140):72)*dt);
   b.x+=b.vx*dt;b.y+=b.vy*dt;
-  if(b.x<bounds.left||b.x>bounds.right){b.x=reflectCourt(b.x);b.vx*=-1;}
+  if(b.x<bounds.left||b.x>bounds.right){b.x=reflectCourt(b.x);b.vx*=-1;sound("bounce");}
   const row=b.vy>0?bounds.player:bounds.rival;
   const crossed=b.vy>0?previousY<row&&b.y>=row:previousY>row&&b.y<=row;
   const hitX=crossed?previousX+(b.x-previousX)*(row-previousY)/(b.y-previousY):b.x;
@@ -491,7 +509,9 @@ function paintCourt(g){
   if(ping){
     rect(c,"#abc6b17b",159,13,1,163);
     for(let x=35;x<285;x+=5)rect(c,"#e8ddab",x,93,2,2);
+    rect(c,"#172e3eb5",g.rival-17,bounds.rival-1,35,5);
     rect(c,"#d67561",g.rival-16,bounds.rival-5,32,5);
+    rect(c,"#172e3eb5",g.player-22,bounds.player+3,45,5);
     rect(c,"#e7b567",g.player-21,bounds.player,42,5);
     if(g.ball.vy>0&&g.ball.y>94){
       const landing=pingIntercept(g.ball,bounds.player);
@@ -503,11 +523,17 @@ function paintCourt(g){
       for(let col=160-goalHalf;col<160+goalHalf;col+=7)rect(c,"#809776",col,y,1,5);
     }
     for(const [x,y,player] of [[g.rival,foosRows.rivalAttack,false],[g.rivalGuard,foosRows.rivalDefense,false],[g.player,foosRows.attack,true],[g.guardX,foosRows.defense,true]]){
-      rect(c,"#bcb9a0",29,y-1,262,2);
+      rect(c,"#102925aa",29,y+2,262,2);
+      rect(c,"#aeb7ac",25,y-1,270,3);
+      rect(c,"#e3e7d4",25,y-1,270,1);
+      rect(c,player?"#247e91":"#99554e",player?284:17,y-3,18,6);
       for(const offset of [-37,0,37]){
-        const lift=player&&g.kick>0?-4:0;
-        rect(c,player?"#edb960":"#d66d64",x+offset-5,y-5+lift,10,10);
-        rect(c,"#f2dfbd",x+offset-2,y-6+lift,4,3);
+        const turn=player&&g.kick!==0?Math.sin(Math.abs(g.kick)*9):0;
+        const shift=reducedMotion?0:turn*4;
+        rect(c,"#173a36aa",x+offset-4,y+3,8,5);
+        rect(c,player?"#73d9f5":"#eea065",x+offset-4,y-4-shift,8,8);
+        rect(c,"#f2dfbd",x+offset-2,y-7-shift,4,4);
+        rect(c,"#26313d",x+offset-3,y+3+shift,6,2);
       }
     }
   }
@@ -522,6 +548,9 @@ function paintCourt(g){
     rect(c,"#ffd364",ready.x-7,ready.row+7,14,1);
   }
   if(ping&&pingReady(g))rect(c,"#efba62",g.ball.x-4,g.ball.y-4,8,8);
+  if(ping&&!reducedMotion&&g.wait===0&&!g.pingPlayerServe&&!g.result){
+    for(let i=3;i>0;i--)rect(c,"#c9eff544",g.ball.x-g.ball.vx*i*.015-1,g.ball.y-g.ball.vy*i*.015-1,3,3);
+  }
   if(ping&&g.powerHit&&g.impact>0){
     rect(c,"#b4d7ce99",g.ball.x-1,g.ball.y+3,3,6);
     rect(c,"#b4d7ce55",g.ball.x,g.ball.y+10,2,4);
@@ -569,6 +598,7 @@ function shuffleCards(deck){
   return deck;
 }
 function makeCardDeck(){
+  sound("shuffle");
   return shuffleCards(suits.flatMap(suit=>ranks.map(([name,points],order)=>({suit,name,points,order,value:scopaValues[order]}))));
 }
 function startBriscola(){
@@ -590,18 +620,19 @@ function playCard(g,side,index){
     return;
   }
   if(g!==minigame||g.phase!=="playing"||g.turn!==side||!g.hands[side][index])return;
+  sound("card");
   g.table[side]=g.hands[side].splice(index,1)[0];
   if(!g.table[1-side]){
     g.turn=1-side;
     g.note=g.turn===0?"Tocca a te.":"L’avversario sceglie…";
     renderBriscola(g.turn===0);
-    if(g.turn===1)g.timer=setTimeout(()=>rivalCard(g),320);
+    if(g.turn===1)scheduleChallenge(g,()=>rivalCard(g),320);
     return;
   }
   const follower=1-g.leader;
   const taker=takesTrick(g.table[g.leader],g.table[follower],g.trump.suit)?follower:g.leader;
   const points=g.table[0].points+g.table[1].points;
-  g.score[taker]+=points;
+  g.score[taker]+=points;sound("trick");
   g.tricks++;
   g.phase="trick";
   g.note=(taker===0?"Prendi tu":"Prende l’avversario")+" · "+points+(points===1?" punto":" punti");
@@ -610,8 +641,7 @@ function playCard(g,side,index){
     endChallenge(g,g.score[0]>60?"win":g.score[0]<60?"loss":"tie");
     return;
   }
-  g.timer=setTimeout(()=>{
-    if(g!==minigame)return;
+  scheduleChallenge(g,()=>{
     if(g.deck.length){
       g.hands[taker].push(g.deck.shift());
       g.hands[1-taker].push(g.deck.shift());
@@ -619,7 +649,7 @@ function playCard(g,side,index){
     g.table=[null,null];g.leader=taker;g.turn=taker;g.phase="playing";
     g.note=taker===0?"Tocca a te.":"L’avversario apre la mano…";
     renderBriscola(taker===0);
-    if(taker===1)g.timer=setTimeout(()=>rivalCard(g),400);
+    if(taker===1)scheduleChallenge(g,()=>rivalCard(g),400);
   },820);
 }
 function rivalCard(g){
@@ -696,7 +726,7 @@ function chooseScopaCard(g,index){
 }
 function playScopa(g,side,index,capture){
   if(g!==minigame||g.result||g.breakdown||g.turn!==side||!g.hands[side][index])return;
-  const [card]=g.hands[side].splice(index,1);
+  const [card]=g.hands[side].splice(index,1);sound("card");
   g.selected=-1;g.options=[];
   const captured=capture.map(i=>g.board[i]);
   const lastPlay=!g.deck.length&&g.hands.every(hand=>!hand.length);
@@ -707,7 +737,8 @@ function playScopa(g,side,index,capture){
     g.board=g.board.filter((_,i)=>!indices.has(i));
     g.lastCapture=side;
     sweep=!g.board.length&&!lastPlay;
-    if(sweep){g.sweeps[side]++;chime([65,69,72]);}
+    if(sweep){g.sweeps[side]++;sound("scopa");}
+    else sound("trick");
   }else g.board.push(card);
   g.last={side,card,captured,sweep};
   if(lastPlay){finishScopaRound(g);return;}
@@ -716,7 +747,7 @@ function playScopa(g,side,index,capture){
   }
   g.turn=1-side;
   renderScopa(g.turn===0);
-  if(g.turn===1)g.timer=setTimeout(()=>rivalScopa(g),540);
+  if(g.turn===1)scheduleChallenge(g,()=>rivalScopa(g),540);
 }
 function rivalScopa(g){
   if(g!==minigame||g.result||g.breakdown||g.turn!==1)return;
@@ -800,7 +831,7 @@ function renderScopa(focusHand=false,focusCapture=false){
     minigame=startScopa(g.score,1-g.leader,g.round+1);renderScopa(minigame.turn===0);
     if(minigame.turn===1){
       const next=minigame;
-      next.timer=setTimeout(()=>rivalScopa(next),540);
+      scheduleChallenge(next,()=>rivalScopa(next),540);
       $("challengeStatus").focus();
     }
   };

@@ -44,6 +44,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <button data-move="down" aria-label="Cammina in basso">↓</button>
 <button data-move="right" aria-label="Cammina a destra">→</button>
 </div>
+<div id="smokingTools" class="actions"><button id="smokingAction">Fuma</button><button id="smokingAsh" hidden></button><button id="smokingEnd" hidden></button><small id="smokingStatus" role="status"></small></div>
 <button id="interact" class="primary">Interagisci <kbd>E</kbd></button>
 </div><details id="controlGuide" class="control-guide">
 <summary>Guida ai comandi</summary>
@@ -129,6 +130,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <p id="raceLeader" class="race-leader"></p>
 </div>
 <div id="raceHorses" class="race-horses"></div>
+<ol id="racePhotoFinish" class="race-photo" hidden></ol>
 <div class="actions">
 <label id="raceStakeLabel"><span id="raceStakeText"></span> <input id="raceStake" type="number" min="0" max="5" value="0" step="1"></label>
 <button id="raceStart" class="primary"></button>
@@ -140,6 +142,8 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <p id="virtualScore" class="race-signal"></p>
 <canvas id="virtualPitch" width="480" height="260" role="img" aria-label="Campo della partita virtuale"></canvas>
 <p id="virtualLegend" class="virtual-legend"></p>
+<p id="virtualCommentary" class="virtual-legend"></p>
+<button id="virtualReplay" hidden>Replay</button>
 </div>
 <div id="virtualMarkets" class="virtual-markets"></div>
 <div class="actions" id="virtualTicket">
@@ -149,6 +153,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 </div>
 <ol id="virtualGoals" class="virtual-goals"></ol>
 </section>
+<details id="challengeAudio" class="challenge-audio"><summary id="challengeAudioLabel">Opzioni audio</summary><div id="challengeMixer" class="audio-mixer"></div></details>
 <p id="challengeStatus" class="challenge-result" role="status" tabindex="-1"></p>
 <div class="actions challenge-controls">
 <button id="challengeLeft" aria-label="Sposta a sinistra">←</button><button id="challengeRight" aria-label="Sposta a destra">→</button>
@@ -206,7 +211,8 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <details class="journal campus-options">
 <summary>Opzioni</summary>
 <label><input type="checkbox" id="unarmedGuard"> Usa la variante con guardia disarmata</label>
-<label class="audio-level">Volume musica <input id="musicVolume" type="range" min="0" max="100" value="65"></label>
+<label><input type="checkbox" id="smokingEnabled" checked> <span id="smokingLabel">Mostra il comando Fuma</span></label>
+<div id="campusMixer" class="audio-mixer"></div>
 <label><input type="checkbox" id="surpriseEnabled" checked> Sorprese horror-comiche</label>
 <p class="hint">Attive di default. Puoi disattivarle qui. La voce segue l’impostazione audio del gioco.</p>
 </details>

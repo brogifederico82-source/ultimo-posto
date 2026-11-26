@@ -298,7 +298,10 @@ function draw(now){
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
   worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},layers,false,
-    {row:state.y+.86,draw:()=>sprite(stage,state.avatar,x+8,y+14,now-lastWalk<160?Math.floor(now/75)%3:0,state.look)});
+    {row:state.y+.86,draw:()=>{
+      sprite(stage,state.avatar,x+8,y+14,now-lastWalk<160?Math.floor(now/75)%3:0,state.look);
+      paintSmoking(stage,x+8,y+14,now);
+    }});
   if(z.ground==="grass"&&!reducedMotion){
     for(let i=0;i<18;i++){
       const px=(i*131+Math.floor(now/120))%(z.width*16);
@@ -472,12 +475,18 @@ function frame(now){
     if(!state.ending&&!minigame&&!activeScene&&!state.prologue&&!$("campusSurprise").open)trafficClock+=delta;
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
+    nearbyTrafficSound(now);
+    tickSmoking(now);
     const move=moves.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
     if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
       if(!crossRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
         state.x=x;state.y=y;dirty=true;
+        if(cigarette)updateSmokingUI();
+        const area=room(state.zone);
+        const surface=terrainCache.get(area)?.get(x+y*area.width)?.kind??area.ground;
+        sound(surface==="grass"?"grass":surface==="floor"?"floor":"pavement","map");
         collectCampusCoin();syncBackgroundMusic();
         paintCampusOverview();
         trafficImpact();
@@ -488,35 +497,39 @@ function frame(now){
       lastWalk=now;
     }
     if(dirty&&(!move||activeScene||now-lastWalk>=300)){save();dirty=false;}
-    if(minigame?.kind==="arcade")tickArcade(now);
-    if(minigame?.kind==="calcetto")tickCalcetto(minigame,now);
-    if(minigame?.kind==="loft")tickLoftGame(now);
-    if(minigame?.kind==="arm")tickArm(now);
-    if(minigame?.kind==="dance")tickDance(now);
-    if(minigame?.kind==="virtuali")tickVirtualFootball(minigame,now);
-    if(minigame?.kind==="cavalli")tickVialeRace(minigame,now);
+    if(!$("challengeAudio").open){
+      if(minigame?.kind==="arcade")tickArcade(now);
+      if(minigame?.kind==="calcetto")tickCalcetto(minigame,now);
+      if(minigame?.kind==="loft")tickLoftGame(now);
+      if(minigame?.kind==="arm")tickArm(now);
+      if(minigame?.kind==="dance")tickDance(now);
+      if(minigame?.kind==="virtuali")tickVirtualFootball(minigame,now);
+      if(minigame?.kind==="cavalli")tickVialeRace(minigame,now);
+    }
     if(state.ending?.guard)paintGuardOutcome(now);
     else if(!minigame)draw(now);
   }
   requestAnimationFrame(frame);
 }
 let audioContext=null,audioOn=false;
-const entranceMusic=$("entranceMusic"),campusMusic=$("campusMusic"),volumeControl=$("musicVolume");
+let lastTrafficSound=-Infinity,lastTrafficCheck=-Infinity;
+function nearbyTrafficSound(now){
+  if(!audioOn||!channelLevel("map")||now-lastTrafficSound<900||now-lastTrafficCheck<230||minigame||activeScene||state.prologue||state.ending)return;
+  const area=room(state.zone);
+  lastTrafficCheck=now;
+  const close=sceneObjects(area).some(o=>{
+    if(!isVehicle(o)||o.behavior==="idle")return false;
+    const at=positionOf(o,trafficClock,area.width);
+    return Math.abs(state.x-at.x-at.w/2)<4&&Math.abs(state.y-at.y)<2.4;
+  });
+  if(close){lastTrafficSound=now;sound("traffic","map");}
+}
+const entranceMusic=$("entranceMusic"),campusMusic=$("campusMusic");
 let currentMusic=entranceMusic,musicStart=null,musicFailed=false;
 function applyMusicVolume(){
-  const value=Number(volumeControl.value)/100;
-  entranceMusic.volume=campusMusic.volume=Number.isFinite(value)?value:.65;
+  entranceMusic.volume=campusMusic.volume=channelLevel("master")*channelLevel("music");
 }
-try{
-  const preferred=localStorage.getItem("ultimo-posto-volume");
-  if(preferred!==null)volumeControl.value=preferred;
-}catch{}
 applyMusicVolume();
-volumeControl.oninput=()=>{
-  applyMusicVolume();
-  if(audioOn&&!musicFailed)audioFeedback(currentMusic.volume===0?"Volume della musica a zero.":"");
-  try{localStorage.setItem("ultimo-posto-volume",volumeControl.value);}catch{}
-};
 function audioFeedback(message=""){
   $("audioFeedback").textContent=message;
   $("audioFeedback").hidden=!message;
@@ -545,28 +558,19 @@ function syncBackgroundMusic(){
 function enableAudio(){
   const Audio=window.AudioContext||window.webkitAudioContext;
   if(Audio){
-    audioContext??=new Audio();audioContext.resume().catch(()=>{});
+    audioContext??=new Audio();initEffects();audioContext.resume().catch(()=>{});
   }
   audioOn=true;$("audio").textContent=tr("Audio acceso");$("audio").setAttribute("aria-pressed","true");
 }
 function chime(notes,spacing=.12,volume=.065){
-  if(!audioOn || !audioContext)return;
-  for(const [i,note] of notes.entries()){
-    const at=audioContext.currentTime+i*spacing;
-    const osc=audioContext.createOscillator(), gain=audioContext.createGain();
-    osc.type="triangle";osc.frequency.value=440*2**((note-69)/12);
-    gain.gain.setValueAtTime(volume,at);gain.gain.exponentialRampToValueAtTime(.001,at+.22);
-    osc.connect(gain);gain.connect(audioContext.destination);osc.start(at);osc.stop(at+.24);
-  }
+  playTones(notes,spacing,volume,minigame?"games":"map");
 }
 $("audio").onclick=()=>{
-  if(audioOn&&musicFailed){musicFailed=false;audioFeedback();syncBackgroundMusic();return;}
   if(audioOn){
     audioOn=false;musicStart=null;audioFeedback();
     $("audio").textContent=tr("Audio spento");
     $("audio").setAttribute("aria-pressed","false");
-    currentMusic.pause();
-    audioContext?.suspend().catch(()=>{});
+    currentMusic.pause();stopEffects();
   }else{
     enableAudio();musicFailed=false;syncBackgroundMusic();
   }
@@ -575,6 +579,10 @@ window.addEventListener("keydown",event=>{
   if(screen!=="game"||$("campusSurprise").open||event.ctrlKey||event.altKey||event.metaKey)return;
   const key=event.key.toLowerCase();
   if(minigame){
+    if($("challengeAudio").open){
+      if(key==="escape"){event.preventDefault();$("challengeAudio").open=false;}
+      return;
+    }
     if(key==="escape"){event.preventDefault();closeChallenge();return;}
     if(minigame.kind==="dance"&&danceKeys.includes(key)){event.preventDefault();if(!event.repeat)danceInput(danceKeys.indexOf(key));return;}
     if(minigame.kind==="arm"&&(key===" "||key==="e")&&event.target!==$("challengeExit")&&event.target!==$("challengeReplay")){
@@ -671,14 +679,14 @@ function checkCampusSurprise(){
   $("surpriseTitle").textContent=encounter.voice;
   $("surpriseLine").textContent=encounter.line;
   $("campusSurprise").showModal();
-  if(audioOn&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
+  if(audioOn&&channelLevel("master")&&channelLevel("voices")&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
     surpriseVoice=new SpeechSynthesisUtterance(encounter.voice);
     surpriseVoice.lang="it-IT";
     const italian=window.speechSynthesis.getVoices().filter(voice=>/^it(-|_)/i.test(voice.lang));
     const voice=italian.find(candidate=>candidate.localService&&/enhanced|premium|natural/i.test(candidate.name))??italian.find(candidate=>candidate.localService)??italian[0];
     if(voice)surpriseVoice.voice=voice;
     surpriseVoice.rate=1.04;
-    surpriseVoice.volume=.55;
+    surpriseVoice.volume=.55*channelLevel("master")*channelLevel("voices");
     window.speechSynthesis.speak(surpriseVoice);
   }
   save();
