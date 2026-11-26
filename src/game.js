@@ -325,11 +325,12 @@ function carry(item){
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
 function interact(){
-  if(screen!=="game"||state.ending||state.prologue||$("campusSurprise").open)return;
+  if(!exploringCampus())return;
   const spot=nearby();if(!spot)return;
+  keys.clear();controls.clear();
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
-    state.campusGateOpen=true;activeScene=null;keys.clear();controls.clear();
+    state.campusGateOpen=true;activeScene=null;
     if(state.x===spot.x&&state.y===spot.y+1&&!blocked(state.zone,spot.x,spot.y))state.y=spot.y;
     syncBackgroundMusic();save();renderScene();$("interact").focus();
     return;
@@ -339,12 +340,11 @@ function interact(){
   }
   const destination=doorDestination(spot);
   if(destination){
-    keys.clear();controls.clear();
     travel(...destination);save();renderScene();$("interact").focus();
     return;
   }
   state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);renderScene();
-  if(!$("speakerPortrait").hidden)$("sceneTitle").focus();
+  focusScene();
 }
 const nativeDoors={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
 function doorDestination(spot){
@@ -786,12 +786,20 @@ function renderScene(){
       button.dataset.shortcut=String(index);
       button.setAttribute("aria-keyshortcuts",String(index));
     }
-    button.onclick=()=>{state.chatTopic=null;action();if(screen==="game"){save();renderScene();if(!minigame)($("speakerPortrait").hidden?$("interact"):$("sceneTitle")).focus();}};
+    button.onclick=()=>{
+      state.chatTopic=null;
+      action();
+      if(screen!=="game")return;
+      save();renderScene();
+      if(!minigame)focusScene();
+    };
     $("choices").append(button);
   }
   if(activeScene && !state.ending){
     const close=document.createElement("button");close.textContent=tr("Torna a esplorare");
-    close.onclick=()=>{activeScene=null;state.chatTopic=null;state.freeMoment=null;renderScene();$("interact").focus();};$("choices").append(close);
+    close.setAttribute("aria-keyshortcuts","Escape");
+    close.onclick=closeScene;
+    $("choices").append(close);
   }
   $("log").replaceChildren();
   for(const entry of state.log){const li=document.createElement("li");li.textContent=tr(entry);$("log").append(li);}

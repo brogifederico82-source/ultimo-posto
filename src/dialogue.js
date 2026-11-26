@@ -349,9 +349,20 @@ function autoEncounter(o){
   if(o.native==="trend"&&o.action==="native")openChallenge("dance");
   return true;
 }
+function exploringCampus(){
+  return screen==="game"&&!state.prologue&&!state.ending&&!activeScene&&!minigame&&!$("campusSurprise").open;
+}
+function focusScene(){
+  $(exploringCampus()?"interact":"sceneTitle").focus();
+}
+function closeScene(){
+  activeScene=null;state.chatTopic=null;state.freeMoment=null;
+  keys.clear();controls.clear();
+  renderScene();focusScene();
+}
 let stageInteraction=null;
 $("stage").onclick=event=>{
-  if(screen!=="game"||activeScene||minigame||!stageInteraction)return;
+  if(!exploringCampus()||!stageInteraction)return;
   const nearest=nearby();
   if(nearest?.uid!==stageInteraction.uid)return;
   const canvas=$("stage"), bounds=canvas.getBoundingClientRect();
@@ -549,17 +560,22 @@ const moves=[
   {control:"up",keys:["w","arrowup"],dx:0,dy:-1},
   {control:"down",keys:["s","arrowdown"],dx:0,dy:1}
 ];
+let movementPriority=[...moves];
+function prioritizeMove(move){
+  movementPriority=movementPriority.filter(item=>item!==move);
+  movementPriority.unshift(move);
+}
 function frame(now){
   mapClock=reducedMotion?0:now;
   const delta=Math.min(40,now-(lastTrafficFrame||now));
   lastTrafficFrame=now;
   if(screen==="editor")drawEditor(now);
   if(screen==="game"){
-    if(!state.ending&&!minigame&&!activeScene&&!state.prologue&&!$("campusSurprise").open)trafficClock+=delta;
+    if(exploringCampus())trafficClock+=delta;
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
-    const move=moves.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
-    if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=walkInterval){
+    const move=exploringCampus()&&movementPriority.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
+    if(move&&now-lastWalk>=walkInterval){
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
       if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
@@ -661,6 +677,8 @@ $("audio").onclick=()=>{
 window.addEventListener("keydown",event=>{
   if(screen!=="game"||$("campusSurprise").open||event.ctrlKey||event.altKey||event.metaKey)return;
   const key=event.key.toLowerCase();
+  const field=event.target instanceof Element&&event.target.closest("input,select,textarea,[contenteditable]:not([contenteditable=false])");
+  if(field&&!(minigame&&key==="escape"))return;
   if(minigame){
     if(key==="escape"){event.preventDefault();closeChallenge();return;}
     if(minigame.kind==="dance"&&danceKeys.includes(key)){event.preventDefault();if(!event.repeat)danceInput(danceKeys.indexOf(key));return;}
@@ -702,32 +720,57 @@ window.addEventListener("keydown",event=>{
     choices[next].focus();
     return;
   }
-  if(["arrowleft","arrowright","arrowup","arrowdown","a","d","w","s","e","escape"].includes(key))event.preventDefault();
-  keys.add(key);
-  if(key==="e"&&!event.repeat&&!activeScene)interact();
-  if(key==="escape"&&activeScene){
-    activeScene=null;state.chatTopic=null;state.freeMoment=null;
-    keys.clear();controls.clear();renderScene();$("interact").focus();
+  if(key==="escape"&&activeScene&&!state.ending){
+    event.preventDefault();closeScene();return;
+  }
+  if(!exploringCampus())return;
+  if(key==="e"){
+    event.preventDefault();
+    if(!event.repeat)interact();
+    return;
+  }
+  const move=moves.find(item=>item.keys.includes(key));
+  if(move){
+    event.preventDefault();
+    if(!event.repeat){keys.add(key);prioritizeMove(move);}
   }
 });
 window.addEventListener("keyup",event=>keys.delete(event.key.toLowerCase()));
-window.addEventListener("blur",()=>{keys.clear();controls.clear();if(dirty){save();dirty=false;}});
+function releaseCampusControls(){
+  keys.clear();controls.clear();
+  if(dirty){save();dirty=false;}
+}
+window.addEventListener("blur",releaseCampusControls);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)releaseCampusControls();});
 for(const button of document.querySelectorAll("[data-move]")){
   const direction=button.dataset.move;
-  button.onpointerdown=event=>{button.setPointerCapture(event.pointerId);controls.add(direction);};
+  const move=moves.find(item=>item.control===direction);
+  function holdDirection(){
+    controls.add(direction);
+    prioritizeMove(move);
+  }
+  button.onpointerdown=event=>{
+    if(!exploringCampus())return;
+    button.setPointerCapture(event.pointerId);
+    holdDirection();
+  };
   button.onlostpointercapture=()=>controls.delete(direction);
   button.onpointerup=()=>controls.delete(direction);
   button.onpointercancel=()=>controls.delete(direction);
   button.onkeydown=event=>{
     if(event.key!==" "&&event.key!=="Enter")return;
-    event.preventDefault();controls.add(direction);
+    event.preventDefault();
+    if(!event.repeat&&exploringCampus())holdDirection();
   };
   button.onkeyup=event=>{
     if(event.key===" "||event.key==="Enter")controls.delete(direction);
   };
   button.onblur=()=>controls.delete(direction);
 }
-$("interact").onclick=interact;
+$("interact").onclick=()=>{
+  if(exploringCampus())interact();
+  else if(activeScene&&finishCaption())focusScene();
+};
 const surprisePreference="ultimo-posto-sorprese";
 const campusSurprises=[
   {zone:"giardino",x:13,y:39,id:"Fantasma del fuoricorso",voice:"Guagliò!",line:"Da Napoli, il fantasma del fuoricorso. Gli rimane un esame dal 1998.",theme:"ghost"},
