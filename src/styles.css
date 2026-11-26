@@ -435,3 +435,45 @@ button, select, input { font-family: var(--interface); }
 .race-photo { display: grid; gap: .2rem; margin-block: .45rem; padding-inline-start: 1.7rem; }
 .race-photo li { padding: .2rem .45rem; border-inline-start: 3px solid var(--runner-color); background: #13243c; }
 .race-photo li[data-winner] { color: #fff2bb; font-weight: bold; }
+
+/* Keep the essential controls within thumb reach without blocking page scroll. */
+@media (max-width:760px), (pointer:coarse) and (max-height:600px) {
+  main {
+    padding-left:max(12px,env(safe-area-inset-left));
+    padding-right:max(12px,env(safe-area-inset-right));
+  }
+  #game:not(.game-reading) { padding-bottom:calc(136px + env(safe-area-inset-bottom)); }
+  #game .frame { margin-top:10px; }
+  #game .touch {
+    position:fixed;
+    inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
+    justify-content:space-between;
+    gap:6px;
+    padding:6px;
+    background:var(--panel);
+  }
+  #game.game-reading .touch { display:none; }
+  #game.game-reading .frame { display:none; }
+  #game .touch .direction-pad { grid-template-columns:repeat(3,44px); gap:3px; }
+  #game .touch .direction-pad button { min-width:44px; min-height:44px; padding:0; font-size:19px; }
+  #game .touch #interact { min-height:52px; margin-left:0; }
+  #smokingTools { flex:1 1 62px; gap:4px; }
+  #smokingTools button { min-width:44px; padding-inline:6px; }
+  #smokingStatus { display:none; }
+  .game-reading .scene { margin-top:10px; }
+  #choices { display:grid; gap:8px; }
+  #choices button, #skipCaption { min-height:48px; }
+  select, input[type=text], input[type=number], textarea { font-size:16px; }
+  dialog.challenge { max-height:calc(100dvh - 16px - env(safe-area-inset-bottom)); padding-bottom:0; }
+  .challenge header {
+    position:sticky; top:0; z-index:2;
+    background:var(--panel);
+  }
+  .challenge-controls {
+    position:sticky; bottom:0; z-index:1;
+    padding:6px 0;
+    background:var(--panel);
+  }
+  .challenge-controls button { min-width:48px; min-height:48px; }
+  .challenge-controls:not(:has(button:not([hidden]))) { display:none; }
+}

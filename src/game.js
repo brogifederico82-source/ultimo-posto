@@ -159,7 +159,10 @@ function show(next){
     preview();
   }
   if(next==="editor") enterEditor();
-  if(next==="game") renderScene();
+  if(next==="game"){
+    renderScene();
+    window.scrollTo(0,0);
+  }
   if(next!=="editor")refreshLanguage();
   syncBackgroundMusic();
 }
@@ -338,7 +341,8 @@ function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
 function interact(){
   if(!exploringCampus())return;
-  const spot=nearby();if(!spot)return;
+  const spot=nearby();
+  if(!spot){sound("error","interface");return;}
   keys.clear();controls.clear();
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
@@ -357,6 +361,9 @@ function interact(){
     sound(spot.kind==="stairs"||spot.target.endsWith("#scale")?"stairs":"door","map");
     travel(...destination);save();renderScene();$("interact").focus();
     return;
+  }
+  if(spot.uid!=="viale-ingresso-varco"){
+    sound(gateLocked(spot.gate)?"error":kindLayer(spot)==="persone"?"talk":"inspect","map");
   }
   state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);
   if(resumableScene(activeScene))save();
@@ -792,6 +799,7 @@ function renderScene(){
   $("speakerPortrait").hidden=!conversation;
   $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
   $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
+  $("game").classList.toggle("game-reading",Boolean(activeScene||state.prologue||state.ending));
   $("guardOutcome").hidden=!state.ending?.guard;
   refreshGateWarning();paintGuardOutcome(performance.now());
   paintSpeaker(performance.now());

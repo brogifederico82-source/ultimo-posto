@@ -188,9 +188,9 @@ function openChallenge(id,practice=false){
   $("racePanel").hidden=!isRace;
   $("virtualPanel").hidden=!isVirtual;
   $("brisLegend").hidden=id!=="bris";
-  $("brisLegend").open=id==="bris";
+  $("brisLegend").open=id==="bris"&&!touchGameplay.matches;
   $("scopaLegend").hidden=!isScopa;
-  $("scopaLegend").open=isScopa;
+  $("scopaLegend").open=isScopa&&!touchGameplay.matches;
   $("brisTable").hidden=id!=="bris";
   $("scopaTable").hidden=!isScopa;
   $("pokerTable").hidden=!isPoker;

@@ -70,6 +70,7 @@ function playTones(notes,spacing,volume,channel,type="triangle",duration=.18){
   }
 }
 const soundPalette={
+  talk:[[59,65],.10,"triangle"],inspect:[[68,72],.085,"sine"],choice:[[65,74],.10,"triangle"],
   click:[[67],.044,"sine"],menu:[[64,72],.10,"sine"],error:[[48,43],.13,"triangle"],
   pavement:[[48],.062,"triangle"],grass:[[43],.052,"sine"],floor:[[53],.055,"sine"],
   door:[[48,55],.11,"triangle"],stairs:[[53,57,60],.11,"sine"],gate:[[60,67,72],.13,"triangle"],
@@ -188,5 +189,15 @@ document.addEventListener("click",event=>{
     event.preventDefault();event.stopImmediatePropagation();
     return;
   }
-  if(button.id!=="audio")sound(button.matches("summary,#homeButton,#edOpen")?"menu":"click","interface");
+  if(button.id==="audio")return;
+  resumeEffects();
+  if(button.closest("[data-move],.challenge-controls,.hand,#scopaChoices,#holdemActions")||button.id==="interact")return;
+  sound(button.closest("#choices")?"choice":button.matches("summary,#homeButton,#edOpen")?"menu":"click","interface");
 },true);
+
+// iOS can interrupt Web Audio when Safari goes into the background.
+function resumeEffects(){
+  if(audioOn&&audioContext&&audioContext.state!=="running")audioContext.resume().catch(()=>{});
+}
+document.addEventListener("pointerdown",resumeEffects,{passive:true});
+document.addEventListener("keydown",resumeEffects);
