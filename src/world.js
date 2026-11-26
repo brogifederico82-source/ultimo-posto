@@ -9,7 +9,7 @@ const catalog={
   "Architettura":[["wall","Muro","edifici","#887870",1,1,true],["door","Porta","edifici","#ac754d"],["window","Finestra","edifici","#78a5a5"],["stairs","Scale","edifici","#a09b88"],["roof","Edificio","edifici","#ab6654",4,3,true]],
   "Terreno":[["grass","Prato","terreno","#476f4d"],["road","Asfalto","terreno","#687078"],["paving","Pavimentazione","terreno","#a59a87"],["path","Sentiero","terreno","#b3a18a"],["floor","Pavimento interno","terreno","#806a65"]],
   "Vegetazione":[["tree","Albero","decori","#4c7553",1,1,true],["hedge","Siepe","decori","#557c4e",1,1,true],["bush","Cespuglio","decori","#648052"],["flowers","Fiori","decori","#d8a86f"]],
-  "Arredamento":[["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
+  "Arredamento":[["radioVan","Furgone di Radio Luiss","arredi","#ad3039",3,2,true],["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
   "Università":[["classroom","Aula","edifici","#a67762",3,2,true],["board","Lavagna","arredi","#487062"],["vending","Distributore","arredi","#9b6456",1,1,true],["turnstile","Tornello","edifici","#84958a"],["library","Biblioteca","edifici","#897460",3,2,true]],
   "Intrattenimento":[["foos","Biliardino","arredi","#48866d",2,1,true],["ping","Ping pong","arredi","#397d82",2,1,true],["bris","Tavolo da briscola","arredi","#80694b",2,1,true],["poker","Tavolo da poker","arredi","#33725e",2,1,true]],
   "Personaggi":[["athlete","Gymbro","persone","#a94e47"],["heatedStudent","Studente con IQOS","persone","#af6380"],["sportGlasses","Studente con occhiali sportivi","persone","#527f87"],["student","Studente","persone","#bb6268"],["guard","Guardia","persone","#6089aa"],["creator","Influencer","persone","#9966a3"],["bartender","Barista","persone","#ae775e"],["professor","Professore","persone","#b09461"],["cleaner","Spazzino","persone","#80a471"]],
@@ -57,7 +57,7 @@ function updateGardenStudentNames(map){
     if(names&&student.name===names[0])student.name=names[1];
   }
 }
-const originalMap=normalizeCampus(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))));
+const originalMap=normalizeCampus(addRadioVan(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,13],
@@ -213,7 +213,7 @@ function loadCampus(){
           }
         }
       }
-      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);}
+      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);addRadioVan(map);}
       if(!embedded){
         const prior=Object.fromEntries(polaZones.map(id=>[id,map.zones[id]?.width]));
         installPola(map);
@@ -519,6 +519,23 @@ function drawObject(c,o,now=0,editing=false){
         for(let a=3;a<15;a+=3)box("#ffffff26",a,2,1,9);
         if(o.kind==="classroom"||o.kind==="library"){box("#384b49",5,10,6,4);box("#89a299",6,10,4,2);}
         break;
+      case "radioVan":{
+        box("#26333680",1,11,15,4);
+        box("#22262a",2,10,3,4);box("#22262a",11,10,3,4);
+        box("#a7a7a1",3,11,1,2);box("#a7a7a1",12,11,1,2);
+        box("#532d33",0,5,15,6);box("#532d33",13,7,3,4);
+        box(color,1,4,13,8);box(color,13,6,3,6);
+        box("#d46462",1,4,12,1);box("#902830",1,11,14,1);
+        box("#293941",2,5,8,3);box("#293941",11,5,2,3);box("#293941",13,6,2,2);
+        box("#68888a",2,5,7,1);box("#68888a",11,5,2,1);
+        box("#c5c1b1",3,2,5,2);box("#e6dec9",3,2,4,1);
+        box("#f0ca87",15,8,1,1);box("#eb826e",0,7,1,1);
+        c.save();c.scale(16/w,16/h);
+        c.fillStyle="#fff3df";c.textAlign="center";c.font="bold "+Math.min(7,w/6.5)+"px sans-serif";
+        c.fillText("Radio Luiss",w*.47,h*.66,w*.86);
+        c.restore();
+        break;
+      }
       case "wall":box(shadow,0,1,16,14);box(color,0,2,16,10);box(light,0,2,16,2);box("#141d213a",0,9,16,1);break;
       case "door":case "turnstile":
         box(shadow,2,2,12,13);
@@ -694,6 +711,45 @@ function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
     }
   }
 }
+// Draw each wall cell flush with its neighbours. Editor objects and collision
+// footprints stay intact, including the openings for doors and paths.
+const perimeterCellsCache=new WeakMap();
+function isPerimeterWall(o){
+  return o.kind==="wall"&&o.rotation===0&&[o.x,o.y,o.w,o.h].every(Number.isInteger)&&
+    (o.uid.startsWith("cinta-")||o.uid.startsWith("viale-tornello-")||
+     /^viale-romania-25[12]$/.test(o.uid));
+}
+function perimeterCells(objects,width){
+  const cached=perimeterCellsCache.get(objects);
+  if(cached)return cached;
+  const cells=new Set();
+  for(const o of objects){
+    if(!isPerimeterWall(o))continue;
+    for(let y=o.y;y<o.y+o.h;y++)for(let x=o.x;x<o.x+o.w;x++)cells.add(x+y*width);
+  }
+  perimeterCellsCache.set(objects,cells);
+  return cells;
+}
+function paintPerimeterWall(c,o,cells,width){
+  for(let y=o.y;y<o.y+o.h;y++)for(let x=o.x;x<o.x+o.w;x++){
+    const px=x*16,py=y*16,i=x+y*width;
+    const west=x>0&&cells.has(i-1),east=x+1<width&&cells.has(i+1);
+    const north=cells.has(i-width),south=cells.has(i+width);
+    rect(c,"#9b907b",px,py,16,16);
+    for(const dy of [2,8,14]){
+      rect(c,"#b2a48b",px,py+dy,16,2);
+      const joint=(y*3+dy)%11+2;
+      if(dy<14)rect(c,"#817864",px+joint,py+dy+2,1,3);
+    }
+    if(!north)rect(c,"#d8ccb0",px,py,16,2);
+    if(!west)rect(c,"#c4b89c",px,py,2,16);
+    if(!east)rect(c,"#756e60",px+14,py,2,16);
+    if(!south){
+      rect(c,"#716858",px,py+12,16,2);
+      rect(c,"#3c4645",px,py+14,16,2);
+    }
+  }
+}
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
   const margin=2,left=Math.max(0,Math.floor(view.x/16)-margin),top=Math.max(0,Math.floor(view.y/16)-margin);
@@ -739,7 +795,9 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }
   const foreground=[];
-  for(const raw of editing?z.objects:sceneObjects(z)){
+  const objects=editing?z.objects:sceneObjects(z);
+  const connected=id==="giardino"&&visible.edifici?perimeterCells(editing?[...objects]:objects,z.width):null;
+  for(const raw of objects){
     const layer=kindLayer(raw);
     if(!visible[layer]||layer==="terreno")continue;
     const o=positionOf(raw,editing?0:isVehicle(raw)?trafficClock:now,z.width);
@@ -748,7 +806,10 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       drawObject(c,o,now,editing);
       continue;
     }
-    foreground.push({row:o.y+o.h,draw:()=>drawObject(c,o,now,editing)});
+    const draw=connected&&isPerimeterWall(o)
+      ?()=>paintPerimeterWall(c,o,connected,z.width)
+      :()=>drawObject(c,o,now,editing);
+    foreground.push({row:o.y+o.h,draw});
   }
   if(player)foreground.push(player);
   foreground.sort((a,b)=>a.row-b.row).forEach(o=>o.draw());

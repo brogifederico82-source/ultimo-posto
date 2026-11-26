@@ -148,6 +148,23 @@ function furnishCampusFountains(map){
   }
   return map;
 }
+function addRadioVan(map){
+  const garden=map.zones.giardino;
+  if(!garden||garden.objects.some(o=>o.uid==="radio-luiss-van"))return map;
+  if(!garden.objects.some(o=>o.uid==="radio-building"&&o.x===29&&o.y===45))return map;
+  const {width,height}=garden;
+  const x=30,y=55,w=3,h=2;
+  if(x+w>width||y+h>height||garden.objects.some(o=>(o.solid||o.action)&&
+      o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+h&&o.y+(o.h??1)>y))return map;
+  garden.objects.push({
+    uid:"radio-luiss-van",kind:"radioVan",name:"Furgone di Radio Luiss",x,y,w,h,color:"#ad3039",
+    rotation:0,variant:0,solid:true,action:"dialog",native:"",target:"",gate:"",missionTarget:"",
+    text:"Il furgone della radio è parcheggiato davanti allo studio. Dai finestrini si vedono un microfono, tre cavi e una scatola con scritto «NON STACCARE».",
+    behavior:"idle",speed:1.7,auto:false,route:[]
+  });
+  return map;
+}
+
 function hasIntegratedEntrance(){
   return Boolean(campus.zones.giardino?.objects.some(o=>o.uid==="viale-ingresso-start"));
 }
