@@ -4,11 +4,26 @@ const court=$("challengeCourt");
 const courtInk=court.getContext("2d");
 court.tabIndex=0;
 const arcadeRules={
-  arm:"Premi Spazio o Spingi nella fascia verde. Ogni passaggio concede un tentativo. Vince chi prende due round.",
-  dance:"Segui le frecce prima che scada il tempo. Servono almeno quattro mosse su cinque.",
-  ping:"Muovi la racchetta con ←/→ o A/D. Premi Spazio o il pulsante per servire. Durante lo scambio il bordo della racchetta cambia la direzione del tiro. Premi Schiaccia quando compare il mirino. Si gioca a 7 punti, con due di vantaggio.",
-  foos:"Muovi le stecche con ←/→ o A/D. La difesa para da sola. Premi Spazio o Tira quando si accende l’omino vicino alla palla. Tieni una direzione mentre tiri con il tempo giusto per usare la sponda. Vince chi segna 3 gol.",
-  bris:"Scegli una carta con il mouse o con i tasti 1, 2 e 3. La briscola batte gli altri semi. Nel seme di apertura e in quello di briscola l’ordine è Asso, Tre, Re, Cavallo, Fante, 7, 6, 5, 4, 2. Vince chi supera 60 punti."
+  arm:[
+    "Quando l’indicatore entra nella fascia verde, premi Spazio o il pulsante Spingi. Hai un tentativo per passaggio. Vinci due round per battere Riccardo.",
+    "When the marker enters the green band, press Space or select Push. You get one attempt per pass. Win two rounds to beat Riccardo."
+  ],
+  dance:[
+    "Guarda la freccia grande. Prima che la barra si svuoti, premi la stessa freccia sulla tastiera o toccala sullo schermo. Bastano quattro mosse giuste su cinque.",
+    "Watch the large arrow. Before the bar runs out, press the matching arrow key or tap its button. Get four of the five moves right to win."
+  ],
+  ping:[
+    "Muovi la racchetta con ←/→ o A/D. Quando tocca a te, premi Servi o Spazio. Durante lo scambio puoi mirare con il bordo della racchetta. Quando la pallina si illumina, premi Schiaccia o Spazio. Per vincere servono almeno 7 punti e due di vantaggio.",
+    "Move the paddle with ←/→ or A/D. When it’s your serve, select Serve or press Space. Aim with the edge of the paddle during a rally. When the ball lights up, select Smash or press Space. Score at least 7 points and lead by two to win."
+  ],
+  foos:[
+    "Sposta le stecche con ←/→ o A/D per intercettare la palla. Quando un omino si illumina, premi Tira o Spazio. Per un tiro di sponda, tieni premuta una direzione mentre colpisci. Vince chi segna per primo 3 gol.",
+    "Move the rods with ←/→ or A/D to intercept the ball. When a player lights up, select Shoot or press Space. Hold a direction as you strike to attempt a bank shot. First to 3 goals wins."
+  ],
+  bris:[
+    "Per giocare una carta, selezionala o premi 1, 2 o 3. La briscola batte gli altri semi. Se nessuno gioca briscola, vince la carta più forte del seme giocato per primo. Con 61 punti vinci, con 60 a testa pareggi.",
+    "Select a card or press 1, 2 or 3 to play it. A trump beats any other suit. If neither player uses a trump, the strongest card in the suit led wins the trick. Score 61 points to win. A 60–60 score is a draw."
+  ]
 };
 const prizes={
   calcetto:["Gettone Calcetto","Hai battuto Matteo a calcetto."],
@@ -113,7 +128,7 @@ function renderDance(){
     marker.className=g.hits[index]===true?"done":g.hits[index]===false?"miss":index===g.index?"current":"";
     sequence.append(marker);
   }
-  if(!g.result)$("challengeStatus").textContent=g.index===0?local("Pronto al primo passo?","Ready for the first move?"):
+  if(!g.result)$("challengeStatus").textContent=g.index===0?local("Prima mossa: segui la freccia.","First move: match the arrow."):
     g.hits[g.index-1]?local("A tempo.","On beat."):local("Mossa mancata.","Missed move.");
 }
 function danceInput(move){
@@ -159,7 +174,7 @@ function openChallenge(id,practice=false){
   else if(isCalcetto)minigame=startCalcetto();
   else minigame=isScopa?startScopa():isCards?startBriscola():startArcade(id);
   minigame.practice=practice;
-  $("challengeTitle").textContent=tr(challengeNames[id])+(practice?" · Allenamento":"");
+  $("challengeTitle").textContent=tr(challengeNames[id])+(practice?local(" · Allenamento"," · Practice"):"");
   $("challengeRules").textContent=isScopa?local(
     "Gioca con mouse, tocco o tasti 1, 2, 3. Se puoi fare più prese, scegli quella che preferisci.",
     "Play with mouse, touch, or keys 1, 2, 3. If there are several captures, choose the one you want."
@@ -171,7 +186,7 @@ function openChallenge(id,practice=false){
     "Pick the winner. Stake 0 to 5 campus coins. The odds are the total payout if your horse wins."):
     isPoker?local("Bui 1/2. Parti con 100 fiches. Usa la migliore combinazione di cinque carte tra le tue due e le cinque comuni.",
     "Blinds 1/2. Start with 100 chips. Make the best five-card hand from your two cards and the five community cards."):
-    isLoft?loftGames[id].rules:tr(arcadeRules[id]);
+    isLoft?loftGames[id].rules:local(...arcadeRules[id]);
   if(practice&&id==="ping")$("challengeRules").textContent=local(
     "Allenamento a 3 punti. Trascina o usa le frecce per muovere la racchetta. Premi Spazio per servire o schiacciare.",
     "Practice to 3 points. Drag or use arrow keys to move the paddle. Press Space to serve or smash.");
@@ -583,7 +598,7 @@ function paintCourt(g){
       else prompt=local("Segui la tacca sotto la racchetta","Follow the mark below the paddle");
     }
     if(!ping&&g.wait===0){
-      prompt=g.impact>0?(g.bankHit?local("Tiro di sponda!","Bank shot!"):g.powerHit?"Timing perfetto!":"Palla colpita!"):g.kick>0?"Tiro!":ready?"Ora · Spazio o Tira":"Intercetta la palla con una delle due stecche.";
+      prompt=g.impact>0?(g.bankHit?local("Tiro di sponda!","Bank shot!"):g.powerHit?local("Colpo perfetto!","Perfect strike!"):"Palla colpita!"):g.kick>0?"Tiro!":ready?"Ora · Spazio o Tira":"Intercetta la palla con una delle due stecche.";
     }
     if($("challengeStatus").textContent!==tr(prompt))$("challengeStatus").textContent=tr(prompt);
   }

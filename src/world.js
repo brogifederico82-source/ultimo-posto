@@ -288,7 +288,7 @@ function loadCampus(){
           if(!prior||![hash].flat().includes(gardenFingerprint(prior.objects)))continue;
           map.zones[id]={...structuredClone(latest),name:prior.name,plan:prior.plan};
         }
-        const revisedZones={giardino:[3770965331,785279541,2540694351,2053466179],primo:[1116216150,713528194],mensa:[4059249112]};
+        const revisedZones={pola:[1834389237],giardino:[2965020914,1377501407,80380783,3935577901,3770965331,785279541,2540694351,2053466179],primo:[1116216150,713528194],mensa:[4059249112]};
         for(const [id,hashes] of Object.entries(revisedZones)){
           const prior=map.zones[id], latest=originalMap.zones[id];
           if(!prior||(id!=="mensa"&&(prior.width!==latest.width||prior.height!==latest.height))||
@@ -394,7 +394,7 @@ function blocked(id,x,y,now=0,profile=state){
   const zone=room(id);
   if(x<0||y<0||x>=zone.width||y>=zone.height)return true;
   return zoneObjects(zone).solid.some(o=>
-    (o.uid!=="viale-ingresso-varco"||(!profile?.campusGateOpen&&profile?.mode!=="free"))&&
+    (!campusTurnstile(o.uid)||(!profile?.campusGateOpen&&profile?.mode!=="free"))&&
     (!o.gate||gateLocked(o.gate,profile))&&insideObject(positionOf(o,now),x+.5,y+.5));
 }
 function freeTile(id,x,y,profile=state){
@@ -592,9 +592,9 @@ function drawObject(c,o,now=0,editing=false){
   }else if(spec[2]==="persone"){
     const appearance=characterAppearance(o);
     const size=o.kind==="athlete"?1.05:.89;
-    sprite(c,appearance,8,15,o.step??0,editing?o.look??"down":ambienteSguardo(o,now),size,characterCoat(o));
+    sprite(c,appearance,o.native==="trend"?-3:8,15,o.step??0,editing?o.look??"down":ambienteSguardo(o,now),size,characterCoat(o));
     if(o.native==="trend"){
-      sprite(c,{...appearance,capelli:5,tinta:2,abito:3},12,15,(Math.floor(now/170)+1)%3,"down",.73);
+      sprite(c,{...appearance,capelli:5,tinta:2,abito:3},21,15,(Math.floor(now/170)+1)%3,"down",.89);
     }
     if(o.kind==="heatedStudent"){
       box("#e9e0d4",12,6,2,1);box("#9b8c80",14,6,1,1);
@@ -611,6 +611,18 @@ function drawObject(c,o,now=0,editing=false){
         box("#a2b8af",1,3,14,1);box("#77999e",2,10,12,2);
         box("#ded2b1",1,12,1,3);box("#ded2b1",14,12,1,3);break;
       case "pillar":
+        if(o.uid.startsWith("viale-pilastro-")){
+          box("#9d998d",2,5,12,11);box("#f4edda",3,5,9,10);
+          box("#c7c2b3",1,4,14,1.5);box("#fbf3dd",2,3.4,12,1);
+          box("#b9aa91",6,2.3,4,1.3);box("#d4c5aa",4,.8,8,1.8);
+          box("#ede0c5",3,.5,10,.7);box("#967b50",5,9,4,2);break;
+        }
+        if(o.uid.startsWith("romania-panama-stipite-")){
+          box("#706653",2,5,12,11);box("#b0a18a",3,5,9,11);
+          for(const row of [7,10,13])box("#897b65",3,row,9,.55);
+          box("#8d806a",1,4,14,2);box("#c1b19a",2,3.5,12,1);
+          box("#8f806b",6,2.5,4,1.5);box("#b5a68d",5,.5,6,2.5);box("#c8bba3",6,0,4,1);break;
+        }
         box("#b6b5a7",2,5,12,11);box(color,3,5,9,10);box("#fff7e5",2,4,12,1);
         box("#afa691",4,1,8,2);box(light,5,0,6,2);box("#c6baa2",5,2,6,2);box("#777266",5,8,4,2);break;
       case "booth":

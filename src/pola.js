@@ -72,7 +72,7 @@ function installPola(map){
       add("portinaia","guard",24,24,1,1,{name:"Marisa · Portineria di Villa Alberoni",action:"dialog",
         text:"«La festa è sopra, nel cortile. Se siete in anticipo fate un giro al Tinello. Il Nilo almeno sa aspettare.»"});
       add("auto-parcheggiata","car",25,28,2,1,{name:"Auto del car sharing",color:"#527584"});
-      for(const [i,x,y] of [[0,7,23],[1,12,6],[2,2,10],[3,5,6],[4,30,21],[5,37,21],[6,39,6],[7,40,24],[8,2,23]]){
+      for(const [i,x,y] of [[0,7,23],[1,9,6],[2,2,10],[3,5,6],[4,30,21],[5,37,21],[6,39,6],[7,40,17],[8,2,23]]){
         add("pino-"+i,"pine",x,y,3,3,{solid:false});
       }
       for(const [i,x,y] of [[0,17,13],[1,25,13],[2,17,21],[3,25,21],[4,5,21],[5,35,19]]){

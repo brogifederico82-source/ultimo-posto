@@ -485,6 +485,7 @@ function carry(item){
 }
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
+function campusTurnstile(uid){return uid==="viale-ingresso-varco"||uid==="panama-varco";}
 function interact(){
   if(!exploringCampus())return;
   const spot=nearby();
@@ -492,7 +493,7 @@ function interact(){
   if(!spot){sound("error","interface");return;}
   ambienteInteragisci(spot);
   clearCampusInputs();
-  if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
+  if(campusTurnstile(spot.uid)&&(isFree()||has("Via libera")||state.campusGateOpen)){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
     sound("gate","map");
     state.campusGateOpen=true;activeScene=null;
@@ -525,7 +526,7 @@ function doorDestination(spot){
     return Object.hasOwn(campus.zones,destination[0])?destination:null;
   }
   if(spot.action!=="native")return null;
-  if(spot.uid!=="viale-ingresso-varco"&&spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
+  if(!campusTurnstile(spot.uid)&&spot.native==="varco"&&(isFree()||has("Via libera")))return ["giardino"];
   if(spot.kind!=="door"&&spot.kind!=="stairs")return null;
   const destination=nativeDoors[spot.native];
   return destination&&Object.hasOwn(campus.zones,destination)?[destination]:null;
@@ -575,11 +576,11 @@ function reserve(title,text){
 }
 const storySteps=[
   ["Via libera","Mostra il badge alla guardia","Show your badge to security"],
-  ["Colloquio tutor","Vai al tutorato davanti al Dome","Visit the tutoring office by The Dome"],
-  ["Lezione A200","Segui Storia contemporanea in Aula Chiesa","Attend Contemporary History in A200"],
-  ["Progetto LOFT","Consegna il progetto al LOFT, all’ultimo piano","Submit your project at the top-floor LOFT"],
-  ["Seminario Parenzo","Prendi la navetta e partecipa al seminario a Parenzo","Take the shuttle and join the seminar at Parenzo"],
-  ["Abilitazione Green Mobility","Completa l’abilitazione Green Mobility","Complete your Green Mobility orientation"],
+  ["Colloquio tutor","Prepara il piano di studio con Viola al tutorato, davanti al Dome","Plan your studies with Viola at the tutoring office opposite The Dome"],
+  ["Lezione A200","Segui la lezione di Storia contemporanea in Aula Chiesa (A200)","Attend Contemporary History in Aula Chiesa (A200)"],
+  ["Progetto LOFT","Consegna il podcast al LOFT, all’ultimo piano","Hand in your podcast at the LOFT on the top floor"],
+  ["Seminario Parenzo","Prendi la navetta dal giardino di Romania e segui il seminario a Parenzo","Take the shuttle from the garden at Romania and attend the seminar at Parenzo"],
+  ["Abilitazione Green Mobility","Attiva Green Mobility all’area car sharing di Viale Romania","Activate Green Mobility at the car-sharing area on Viale Romania"],
   ["Festa a Pola","Raggiungi Pola in car sharing e festeggia la laurea","Reach Pola by car share and celebrate graduation"]
 ];
 const romaniaComplete=()=>storySteps.slice(0,4).every(([item])=>has(item));
@@ -737,11 +738,11 @@ function nativeScene(id){
           state.completedEvents.push("pola-foto");record("Pola · Foto di laurea sotto le luci del cortile.");sound("inspect","map");
         }]);
     case "navetta":
-      if(!isFree()&&!romaniaComplete())return scene("Navetta Luiss · Parenzo","La navetta sarà disponibile dopo le attività di Romania. Segui gli obiettivi nel diario.");
+      if(!isFree()&&!romaniaComplete())return scene("Navetta Luiss · Parenzo",local("Prima di partire devi completare le tappe di Romania. Apri il diario dal menu per vedere quella che ti manca.","Finish the Romania objectives before boarding. Open the journal from the menu to see your next step."));
       return scene("Navetta Luiss · Parenzo",state.shuttleTicket?
-        "Prenotazione attiva. Mostra il QR all’autista per salire.":"La corsa collega Viale Romania a Via Parenzo. Prenota dal telefono del gioco.",
-        state.shuttleTicket?["Mostra il QR e sali",()=>{state.shuttleTicket=false;record("Navetta · Arrivo a Parenzo");travel("parenzo","shuttle");}]:
-          ["Prenota Romania → Parenzo",()=>{state.shuttleTicket=true;record("Navetta · Prenotazione confermata, QR disponibile.");}]);
+        local("Il posto è prenotato. Mostra il codice QR all’autista per partire.","Your seat is booked. Show the driver your QR code to board."):local("La navetta va a Via Parenzo. Prenota qui la corsa, poi mostra il codice QR all’autista.","This shuttle goes to Via Parenzo. Book your seat here, then show the driver your QR code."),
+        state.shuttleTicket?[local("Mostra il QR e sali","Show your QR code and board"),()=>{state.shuttleTicket=false;record("Navetta · Arrivo a Parenzo");travel("parenzo","shuttle");}]:
+          [local("Prenota un posto per Parenzo","Book a seat to Parenzo"),()=>{state.shuttleTicket=true;record("Navetta · Prenotazione confermata, QR disponibile.");}]);
     case "sociologia":
       return scene("Arianna · Sociologia della comunicazione",
         has("Taccuino di Goffman")?"«Al prossimo seminario porto la tua nota. Anche la fila al bar ha un retroscena.»":
@@ -769,12 +770,16 @@ function nativeScene(id){
         ["Perché il Muro venne costruito?",()=>{state.historyAnswer="«Nel 1961 la Germania Est volle fermare l’esodo verso Ovest attraverso Berlino.»";}],
         ["Un’altra domanda",()=>{state.historyAnswer=null;}]);
     case "guardia":
+      if(activeScene==="panama-guardia")return scene("Guardia di Via Panama",
+        has("Via libera")?"«Puoi passare. Il lettore del tornello è fra i due pilastri.»":"«Buongiorno. Mi mostra il badge?»",
+        ...(has("Via libera")?[]:[["Mostra il badge",()=>badge("Via Panama · Badge verificato alla portineria.")]]));
       return scene("La guardia",has("Via libera")?"«Badge a posto. Il tornello è alla tua destra, accanto alla bacheca.»":"Ti scruta in silenzio. Poi scruta lo zaino. Lo zaino sembra più preparato di te.",
         ...(has("Via libera")?[]:[["Mostra il badge",()=>badge("La guardia approva il badge. Su di te si riserva. ")]]),
         ...(t.autocontrollo>=65||t.socialita>=65?[["Sostieni lo sguardo e saluta",()=>{badge("La guardia ricambia il saluto. Non succedeva dal 2018.");discover("sguardo","Vittoria ai punti");change("coraggio",4);}]]:[]));
     case "bacheca":return scene("Bacheca del campus","Tra un seminario sul futuro e un volantino per ripetizioni di micro c’è una nota sui posti al Dome.",
       ["Leggi il retro",()=>{carry("Nota del Dome");discover("bacheca","Il retro della locandina");}]);
     case "varco":
+      if(activeScene==="panama-varco")return scene("Tornello di Via Panama","Per entrare, mostra il badge alla guardia accanto al varco.");
       if(activeScene==="viale-ingresso-varco"&&!has("Via libera")&&!isFree())return gateConfrontation();
       return scene("Tornello",has("Via libera")||isFree()?"Badge riconosciuto. Il tornello è aperto.":"Presenta il badge alla guardia, a sinistra del tornello.",
         ...((isFree()||has("Via libera"))?[["Entra nel campus",()=>travel("giardino")]]:[]));
@@ -846,7 +851,7 @@ function nativeScene(id){
     case "matroneo":return scene("Matroneo",has("Telefono silenziato")?"Il telefono tace. Un posto accanto al muro si è appena liberato.":"Si sente persino il cursore. Una studentessa ti indica il telefono con un cenno.",
       ...(has("Telefono silenziato")?[reserve("Il silenzio del Matroneo","Finalmente studi. Ti accorgi che il rumore che sentivi in testa era il biliardino immaginario.")]:[]),
       ...(has("Dritta sul Matroneo")&&has("Prenotazione Biliardino")?[reserve("Il posto del campione","I Nullafacenti hanno liberato il loro tavolo. Il torneo dell’anno prossimo è già in calendario. L’esame di domani, purtroppo, pure.")]:[]));
-    default:return scene("Cerca un posto per studiare","Avvicinati a persone, porte e oggetti e premi E. Apri la mappa sotto i comandi per orientarti.");
+    default:return scene("Cerca un posto per studiare",local("Avvicinati a una persona, a una porta o a un oggetto. Premi E o tocca Interagisci. Per orientarti, apri il menu e scegli Mappa.","Walk up to a person, door or object. Press E or tap Interact. To find your way, open the menu and choose Map."));
   }
 }
 function finish(title,text){
