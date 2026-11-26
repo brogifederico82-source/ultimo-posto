@@ -128,7 +128,7 @@ function stored(mode="story"){
     }
     if(hasIntegratedEntrance()&&data.zone==="giardino"&&typeof data.campusGateOpen!=="boolean")data.campusGateOpen=true;
     [data.x,data.y]=freeTile(data.zone,Number.isFinite(data.x)?data.x:2,Number.isFinite(data.y)?data.y:2,data);
-    return {...data,freeMoment:null,campusExpanded:true,wins:data.wins??{},events:Array.isArray(data.events)?data.events:[],
+    return {...data,freeMoment:null,campusExpanded:true,wins:data.wins??{},pockets:Array.isArray(data.pockets)?data.pockets:[],secrets:Array.isArray(data.secrets)?data.secrets:[],events:Array.isArray(data.events)?data.events:[],
       completedEvents:Array.isArray(data.completedEvents)?data.completedEvents:[],mission:typeof data.mission==="string"?data.mission:"",missionTarget:typeof data.missionTarget==="string"?data.missionTarget:""};
   }catch{return null;}
 }
