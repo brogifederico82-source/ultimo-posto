@@ -90,7 +90,7 @@ h1 em { color: var(--gold); }
 .hero canvas {
   inset: 0;
   object-position: 65% center;
-  filter: saturate(1.2) contrast(1.08);
+  filter: saturate(1.38) contrast(1.08);
 }
 .hero-copy {
   background: linear-gradient(90deg, #111925 2%, #111925df 34%, #11192532 76%, transparent);
@@ -186,7 +186,7 @@ button{min-height:44px;box-shadow:0 2px 0 #0c1522;transition:background-color .1
 
 #speakerPortrait{float:none;display:block;width:min(100%,640px);margin:0 auto 12px}
 
-.game-conversation .frame,.game-conversation .touch{display:none}
+.game-conversation .touch{display:none}
 .game-conversation .scene{max-width:780px;margin:0 auto;padding:clamp(14px,3vw,26px)}
 .game-conversation #speakerPortrait{border-color:var(--gold)}
 
@@ -245,7 +245,7 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 .direction-pad{display:grid;grid-template-columns:repeat(3,minmax(36px,1fr));gap:4px}
 .direction-pad [data-move="up"]{grid-column:2}
 .direction-pad [data-move="left"]{grid-column:1}
-#game .touch .direction-pad button{min-height:36px;padding-block:4px}
+#game .touch .direction-pad button{min-height:44px;padding-block:4px}
 #game .touch #interact{min-height:46px}
 .game-conversation #speakerPortrait{width:min(100%,460px)}
 #surpriseHint{margin-block:12px}
@@ -270,6 +270,8 @@ kbd{font:700 .73em monospace;border:1px solid currentColor;border-radius:4px;pad
 #audioFeedback{max-width:170px;color:#ffc997}
 
 .gate-warning{padding:10px 14px;border:1px solid #d8a260;border-left:4px solid #d8a260;border-radius:8px;background:#382a2d;color:#ffdfaa}
+#impactOutcome{width:min(100%,580px);height:auto;max-height:30dvh;object-fit:contain;margin:0 auto 12px;border:1px solid #8e7253;border-radius:12px;image-rendering:pixelated}
+#impactOutcome:not([hidden]){display:block}
 #guardOutcome{display:block;width:min(100%,580px);margin:0 auto 12px;border:1px solid #765065;border-radius:12px}
 .holdem-seats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; }
 .holdem-seat { min-width: 0; padding: .45rem; border: 1px solid #927c52; border-radius: .35rem; }
@@ -436,6 +438,52 @@ button, select, input { font-family: var(--interface); }
 .race-photo li { padding: .2rem .45rem; border-inline-start: 3px solid var(--runner-color); background: #13243c; }
 .race-photo li[data-winner] { color: #fff2bb; font-weight: bold; }
 
+/* Adattivo e accessibilità: bersagli da 44px, focus visibile, schermi piccoli e molto larghi */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.skip-link{position:absolute;left:8px;top:-60px;z-index:50;padding:10px 14px;background:#ffd27a;color:#1b1b1b;font-weight:700;text-decoration:none}
+.skip-link:focus{top:8px}
+:where(a,button,summary,select,input,textarea,canvas[tabindex],[tabindex]):focus-visible{outline:3px solid #ffd27a;outline-offset:2px;box-shadow:0 0 0 5px #131c1c}
+summary{padding-block:11px;cursor:pointer}
+.direction-pad{grid-template-columns:repeat(3,minmax(44px,1fr))}
+.direction-pad button,#game .touch button,.fields select,.fields button,select,input[type=text],input[type=number]{min-height:44px}
+input[type=range]{min-height:44px;touch-action:pan-y}
+label:has(>input[type=checkbox]){display:inline-flex;align-items:center;gap:8px;min-height:44px}
+input[type=checkbox]{width:22px;height:22px;flex:none}
+.campus-reference a,.journal a,.map-editor a{display:inline-block;padding-block:12px}
+.hint,small{color:#d4c7a4}
+@media (min-width:1600px){main{max-width:1320px}}
+@media (max-width:760px){
+  header{flex-wrap:wrap;row-gap:6px;padding-bottom:8px}
+  header .brand{flex:1 1 auto}
+  .soundbar{flex:0 1 auto;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+  .soundbar button{min-height:44px;padding-inline:10px;font-size:.9rem}
+}
+@media (max-width:420px){
+  #home .home-actions,#home .home-tools,#home .home-language{display:grid;grid-template-columns:1fr 1fr}
+  #home .home-actions button{grid-column:1/-1}
+  .map-editor select,.editor-bar select{max-width:100%}
+  .editor-bar label,.editor-bar button{max-width:100%}
+  .map-editor{overflow-x:hidden}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:1100px){
+  main{padding-block:8px}
+  header{padding-bottom:4px;flex-wrap:nowrap}
+  .soundbar button{min-height:44px}
+  #game .frame{margin-top:2px}
+  #stage{max-height:calc(100dvh - 64px);width:auto;max-width:100%;margin-inline:auto}
+  #game .frame{display:flex;justify-content:center}
+  body #game .touch{background:transparent;border:0;box-shadow:none;max-width:none;margin:0;pointer-events:none;grid-template-columns:auto 1fr auto;padding:0}
+  body #game .touch>*{pointer-events:auto}
+  body #game .touch .direction-pad{grid-column:1;grid-row:1/span 2;align-self:end}
+  body #game .touch .direction-pad button{background:#1d2a39d9}
+  body #game .touch #interact{grid-column:3;grid-row:1/span 2;align-self:end;width:132px;min-height:64px;background:#e5ad62ee}
+  body #game .touch #smokingTools{grid-column:2;grid-row:2;justify-self:center}
+  #game:not(.game-reading){padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+  #game.game-reading .scene{max-height:calc(100dvh - 16px);inset:auto max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  #game.game-reading .scene #speakerPortrait{max-height:30dvh}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{scroll-behavior:auto!important}}
+
 /* Keep the essential controls within thumb reach without blocking page scroll. */
 @media (max-width:760px), (pointer:coarse) and (max-height:600px) {
   main {
@@ -453,7 +501,6 @@ button, select, input { font-family: var(--interface); }
     background:var(--panel);
   }
   #game.game-reading .touch { display:none; }
-  #game.game-reading .frame { display:none; }
   #game .touch .direction-pad { grid-template-columns:repeat(3,44px); gap:3px; }
   #game .touch .direction-pad button { min-width:44px; min-height:44px; padding:0; font-size:19px; }
   #game .touch #interact { min-height:52px; margin-left:0; }
@@ -525,19 +572,51 @@ button, select, input { font-family: var(--interface); }
   body:has(#game:not([hidden]).game-reading) { overflow:hidden; }
   #game.game-reading .scene {
     position:fixed; inset:auto 8px max(8px,env(safe-area-inset-bottom)) 8px;
-    z-index:6; width:auto; max-width:none; max-height:calc(100dvh - 80px);
+    z-index:6; width:auto; max-width:none; max-height:min(49dvh,420px);
     overflow:auto; overscroll-behavior:contain; margin:0; padding:12px;
-    color:#222833; background:#fff9ed;
-    border:2px solid #63503a; border-radius:14px; box-shadow:0 6px 26px #08121bb3;
+    color:#f0dfc0; background:#202d30;
+    border:2px solid #8d7455; border-radius:14px; box-shadow:0 6px 26px #08121bb3;
   }
-  #game.game-reading .scene h3,#game.game-reading .scene #playerLine {color:#53352a;}
-  #game.game-reading .scene #sceneText {color:#222833;}
+  #game.game-reading .scene h3,#game.game-reading .scene #playerLine {color:#f8d99e;}
+  #game.game-reading .scene #sceneText {color:#f0dfc0;}
   #game.game-reading .scene button {
-    color:#292a33; background:#f4e9d8; border:1px solid #c6ab89;
+    color:#f6e4c3; background:#314345; border:1px solid #728277;
   }
-  #game.game-reading .scene button:focus-visible {outline:2px solid #5c5038;}
-  #game.game-reading .scene button::before {color:#654329;}
+  #game.game-reading .scene button:focus-visible {outline:2px solid #e3b477;}
+  #game.game-reading .scene button::before {color:#e3b477;}
   #game.game-reading .scene #speakerPortrait {max-height:22dvh;width:auto;max-width:100%;object-fit:contain;}
   #game.game-reading .scene #polaCeremony {max-height:34dvh;object-fit:contain;}
   #game.game-reading :is(.hud,.journal,.control-guide,.gate-warning) {visibility:hidden;}
 }
+
+
+/* Keep the colour boost on game artwork, away from menus and dialogue text. */
+:is(#stage, #campusOverview, #portrait, #speakerPortrait, #challengeCourt, #virtualPitch) {
+  filter: saturate(1.34) contrast(1.035);
+}
+
+
+.map-status { position:relative; z-index:7; flex-wrap:wrap; }
+.inventory { position:relative; }
+.inventory summary { cursor:pointer; min-height:44px; padding:10px 12px; border:1px solid #7d7961;
+  border-radius:9px; background:#253637; color:#f3ddae; }
+.inventory ul { position:absolute; inset:100% 0 auto auto; margin:6px 0 0; padding:9px;
+  list-style:none; z-index:8; min-width:min(230px,70vw); max-height:35dvh; overflow:auto;
+  background:#202d30; border:1px solid #987c51; border-radius:10px; box-shadow:0 10px 24px #10191bd0; }
+.inventory li { padding:7px 9px; border-bottom:1px solid #3f5352; color:#efe0bf; }
+.inventory li:last-child { border-bottom:0; }
+.home-actions a { display:inline-flex; align-items:center; padding:10px; color:var(--cream); }
+.home-actions a[hidden] { display:none; }
+@media (max-width:760px), (pointer:coarse) and (max-height:600px) {
+  #game.game-reading .frame { position:sticky; top:0; }
+  #game.game-reading #stage { max-height:40dvh; width:100%; object-fit:contain; }
+  .scene-toolbar:has(button:not([hidden])) { position:sticky; top:0; z-index:1; background:#202d30; }
+}
+/* Colori vivaci: interfaccia piu calda, meno grigio-blu spento (contrasto AA mantenuto). */
+:root{--night:#161d19;--panel:#26382f;--cream:#f7e6bf;--gold:#f0b266;--line:#6f7a58}
+.frame,.frame canvas{background:#17261f}
+.panel{border-color:#9a7a52}
+button,select,input[type=text]{background:#32463a}
+button:hover{background:#3b5242}
+.hero{background:#2b4a3c}
+.journal{border-block-color:#7a8460}

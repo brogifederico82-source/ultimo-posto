@@ -1,10 +1,11 @@
+import { packageGame } from "./package.mjs";
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { Script } from 'node:vm';
 
 const source = new URL('../src/', import.meta.url);
 const output = new URL('../dist/', import.meta.url);
 const loadText = name => readFile(new URL(name, source), 'utf8');
-const scripts = ['game.js', 'campus-life.js', 'classrooms.js', 'interiors.js', 'pola.js', 'world.js', 'navigation.js', 'audio.js', 'dialogue.js', 'villa-ada.js', 'minigames.js', 'holdem.js', 'viale-races.js', 'virtual-football.js', 'calcetto.js', 'loft-arcade.js', 'smoking.js', 'editor.js'];
+const scripts = ['game.js', 'campus-life.js', 'classrooms.js', 'interiors.js', 'pola.js', 'vivid.js', 'world.js', 'navigation.js', 'audio.js', 'sfx.js', 'dialogue.js', 'ambiente.js', 'villa-ada.js', 'idee.js', 'minigames.js', 'holdem.js', 'viale-races.js', 'virtual-football.js', 'calcetto.js', 'loft-arcade.js', 'smoking.js', 'editor.js'];
 
 const [template, css, map, plan, entranceMusic, campusMusic, ...parts] = await Promise.all([
   loadText('index.html'),
@@ -39,4 +40,5 @@ for (const [name, contents] of Object.entries(sections)) {
 
 await mkdir(output, { recursive: true });
 await writeFile(new URL('index.html', output), html);
+await packageGame(output, html);
 console.log('Built dist/index.html');

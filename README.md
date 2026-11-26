@@ -88,3 +88,9 @@ Al tornello di Romania, un tentativo di passare senza badge fa scattare l’avve
 Da Viale Pola 12 la salita porta al villino. Sul lato sinistro, il vialetto scende al Tinello e al ninfeo del Nilo. La targa si può registrare nel diario. Il cortile della laurea ha un buffet, una foto da scattare e il brindisi che chiude il capitolo. Il cortile, i personaggi e gli eventi sono adattamenti narrativi.
 
 Riferimenti per il villino e il gruppo scultoreo in [Villa Alberoni · Luiss](https://www.luiss.it/it/ateneo/luiss-life/hub-e-sedi/villa-alberoni). La posizione del Tinello rispetto al cancello e alla salita è descritta da [Roma2pass](https://www.roma2pass.it/via-pola/luiss/). La forma circolare e il ninfeo sono documentati nella [guida di Open House Roma 2021, p. 63](https://openhouseroma.org/sites/default/files/2026-03/GUIDA_OHR2021.pdf).
+
+### Installa Ultimo Posto
+
+Apri [Ultimo Posto](https://brogifederico82-source.github.io/ultimo-posto/) e scegli **Installa il gioco**. Su iPhone apri il link in Safari e usa **Condividi → Aggiungi alla schermata Home → Apri come app web**. Dopo il primo caricamento online, l’app può riaprire il gioco offline.
+
+Ogni esecuzione di `node scripts/build.mjs` genera anche `dist/Ultimo-Posto.zip`, scaricabile dalla pagina del gioco. Su computer puoi estrarlo e aprire `index.html` direttamente. La build richiede Node.js 22.2 o successivo e il comando `zip`.
