@@ -545,14 +545,32 @@ function widenCampusWalks(garden){
         x:x+offset,y:y+2,w:2,h:2,color:"#617952"});
     }
   }
+  // Complete the short gaps enclosed by paving where the diagonal walks meet.
+  for(const [x,y,w,h] of [
+    [24,13,3,1],[26,14,1,1],[30,19,2,1],[39,21,2,2],[52,23,1,1],
+    [55,24,1,1],[56,25,1,2],[30,29,1,1],[16,33,1,1],[66,35,1,1],
+    [67,36,1,1],[12,37,3,1],[13,38,2,1],[14,39,1,1],[68,37,1,2],
+    [24,38,1,1],[69,39,2,1],[19,41,1,2],[71,41,1,2],[72,43,1,1],[64,80,1,1]
+  ]){
+    garden.objects.push({uid:"raccordo-"+x+"-"+y,kind:"paving",name:"Raccordo del vialetto",
+      x,y,w,h,color:"#baac95"});
+  }
   garden.objects.push({uid:"campus-circulation",kind:"paving",name:"Soglia principale",x:22,y:73,w:3,h:1,color:"#baac95"});
   for(const [uid,x,y] of [
     ["romania-seduta-dome",53,54],["romania-seduta-atrio",44,78],
     ["acqua-romania-vialetto",18,45],["campus-tree-31",28,67],
-    ["campus-tree-14",27,34],["giardini-vivi-giardino-0",20,42]
+    ["campus-tree-14",27,34]
   ]){
     const item=garden.objects.find(o=>o.uid===uid);
     if(item)Object.assign(item,{x,y});
+  }
+  // Plant along the lawns, leaving the paved approaches to the café and the Dome clear.
+  for(const [id,x,y] of [
+    [0,12,49],[1,34,40],[4,10,46],[5,34,43],[6,32,44],[7,36,47],[8,48,30],
+    [10,54,61],[12,16,49],[13,36,48],[15,46,30],[17,14,49],[19,38,48]
+  ]){
+    const plant=garden.objects.find(o=>o.uid==="giardini-vivi-giardino-"+id);
+    if(plant)Object.assign(plant,{x,y});
   }
 }
 function hasIntegratedEntrance(){
