@@ -581,6 +581,12 @@ function nativeScene(id){
         ...(!has("Progetto LOFT")&&(isFree()||has("Lezione A200")&&has("Colloquio tutor"))?[["Consegna il podcast",()=>checkpoint("Progetto LOFT")]]:[]));
     case "parenzo-seminario":return parenzoSeminar();
     case "pola-festa":return polaParty();
+    case "pola-foto":
+      if(state.completedEvents.includes("pola-foto"))return scene("Foto di laurea","«È venuta bene. Sullo sfondo il buffet è ancora intero. Nessuno ci crederà.»");
+      return scene("Foto di laurea","La fotografa ti fa cenno verso le luci del cortile. «Facciamola prima che arrivi qualcuno a chiederti la tesi.»",
+        ["Scatta la foto",()=>{
+          state.completedEvents.push("pola-foto");record("Pola · Foto di laurea sotto le luci del cortile.");sound("inspect","map");
+        }]);
     case "navetta":
       if(!isFree()&&!romaniaComplete())return scene("Navetta Luiss · Parenzo","La navetta sarà disponibile dopo le attività di Romania. Segui gli obiettivi nel diario.");
       return scene("Navetta Luiss · Parenzo",state.shuttleTicket?

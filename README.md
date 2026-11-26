@@ -39,7 +39,7 @@ In **Settings → Pages**, imposta **Source** su **GitHub Actions**. Le pull req
 - [Luiss Green Mobility](https://www.luiss.it/it/ateneo/luiss-life/servizi-e-opportunita/luiss-green-mobility) e [guida di mobilità Luiss](https://learn.luiss.it/pluginfile.php/1654850/coursecat/description/Infopack%20for%20International%20Students%202024-2025.pdf) per la tratta Romania–Parenzo e il QR.
 - [Linea 360 e fermata Romania](https://www.romamobile.it/paline/percorso/RM100334?id_palina=70481&nav=3).
 
-Le posizioni di fermata, negozio, tornelli, arredi, scale e approdi sono adattate per il gioco dove manca una planimetria di dettaglio. Parenzo e Pola sono scene esterne preliminari.
+Le posizioni di fermata, negozio, tornelli, arredi, scale e approdi sono adattate per il gioco dove manca una planimetria di dettaglio. Parenzo e Pola sono ambienti giocabili con percorsi adattati alla griglia.
 
 La conversazione di Arianna riprende i concetti di ribalta e retroscena in [The Presentation of Self in Everyday Life](https://books.google.com/books/about/The_Presentation_of_Self_in_Everyday_Lif.html?id=6ZlYzgEACAAJ) di Erving Goffman.
 
@@ -81,3 +81,10 @@ Il [LOFT Luiss](https://www.luiss.it/it/ateneo/luiss-life/studentesse-e-studenti
 Nella mappa standard di Romania, strada, strisce, guardia, tornello e Luiss Shop fanno parte dello stesso ambiente del giardino. Le monete si trovano esplorando o completando le attività e si possono spendere al Luiss Shop. In Opzioni regoli il volume. Sunny Underground accompagna la strada e Arcade Sunset accompagna il campus.
 
 Al tornello di Romania, un tentativo di passare senza badge fa scattare l’avvertimento. Insistere sulla linea porta al Game Over con una scena splatter in pixel art. In Opzioni è disponibile anche la variante con la guardia disarmata.
+
+
+## Villa Alberoni nel gioco
+
+Da Viale Pola 12 la salita porta al villino. Sul lato sinistro, il vialetto scende al Tinello e al ninfeo del Nilo. La targa si può registrare nel diario. Il cortile della laurea ha un buffet, una foto da scattare e il brindisi che chiude il capitolo. Il cortile, i personaggi e gli eventi sono adattamenti narrativi.
+
+Riferimenti per il villino e il gruppo scultoreo in [Villa Alberoni · Luiss](https://www.luiss.it/it/ateneo/luiss-life/hub-e-sedi/villa-alberoni). La posizione del Tinello rispetto al cancello e alla salita è descritta da [Roma2pass](https://www.roma2pass.it/via-pola/luiss/). La forma circolare e il ninfeo sono documentati nella [guida di Open House Roma 2021, p. 63](https://openhouseroma.org/sites/default/files/2026-03/GUIDA_OHR2021.pdf).

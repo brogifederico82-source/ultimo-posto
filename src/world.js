@@ -3,12 +3,13 @@ const layers={
   terreno:"Terreno",edifici:"Edifici",arredi:"Arredamento",persone:"Personaggi",decori:"Decorazioni"
 };
 const catalog={
+  "Villa Alberoni":[["polaVilla","Villino di Villa Alberoni","edifici","#a78464",21,6,true],["polaNinfeo","Tinello Alberoni","edifici","#b4a285",10,5,true],["polaBuffet","Buffet","arredi","#dad0b8",7,2,true],["polaLights","Filo di luci","decori","#ffe1a1",8,1]],
   "Campus LUISS":[["domeHall","Padiglione metallico","edifici","#52616a",7,4,true],["chapel","Aula Chiesa","edifici","#ad6c51",6,5,true],["faculty","Edificio in cotto","edifici","#ae6b50",8,4,true],["court","Campo sportivo","decori","#527d72",7,4]],
   "Viale Romania":[["shelter","Pensilina","edifici","#466e7a",4,2,true],["pillar","Pilastro con urna","edifici","#e9e4d3",1,3,true],["booth","Guardiola","edifici","#ddc4a0",3,3,true],["pine","Pino marittimo","decori","#526d49",3,3],["cypress","Cipresso","decori","#355246",1,2],["luiss","Scritta LUISS","decori","#325988",5,2],["zebra","Strisce pedonali","decori","#e4deca",1,3],["bus","Autobus ATAC 360","persone","#a84a45",5,1],["shuttle","Navetta LUISS","persone","#e4e5da",4,1,true],["car","Auto","persone","#b96054",2,1],["scooter","Motorino","persone","#e8bc45"]],
   "Architettura":[["wall","Muro","edifici","#887870",1,1,true],["door","Porta","edifici","#ac754d"],["window","Finestra","edifici","#78a5a5"],["stairs","Scale","edifici","#a09b88"],["roof","Edificio","edifici","#ab6654",4,3,true]],
   "Terreno":[["grass","Prato","terreno","#476f4d"],["road","Asfalto","terreno","#687078"],["paving","Pavimentazione","terreno","#a59a87"],["path","Sentiero","terreno","#b3a18a"],["floor","Pavimento interno","terreno","#806a65"]],
   "Vegetazione":[["tree","Albero","decori","#4c7553",1,1,true],["hedge","Siepe","decori","#557c4e",1,1,true],["bush","Cespuglio","decori","#648052"],["flowers","Fiori","decori","#d8a86f"]],
-  "Arredamento":[["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
+  "Arredamento":[["radioVan","Furgone di Radio Luiss","arredi","#ad3039",3,2,true],["desk","Scrivania","arredi","#a68864",2,1,true],["chair","Sedia","arredi","#9f7851",1,1,true],["sofa","Divano","arredi","#9b685a",2,1,true],["shelf","Scaffale","arredi","#916c4c",1,1,true],["bench","Panchina","arredi","#a08a5b",2,1,true]],
   "Università":[["classroom","Aula","edifici","#a67762",3,2,true],["board","Lavagna","arredi","#487062"],["vending","Distributore","arredi","#9b6456",1,1,true],["turnstile","Tornello","edifici","#84958a"],["library","Biblioteca","edifici","#897460",3,2,true]],
   "Intrattenimento":[["foos","Biliardino","arredi","#48866d",2,1,true],["ping","Ping pong","arredi","#397d82",2,1,true],["bris","Tavolo da briscola","arredi","#80694b",2,1,true],["poker","Tavolo da poker","arredi","#33725e",2,1,true]],
   "Personaggi":[["athlete","Gymbro","persone","#a94e47"],["heatedStudent","Studente con IQOS","persone","#af6380"],["sportGlasses","Studente con occhiali sportivi","persone","#527f87"],["student","Studente","persone","#bb6268"],["guard","Guardia","persone","#6089aa"],["creator","Influencer","persone","#9966a3"],["bartender","Barista","persone","#ae775e"],["professor","Professore","persone","#b09461"],["cleaner","Spazzino","persone","#80a471"],["boar","Cinghiale","persone","#6a5848"]],
@@ -29,6 +30,12 @@ function saveProfileKey(mode){
 const mapId=()=>globalThis.crypto?.randomUUID?.()??("obj-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2));
 const maxCampusZones=34;
 const stockCampus=installTeachingRooms(JSON.parse($("edOriginal").textContent));
+const polaZones=["pola","pola-cortile"];
+const sourcePola={ingresso:stockCampus.zones.ingresso,...Object.fromEntries(polaZones.map(id=>[id,stockCampus.zones[id]]))};
+const normalizedPola=normalizeCampus({version:1,zones:sourcePola}).zones;
+const originalPolaStock=Object.fromEntries(polaZones.map(id=>[id,[sourcePola[id],normalizedPola[id]].map(
+  zone=>new Map(zone.objects.map(o=>[o.uid,JSON.stringify(o)]))
+)]));
 const priorInteriors=normalizeCampus({version:1,zones:Object.fromEntries(
   ["ingresso","aula-chiesa","polivalente","loft"].map(id=>[id,stockCampus.zones[id]])
 )});
@@ -97,7 +104,7 @@ function refineRomania(map){
   }
   return map;
 }
-const originalMap=normalizeCampus(installVillaAda(refineRomania(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))))));
+const originalMap=normalizeCampus(installVillaAda(refineRomania(addRadioVan(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,25],
@@ -253,7 +260,15 @@ function loadCampus(){
           }
         }
       }
-      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);}
+      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);addRadioVan(map);}
+      if(!embedded){
+        const prior=Object.fromEntries(polaZones.map(id=>[id,map.zones[id]?.width]));
+        installPola(map);
+        for(const id of polaZones){
+          if(prior[id]===map.zones[id]?.width)continue;
+          map.zones[id]=normalizeCampus({version:1,zones:{ingresso:map.zones.ingresso,[id]:map.zones[id]}}).zones[id];
+        }
+      }
       return embedded?map:normalizeCampus(installVillaAda(refineRomania(map)));
     }
   }catch{}
@@ -595,6 +610,23 @@ function drawObject(c,o,now=0,editing=false){
         for(let a=3;a<15;a+=3)box("#ffffff26",a,2,1,9);
         if(o.kind==="classroom"||o.kind==="library"){box("#384b49",5,10,6,4);box("#89a299",6,10,4,2);}
         break;
+      case "radioVan":{
+        box("#26333680",1,11,15,4);
+        box("#22262a",2,10,3,4);box("#22262a",11,10,3,4);
+        box("#a7a7a1",3,11,1,2);box("#a7a7a1",12,11,1,2);
+        box("#532d33",0,5,15,6);box("#532d33",13,7,3,4);
+        box(color,1,4,13,8);box(color,13,6,3,6);
+        box("#d46462",1,4,12,1);box("#902830",1,11,14,1);
+        box("#293941",2,5,8,3);box("#293941",11,5,2,3);box("#293941",13,6,2,2);
+        box("#68888a",2,5,7,1);box("#68888a",11,5,2,1);
+        box("#c5c1b1",3,2,5,2);box("#e6dec9",3,2,4,1);
+        box("#f0ca87",15,8,1,1);box("#eb826e",0,7,1,1);
+        c.save();c.scale(16/w,16/h);
+        c.fillStyle="#fff3df";c.textAlign="center";c.font="bold "+Math.min(7,w/6.5)+"px sans-serif";
+        c.fillText("Radio Luiss",w*.47,h*.66,w*.86);
+        c.restore();
+        break;
+      }
       case "wall":box(shadow,0,1,16,14);box(color,0,2,16,10);box(light,0,2,16,2);box("#141d213a",0,9,16,1);break;
       case "door":case "turnstile":
         box(shadow,2,2,12,13);
@@ -617,6 +649,9 @@ function drawObject(c,o,now=0,editing=false){
         break;
       case "lamp":box(shadow,7,5,2,10);box(color,5,2,6,5);box(white,6,3,4,2);break;
       case "bin":box(shadow,4,5,8,10);box(color,4,4,8,8);box(light,3,4,10,2);break;
+      case "polaVilla":case "polaNinfeo":case "polaBuffet":case "polaLights":
+        paintPolaLandmark(c,o,box,now);
+        break;
       case "fountain":{
         const ripple=Math.floor(now/180)%4;
         box("#293d3a65",0,6,16,8);box("#354b48",2,4,12,10);
@@ -811,6 +846,86 @@ function paintCampusBoundary(c,zone,left,top,right,bottom){
   }
   c.restore();
 }
+// Trace continuous stonework from the original wall cells, leaving the mapped
+// gates and collision footprints in place.
+const perimeterCache=new WeakMap();
+function isPerimeterWall(o){
+  return o.kind==="wall"&&o.rotation===0&&[o.x,o.y,o.w,o.h].every(Number.isInteger)&&
+    (o.uid.startsWith("cinta-")||o.uid.startsWith("viale-tornello-")||
+     /^viale-romania-25[12]$/.test(o.uid));
+}
+function perimeterArtwork(objects,width,editing){
+  if(!editing&&perimeterCache.has(objects))return perimeterCache.get(objects);
+  const cells=new Set();
+  for(const o of objects){
+    if(!isPerimeterWall(o))continue;
+    for(let y=o.y;y<o.y+o.h;y++)for(let x=o.x;x<o.x+o.w;x++)cells.add(x+y*width);
+  }
+  const outline=new Path2D(),footprint=new Path2D(),piers=[],edges=new Map();
+  const stride=width+1;
+  const edge=(a,b)=>{
+    if(!edges.has(a))edges.set(a,new Set());
+    edges.get(a).add(b);
+  };
+  for(const cell of cells){
+    const x=cell%width,y=Math.floor(cell/width),v=x+y*stride;
+    const n=cells.has(cell-width),s=cells.has(cell+width);
+    const w=x>0&&cells.has(cell-1),e=x+1<width&&cells.has(cell+1);
+    if(!n)edge(v,v+1);
+    if(!e)edge(v+1,v+stride+1);
+    if(!s)edge(v+stride+1,v+stride);
+    if(!w)edge(v+stride,v);
+    footprint.rect(x*16,y*16,16,16);
+    if(((n&&s&&!e&&(x+y)%8===0)||(w&&e&&!s&&(x+y)%8===0)))piers.push([x*16,y*16]);
+  }
+  const directions=[1,stride,-1,-stride];
+  while(edges.size){
+    const start=edges.keys().next().value,loop=[start];
+    let from=start,to=edges.get(start).values().next().value;
+    for(;;){
+      const outgoing=edges.get(from);
+      outgoing.delete(to);
+      if(!outgoing.size)edges.delete(from);
+      if(to===start)break;
+      const direction=directions.indexOf(to-from),next=edges.get(to);
+      loop.push(to);from=to;
+      to=[1,0,3,2].map(turn=>from+directions[(direction+turn)%4]).find(v=>next?.has(v));
+      if(to===undefined)break;
+    }
+    const corners=loop.filter((v,i)=>v-loop[(i+loop.length-1)%loop.length]!==loop[(i+1)%loop.length]-v);
+    const point=v=>[v%stride*16,Math.floor(v/stride)*16];
+    corners.forEach((v,i)=>{
+      const [x,y]=point(v),[px,py]=point(corners[(i+corners.length-1)%corners.length]);
+      const [nx,ny]=point(corners[(i+1)%corners.length]);
+      const enter=[x+Math.sign(px-x)*6,y+Math.sign(py-y)*6];
+      const leave=[x+Math.sign(nx-x)*6,y+Math.sign(ny-y)*6];
+      if(i===0)outline.moveTo(...enter);else outline.lineTo(...enter);
+      outline.quadraticCurveTo(x,y,...leave);
+    });
+    outline.closePath();
+  }
+  const artwork={outline,footprint,piers};
+  if(!editing)perimeterCache.set(objects,artwork);
+  return artwork;
+}
+function paintPerimeter(c,{outline,footprint,piers},left,top,right,bottom){
+  c.save();
+  c.clip(footprint);
+  c.fillStyle="#958873";c.fill(outline);
+  c.clip(outline);
+  c.lineJoin="round";
+  c.lineWidth=7;c.strokeStyle="#726b5c";c.stroke(outline);
+  c.translate(-1,-1);
+  c.lineWidth=3;c.strokeStyle="#cbbc9d";c.stroke(outline);
+  c.translate(1,1);
+  for(const [x,y] of piers){
+    if(x<left*16||x>=right*16||y<top*16||y>=bottom*16)continue;
+    rect(c,"#746858",x+3,y+3,11,11);
+    rect(c,"#baaa8e",x+3,y+3,10,9);
+    rect(c,"#d0c09e",x+4,y+3,8,2);
+  }
+  c.restore();
+}
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
   const margin=2,left=Math.max(0,Math.floor(view.x/16)-margin),top=Math.max(0,Math.floor(view.y/16)-margin);
@@ -857,9 +972,12 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
     c.lineCap="round";c.lineWidth=1.65;c.strokeStyle="#8c9470";c.stroke();
     c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
   }
-  if(!editing&&visible.edifici)paintCampusBoundary(c,z,left,top,right,bottom);
+  // paintCampusBoundary (tratto a linee, branch story) è tenuta ma non attiva: il perimetro lo disegna paintPerimeter (main).
   const foreground=[];
-  for(const raw of editing?z.objects:continuousWalls(z)){
+  const objects=editing?z.objects:sceneObjects(z);
+  const connected=id==="giardino"&&visible.edifici;
+  if(connected)paintPerimeter(c,perimeterArtwork(objects,z.width,editing),left,top,right,bottom);
+  for(const raw of objects){
     const layer=kindLayer(raw);
     if(!visible[layer]||layer==="terreno")continue;
     const o=positionOf(raw,editing?0:isVehicle(raw)?trafficClock:now,z.width);
@@ -868,6 +986,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       drawObject(c,o,now,editing);
       continue;
     }
+    if(connected&&isPerimeterWall(o))continue;
     foreground.push({row:o.y+o.h,draw:()=>drawObject(c,o,now,editing)});
   }
   if(player)foreground.push(player);

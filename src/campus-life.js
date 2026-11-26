@@ -166,6 +166,30 @@ function furnishCampusFountains(map){
   }
   return map;
 }
+function addRadioVan(map){
+  const garden=map.zones.giardino;
+  if(!garden)return map;
+  const van=garden.objects.find(o=>o.uid==="radio-luiss-van");
+  if(van&&(van.x!==30||van.y!==55||van.w!==3||van.h!==2||van.rotation!==0))return map;
+  if(!garden.objects.some(o=>o.uid==="giardino-caffe"&&o.x===42&&o.y===35))return map;
+  const {width,height}=garden;
+  const x=45,y=33,w=3,h=2;
+  if(x+w>width||y+h>height||garden.objects.some(o=>(o.solid||o.action)&&
+      o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+h&&o.y+(o.h??1)>y))return map;
+  const text="Il furgone rosso di Radio Luiss è parcheggiato di fianco al bar. Sul sedile c’è una lista di ospiti. In cima qualcuno ha scritto: «Quello che arriva prima paga il caffè».";
+  if(van){
+    Object.assign(van,{x,y,text});
+    return map;
+  }
+  garden.objects.push({
+    uid:"radio-luiss-van",kind:"radioVan",name:"Furgone di Radio Luiss",x,y,w,h,color:"#ad3039",
+    rotation:0,variant:0,solid:true,action:"dialog",native:"",target:"",gate:"",missionTarget:"",
+    text,
+    behavior:"idle",speed:1.7,auto:false,route:[]
+  });
+  return map;
+}
+
 function hasIntegratedEntrance(){
   const garden=campus.zones.giardino;
   return Boolean(garden&&zoneObjects(garden).byId.has("viale-ingresso-start"));
