@@ -483,7 +483,8 @@ function draw(now){
   const [drawX,drawY]=walkPosition(now);
   const x=Math.round(drawX*16),y=Math.round(drawY*16);
   const time=reducedMotion?0:now;
-  const zoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
+  const defaultZoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
+  const zoom=Math.max(defaultZoom,20/z.width,12/z.height);
   const viewWidth=320/zoom,viewHeight=192/zoom;
   const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
   const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
@@ -552,11 +553,11 @@ function minimapBase(zone){
   const tiles=terrainCache.get(zone)??terrainMap(zone);
   rect(c,palette[zone.ground],0,0,zone.width,zone.height);
   if(zone===campus.zones.giardino&&zone.width===144){
-    rect(c,"#53595b",0,0,zone.width,zone.height);
+    rect(c,zoneObjects(zone).byId.has("campus-circulation")?"#9b9587":"#53595b",0,0,zone.width,zone.height);
     c.beginPath();campusOutlineFor(zone).forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
   }
   for(const [key,tile] of tiles){
-    if(tile.kind!==zone.ground)rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
+    if(tile.kind!==zone.ground||tile.uid.startsWith("quartiere-verde-"))rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
   }
   for(const o of zoneObjects(zone).solid){
     if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);

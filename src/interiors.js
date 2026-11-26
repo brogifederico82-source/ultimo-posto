@@ -79,3 +79,36 @@ function improveDome2Entrance(map){
     {color:"#3f84a8",solid:true,action:"native",native:"calcetto"});
   return map;
 }
+
+function widenAcademicHalls(map){
+  const floorDirectory={
+    primo:"Primo piano · A101, A103a e A103b.",
+    secondo:"Secondo piano · A201, A202, A203 (Aula Toti), A204, A205a/b, A206a/b, A207, A209, A210 e A211 (Aula Grande). A200 (Aula Chiesa) ha anche un accesso dal campus.",
+    terzo:"Terzo piano · A303, A305a e A305b."
+  };
+  for(const id of ["terra","primo","secondo","terzo","quarto","quinto","parenzo-corridoio"]){
+    const hall=map.zones[id];
+    hall.width+=4;
+    hall.height+=3;
+    const {width,height}=hall;
+    const setSide=(uid,x,y)=>{
+      const item=hall.objects.find(o=>o.uid===uid);
+      if(item)Object.assign(item,{x,y});
+    };
+    setSide("romania-corridoio-panca",width-5,height-3);
+    setSide("parenzo-corridoio-panca",width-5,height-3);
+    setSide("terra-ospite",14,11);
+    setSide("terzo-silenzio",15,11);
+    const walls=[[0,0,width,1],[0,1,1,height-2],[width-1,1,1,height-2],[0,height-1,width,1]];
+    hall.objects=hall.objects.filter(o=>!o.uid.endsWith("-corridoio-parete"));
+    for(const [i,[x,y,w,h]] of walls.entries()){
+      hall.objects.push({uid:id+"-hall-wall-"+i,kind:"wall",name:"Parete perimetrale",x,y,w,h,solid:true,color:"#a38f7d"});
+    }
+    hall.objects.push({uid:id+"-hall-paving",kind:"paving",name:"Corridoio principale",x:1,y:5,w:width-2,h:5,color:"#b8a790"});
+    if(floorDirectory[id])hall.objects.push({uid:id+"-hall-directory",kind:"sign",name:"Pianta del piano",
+      x:width-4,y:4,color:"#c7ad7e",action:"dialog",text:floorDirectory[id]});
+    for(const object of hall.objects.filter(o=>o.action==="portal")){
+      hall.objects.push({uid:object.uid+"-hall-threshold",kind:"paving",name:"Soglia",x:object.x,y:object.y,color:"#b8a790"});
+    }
+  }
+}
