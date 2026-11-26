@@ -105,7 +105,7 @@ const conversations={
   "prof-vitali":[
     "La professoressa Vitali cammina verso The Dome con una cartellina sotto il braccio. «Mi manca un’aula e ho già trovato tre studenti che mi chiedono se l’esame sarà corto.»",
     ["Posso chiederle una cosa sul commerciale?","«Certo. Se mi cita un articolo, però, poi le chiedo di farmi un esempio.»"],
-    ["Sa dov’è la mensa?","«Dal cortile dell’edificio principale. Se mi vede più tardi, probabilmente sto cercando lo stesso ingresso.»"]
+    ["Sa dov’è la mensa?","«Dal cortile dell’edificio principale entri nell’atrio centrale. Per la mensa chieda al personale.»"]
   ],
   "prof-leone":[
     "Il professor Leone guarda il marciapiede. «Sto contando quanti studenti arrivano dalla navetta con il quaderno già aperto. Per ora il campione è minuscolo.»",
@@ -119,7 +119,7 @@ const conversations={
   ],
   "panama-nico":[
     "«Mi hanno detto “facciamo un giro corto”. Siamo già alla seconda panchina e abbiamo saltato il ritorno.»",
-    ["Come si torna a Viale Romania?","«Dal vialetto interno gira verso la mensa, poi costeggia l’edificio principale fino al cancello.»"],
+    ["Come si torna a Viale Romania?","«Dal vialetto interno gira verso l’atrio, poi costeggia l’edificio principale fino al cancello.»"],
     ["Dove trovi un posto tranquillo?","«Vicino alle aiuole, finché non arrivano quelli che ripetono in viva voce.»"]
   ],
   "giardino-lidia":[
@@ -237,24 +237,154 @@ const nativeConversations={
   "ospite":[["Com’è il panel?","«Doveva durare un’ora. Siamo ancora alle presentazioni, ma ci danno il caffè.»"]],
   "silenzio":[["Come hai trovato questo posto?","«Sono salita finché ho smesso di sentire gente dire “mandami il file”.»"]]
 };
-const conversationFor=o=>Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
+function conversationFor(o){
+  const profile=Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
+  if(o.uid!=="cerca-sigaretta"||!has("Biglietto del 360 bis"))return profile;
+  return [local("Andrea controlla l’orologio. «Vedi? Anche oggi il 360 bis è perfettamente in ritardo.»",
+    "Andrea checks his watch. “See? The 360 bis is perfectly late again today.”"),...profile.slice(1)];
+}
 function speechChoice(o,prompt,reply){
   return [prompt,()=>{state.chatTopic={uid:o.uid,prompt,reply};}];
 }
 function addConversation(scene,o,profile){
   const [intro,...topics]=profile??[scene.text,...localTopics];
   const turn=state.chatTopic?.uid===o.uid?state.chatTopic:null;
+  const otherTopics=topics.filter(([prompt])=>prompt!==turn?.prompt);
   return {...scene,text:turn?.reply??intro,playerLine:turn?.prompt,
-    choices:[...scene.choices,...topics.map(([prompt,reply])=>speechChoice(o,prompt,reply))]};
+    choices:[...scene.choices,...otherTopics.map(([prompt,reply])=>speechChoice(o,prompt,reply)),
+      ...(turn?[[local("Torna all’inizio del dialogo","Back to the start of the conversation"),()=>{state.chatTopic=null;}]]:[])]};
+}
+
+
+const campusEpilogue={
+  "tutor-viola":"«Hai restituito quel che ti avevano prestato?» Viola sorride. «La sedia, intendo. Gli appunti puoi passarli avanti.»",
+  "prof-storia":"«Ti ricordi quando cercavi la data giusta?» Serra chiude il registro. «A Pola hai trovato anche il tempo giusto per fare una pausa.»",
+  "radio-tommaso":"«Ho tenuto dieci secondi del cortile dopo il brindisi. Si sente l’acqua e niente altro. È il pezzo più difficile da tagliare.»"
+};
+const campusSmallStories={
+  "mensa-ada":["Leggi il cartellino del cucchiaio","Sotto il porta-posate c’è scritto: «Cucchiaio di riserva. In caso di esame, rompere il vetro». Il vetro è un tovagliolo."],
+  "portico-reader":["Controlla il segnaposto","Sul tavolo c’è un biglietto: «Torno tra cinque minuti». Sotto, a matita: «Anno accademico da definire»."],
+  "courtyard-foos":["Guarda sotto il segnapunti","Un foglietto recita: «La stecca che cigola ha diritto a un appello straordinario». Qualcuno ha aggiunto «con riserva»."],
+  "viale-ingresso-guardia":["Chiedi dove porta il vialetto","«Per il tutorato segui il vialetto verso il Dome. Prima fammi vedere il badge, altrimenti il percorso finisce qui.»"],
+  "tutor-viola":["Chiedi come non perdere il filo","«Scrivi la prossima cosa da fare, una sola. Poi apri la pianta. La fila per il caffè è lunga, ma il semestre lo è di più.»"],
+  "prof-storia":["Chiedi cosa succede dopo la lezione","«Se devi consegnare il lavoro al LOFT, esci sul corridoio del secondo piano e continua a salire. Almeno lì la data di scadenza è una sola.»"],
+  "giardiniera-nora":["Chiedi chi ha piantato i cartelli","«Gli studenti. Quello con scritto “basilico” cresce che è una bellezza. Il basilico, per ora, si è riservato di decidere.»"]
+};
+const radioTapeStops=[
+  {uid:"giardiniera-nora",label:["Registra il rubinetto dell’orto","Record the garden tap"],
+    clue:["All’orto, qualcuno batte il tempo mentre innaffia.","Someone keeps time while watering the garden."],
+    line:["«Ci mette un po’, poi fa tre colpi. Aspetta il terzo: è quello che viene bene.»","“It takes a moment, then it knocks three times. Get the third one. That’s the good one.”"],
+    notes:[62,62,67]},
+  {uid:"courtyard-foos",label:["Registra la pallina sul legno","Record the ball against the wood"],
+    clue:["In terrazza, cerca il gioco che fa rumore anche a partita finita.","On the terrace, find the game that makes noise even after the match."],
+    line:["La pallina batte sul legno. Qualcuno dalla panchina grida «traversa!». Ti tieni anche quello.","The ball hits the wood. Someone on the bench shouts, “Crossbar!” You keep that in the recording."],
+    notes:[69,76,71]},
+  {uid:"loft-podcast",label:["Registra il conto alla rovescia","Record the countdown"],
+    clue:["All’ultimo piano, trova il microfono che si accende prima di un «tre, due…».","On the top floor, find the microphone that lights up before someone says, “Three, two…”"],
+    line:["Tre, due, uno. Nell’ultimo secondo si sente qualcuno spostare una sedia con tutta la delicatezza di un trasloco.","Three, two, one. In the last second, someone moves a chair with all the delicacy of a moving crew."],
+    notes:[71,67,64]}
+];
+function radioTapeHint(){
+  const step=state.radioTape;
+  if(!step||step>radioTapeStops.length+1)return "";
+  const prefix=local("Frequenza fantasma","Ghost Frequency");
+  if(step>radioTapeStops.length)return prefix+" · "+local("Riporta il nastro a Tommaso.","Take the tape back to Tommaso.");
+  return prefix+" · "+(step-1)+"/"+radioTapeStops.length+" · "+local(...radioTapeStops[step-1].clue);
+}
+function radioTapeChoice(o){
+  if(testMode)return null;
+  const step=state.radioTape??0;
+  if(o.uid==="radio-tommaso"){
+    if(!step)return [local("Cerca il nastro della radio","Find the station’s tape"),()=>{
+      state.radioTape=1;
+      record(local("Frequenza fantasma · Tommaso ti ha chiesto tre registrazioni per una sigla.","Ghost Frequency · Tommaso asked you to record three sounds for a new intro."));
+      state.chatTopic={uid:o.uid,prompt:local("Che cosa devo registrare?","What should I record?"),reply:radioTapeHint()};
+    }];
+    if(step>radioTapeStops.length+1)return null;
+    if(step===radioTapeStops.length+1)return [local("Fai ascoltare il nastro","Play back the tape"),()=>{
+      state.radioTape++;
+      carry("Nastro di Radio Luiss");awardCoins(4);
+      record(local("Frequenza fantasma · Hai montato la sigla e guadagnato 4 monete.","Ghost Frequency · You made a new intro and earned four coins."));
+      state.chatTopic={uid:o.uid,prompt:local("Allora, regge?","Well, does it work?"),reply:local(
+        "«Il rubinetto tiene il tempo, il biliardino fa da rullante. E la sedia? Quella va nei titoli di coda.»",
+        "“The tap keeps time, the foosball table is our snare. The chair? That goes in the credits.”")};
+      chime(radioTapeStops.flatMap(stop=>stop.notes),.085);
+    }];
+    return speechChoice(o,local("Chiedi l’indizio della radio","Ask for the radio clue"),radioTapeHint());
+  }
+  const stop=radioTapeStops[step-1];
+  if(stop?.uid!==o.uid)return null;
+  return [local(...stop.label),()=>{
+    state.radioTape++;
+    record(local("Frequenza fantasma","Ghost Frequency")+" · "+local(...stop.label));
+    state.chatTopic={uid:o.uid,prompt:local(...stop.label),reply:local(...stop.line)};
+    chime(stop.notes,.12);
+  }];
+}
+function andreaChoice(o){
+  const ticket="Biglietto del 360 bis",stamp="Tessera della corsa fantasma";
+  if(o.uid==="cerca-sigaretta"){
+    if(has(stamp))return speechChoice(o,local("Gli mostri la tessera obliterata","Show him the punched ticket"),
+      local("«Vedi il buco a forma di tazza? La linea è sospesa ogni volta che manca il caffè.»",
+        "“See the coffee-cup punch? The route gets suspended whenever they run out of coffee.”"));
+    if(has(ticket))return speechChoice(o,local("Gli chiedi dove si timbra","Ask where to punch the ticket"),
+      local("«Alla fermata del 360, fuori dal tornello. Guarda sotto la panchina.»",
+        "“At the 360 stop, outside the gate. Look under the bench.”"));
+    const inHand=cigarette?.phase==="ready";
+    if(testMode||(!inHand&&!cigarettesLeft()))return null;
+    const label=inHand?local("Gli passi la sigaretta che hai in mano","Hand him the cigarette you’re holding"):
+      local("Gli offri una sigaretta dal pacchetto","Offer him a cigarette from the pack");
+    return [label,()=>{
+      if(has(ticket)||(!inHand&&!cigarettesLeft()))return;
+      if(inHand)stopSmoking();else state.cigarettes=cigarettesLeft()-1;
+      carry(ticket);
+      record(local("Andrea · Ti ha dato il biglietto del 360 bis. Cerca sotto la panchina della fermata, fuori dal tornello.",
+        "Andrea · He gave you the 360 bis ticket. Look under the bus-stop bench outside the gate."));
+      state.chatTopic={uid:o.uid,prompt:label,reply:local(
+        "«Tieni. Un biglietto per il 360 bis. Dicono che faccia una sola corsa, quando tutto il campus è in ritardo. Per timbrarlo, guarda sotto la panchina alla fermata fuori dal tornello.»",
+        "“Here. A ticket for the 360 bis. They say it only runs once, when the whole campus is late. Look under the bus-stop bench outside the gate to get it punched.”")};
+    }];
+  }
+  if(o.uid==="radio-tommaso"&&has(stamp)){
+    const label=local("Fagli leggere l’orario del 360 bis","Show him the 360 bis timetable");
+    return [label,()=>{
+      discover("annuncio-360","L’annuncio mai andato in onda");
+      state.chatTopic={uid:o.uid,prompt:label,reply:local(
+        "Tommaso accende il microfono. «Il prossimo autobus partirà appena finisce la registrazione.» Poi spegne tutto. «No, mi sa che abbiamo appena perso anche questo.»",
+        "Tommaso switches on the mic. “The next bus will leave as soon as recording ends.” He switches it off again. “Nope, I think we’ve missed that one too.”")};
+    }];
+  }
+  if(!["bus-360-stop","viale-bus-360-stop"].includes(o.uid)||!has(ticket))return null;
+  const label=local("Controlli sotto la panchina","Look under the bench");
+  const reply=local("Sotto la panchina trovi un’obliteratrice fatta con una pinzatrice. Sul tabellone c’è scritto «360 bis · Capolinea: Ultimo Posto». Una nota avvisa: «Il conducente è già a lezione».",
+    "You find a stapler rigged up as a ticket punch. The sign says “360 bis · Terminus: Last Seat”. A note reads “The driver is already in class”.");
+  if(has(stamp))return speechChoice(o,label,reply);
+  return [label,()=>{
+    if(has(stamp))return;
+    carry(stamp);discover("corsa-fantasma","La corsa fantasma del 360");awardCoins(2);
+    state.chatTopic={uid:o.uid,prompt:label,reply};
+  }];
+}
+function campusOptionalScene(sceneData,o){
+  const andrea=andreaChoice(o);
+  if(andrea)sceneData.choices.unshift(andrea);
+  const tapeChoice=radioTapeChoice(o);
+  if(tapeChoice)sceneData.choices.push(tapeChoice);
+  const optional=campusSmallStories[o.uid];
+  if(optional)sceneData.choices.push(speechChoice(o,optional[0],optional[1]));
+  const memory=has("Festa a Pola")?campusEpilogue[o.uid]:null;
+  if(memory)sceneData.choices.push(speechChoice(o,"Ripensa alla festa di Pola",memory));
+  return sceneData;
 }
 
 function getScene(){
   if(state.prologue)return openingScene();
   if(state.ending?.guard)return scene(state.ending.title,state.ending.text,["Riprova dall’ingresso",()=>{
-    state.ending=null;state.guardWarned=false;
+    state.ending=null;state.guardWarned=false;state.gateConfrontation=0;
     [state.x,state.y]=reachEntry(state.zone,"viale");
     keys.clear();controls.clear();activeScene=null;syncBackgroundMusic();
   }]);
+  if(state.ending?.boar)return villaAdaEndingScene();
   if(state.ending?.traffic)return scene("Game Over",state.ending.text,[atViale(state)?"Riprova dall’ingresso":local("Riprova dal giardino","Retry from the garden"),()=>{
     state.ending=null;[state.x,state.y]=reachEntry(state.zone,atViale(state)&&hasIntegratedEntrance()?"viale":state.zone==="giardino"?"ingresso":undefined);
     keys.clear();controls.clear();activeScene=null;
@@ -266,14 +396,17 @@ function getScene(){
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
   if(!o&&atViale(state))return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
   if(!o)return scene("Cerca un posto per studiare","Avvicinati a persone, porte e oggetti e premi E. Apri la mappa sotto i comandi per orientarti.");
+  const villaScene=villaAdaScene(o);
+  if(villaScene)return villaScene;
+  if(o.uid==="pola-inside"&&!polaAuthorized())return polaParty();
   if(gateLocked(o.gate))return scene(o.name,"Per sbloccarlo, vinci a "+challengeNames[o.gate].toLowerCase()+".");
   const note=o.text||"Sei vicino a "+o.name+".";
   if((!o.action||o.action==="dialog")&&kindLayer(o)==="persone"&&!isVehicle(o)){
-    return addConversation(scene(o.name,o.text||"«Hai un minuto? Sono appena uscito da lezione.»"),o,conversationFor(o));
+    return campusOptionalScene(addConversation(scene(o.name,o.text||"«Hai un minuto? Sono appena uscito da lezione.»"),o,conversationFor(o)),o);
   }
   if(o.action==="native"){
     if(Object.hasOwn(teachingRooms,o.native))return teachingScene(o.native);
-    const result=nativeScene(o.native);
+    const result=campusOptionalScene(nativeScene(o.native),o);
     if(o.native==="navetta"||o.native==="autista")return result;
     if(originalMap.zones[state.zone]?.objects.find(item=>item.uid===o.uid)?.name!==o.name)result.title=o.name;
     const profile=(o.native==="radio"?null:conversationFor(o))??(Object.hasOwn(nativeConversations,o.native)?[result.text,...nativeConversations[o.native]]:null);
@@ -295,7 +428,8 @@ function getScene(){
   }]);
   if(o.action==="event")return scene(o.name,note,...(!state.completedEvents.includes(o.uid)?
     [["Registra nel diario",()=>{state.completedEvents.push(o.uid);record("Evento · "+o.name);}]]:[]));
-  return scene(o.name,note);
+  const turn=state.chatTopic?.uid===o.uid?state.chatTopic:null;
+  return campusOptionalScene({...scene(o.name,turn?.reply??note),playerLine:turn?.prompt},o);
 }
 function completeObjective(o){
   if(state.missionTarget!==o.uid||gateLocked(o.gate))return;
@@ -316,9 +450,25 @@ function autoEncounter(o){
   if(o.native==="trend"&&o.action==="native")openChallenge("dance");
   return true;
 }
+function exploringCampus(){
+  return screen==="game"&&!state.prologue&&!state.ending&&!activeScene&&!minigame&&!$("campusSurprise").open;
+}
+function focusScene(){
+  $(exploringCampus()?"interact":"sceneTitle").focus();
+}
+function closeScene(){
+  const shouldSave=Boolean(resumableScene(activeScene));
+  activeScene=null;state.chatTopic=null;state.freeMoment=null;
+  clearCampusInputs();
+  if(shouldSave)save();
+  renderScene();
+  if(window.matchMedia?.("(max-width: 760px)")?.matches)$("stage").scrollIntoView({block:"start"});
+  $("interact").focus({preventScroll:true});
+}
+$("closeConversation").onclick=closeScene;
 let stageInteraction=null;
 $("stage").onclick=event=>{
-  if(screen!=="game"||activeScene||minigame||!stageInteraction)return;
+  if(!exploringCampus()||!stageInteraction)return;
   const nearest=nearby();
   if(nearest?.uid!==stageInteraction.uid)return;
   const canvas=$("stage"), bounds=canvas.getBoundingClientRect();
@@ -329,7 +479,9 @@ $("stage").onclick=event=>{
   if(stageInteraction.boxes.some(([left,top,right,bottom])=>x>=left&&x<=right&&y>=top&&y<=bottom))interact();
 };
 function draw(now){
-  const z=room(state.zone),x=state.x*16,y=state.y*16;
+  const z=room(state.zone);
+  const [drawX,drawY]=walkPosition(now);
+  const x=Math.round(drawX*16),y=Math.round(drawY*16);
   const time=reducedMotion?0:now;
   const zoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
   const viewWidth=320/zoom,viewHeight=192/zoom;
@@ -339,8 +491,8 @@ function draw(now){
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
   worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},layers,false,
-    {row:state.y+.86,draw:()=>{
-      sprite(stage,state.avatar,x+8,y+14,now-lastWalk<160?Math.floor(now/75)%3:0,state.look);
+    {row:drawY+.86,draw:()=>{
+      sprite(stage,state.avatar,x+8,y+14,walkStep&&now-walkStep.start<135?Math.floor(now/75)%3:0,state.look);
       paintSmoking(stage,x+8,y+14,now);
     }});
   if(z.ground==="grass"&&!reducedMotion){
@@ -352,13 +504,15 @@ function draw(now){
   }
   paintRestrictedLine(stage,state.zone);
   paintCampusCoins(stage,state.zone,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},time);
+  paintVillaBoars(stage,state.zone,now);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
+  const minimap=z.width>20||z.height>12?paintMinimap(z,waypoint,drawX,drawY):null;
   if(waypoint&&!activeScene){
     const px=((waypoint.x+waypoint.w/2)*16-cameraX)*zoom;
     const py=((waypoint.y-.5)*16-cameraY)*zoom;
-    paintCampusWaypoint(stage,clamp(px,9,311),clamp(py,9,183));
+    paintWaypointOnStage(stage,px,py,minimap);
   }
   const nearest=nearby();
   stageInteraction=null;
@@ -380,55 +534,78 @@ function draw(now){
       [sx-width/2-4,sy-4,sx+width/2+4,sy+15],[left-7,top-13,right+7,bottom+6]
     ]};
   }
-  if(z.width>20||z.height>12){
-    const scale=Math.min(79/z.width,52/z.height);
-    const mx=x=>235+x*scale,my=y=>8+y*scale;
-    stage.drawImage(minimapBase(z,scale),231,4);
-    for(const o of sceneObjects(z)){
-      if(isVehicle(o)&&o.behavior!=="idle"){
-        const vehicle=positionOf(o,trafficClock,z.width);
-        rect(stage,"#ff976a",mx(vehicle.x+.5),my(vehicle.y+.5),2,2);
-      }
-      if(o.action)rect(stage,gateLocked(o.gate)?"#ad7868":"#e2b875",mx(o.x),my(o.y),2,2);
-    }
-    stage.font="bold 6px monospace";stage.textAlign="center";stage.fillStyle="#fff1b8";
-    for(const [id,label] of [["dome","D"],["caffe","B"],["terra","E"],["uscita","R"]]){
-      const point=sceneObjects(z).find(o=>o.native===id&&o.action);
-      if(point)stage.fillText(label,mx(point.x)+1,my(point.y)-2);
-    }
-    if(waypoint)paintCampusWaypoint(stage,mx(waypoint.x+.5),my(waypoint.y+.5));
-    rect(stage,"#f5f7d9",mx(state.x),my(state.y),3,3);
-  }
 }
-function minimapBase(zone,scale){
+function minimapBase(zone){
   const cached=minimapCache.get(zone);
   if(cached)return cached;
+  const padding=3,scale=Math.min(79/zone.width,53/zone.height);
+  const mapWidth=zone.width*scale,mapHeight=zone.height*scale;
+  const width=Math.ceil(mapWidth)+padding*2,height=Math.ceil(mapHeight)+padding*2;
   const layer=document.createElement("canvas");
-  layer.width=85;layer.height=59;
+  layer.width=width*2;layer.height=height*2;
   const c=layer.getContext("2d");
-  rect(c,"#d0a46d",0,0,85,59);rect(c,"#273b3b",1,1,83,57);
-  for(const o of zone.objects){
-    const x=4+o.x*scale,y=4+o.y*scale,type=kindLayer(o);
-    if(type==="terreno"&&o.kind!=="grass")rect(c,o.kind==="road"?"#586167":"#7a846e",x,y,scale,scale);
-    if(type==="edifici"&&o.solid)rect(c,"#795a51",x,y,o.w*scale,o.h*scale);
+  c.scale(2,2);
+  rect(c,"#0e1924",0,0,width,height);
+  c.strokeStyle="#c99d67";c.lineWidth=1;c.strokeRect(.5,.5,width-1,height-1);
+  c.save();c.translate(padding,padding);c.beginPath();c.rect(0,0,mapWidth,mapHeight);c.clip();c.scale(scale,scale);
+  const palette={grass:"#35584a",floor:"#65514e",paving:"#a4937d",path:"#9c8d69",road:"#596878"};
+  const tiles=terrainCache.get(zone)??terrainMap(zone);
+  rect(c,palette[zone.ground],0,0,zone.width,zone.height);
+  if(zone===campus.zones.giardino&&zone.width===144){
+    rect(c,"#53595b",0,0,zone.width,zone.height);
+    c.beginPath();campusOutlineFor(zone).forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=palette.grass;c.fill();
   }
-  minimapCache.set(zone,layer);
-  return layer;
+  for(const [key,tile] of tiles){
+    if(tile.kind!==zone.ground)rect(c,palette[tile.kind],key%zone.width,Math.floor(key/zone.width),1,1);
+  }
+  for(const o of zoneObjects(zone).solid){
+    if(kindLayer(o)==="edifici"&&!o.gate&&o.kind!=="turnstile")rect(c,"#bd876d",o.x,o.y,o.w,o.h);
+  }
+  c.restore();
+  const map={layer,scale,padding,width,height,x:315-width,y:5};
+  minimapCache.set(zone,map);
+  return map;
+}
+function paintMinimap(zone,waypoint,playerX,playerY){
+  const map=minimapBase(zone);
+  const {layer,scale,padding,width,height,x,y}=map;
+  const mx=value=>x+padding+value*scale,my=value=>y+padding+value*scale;
+  stage.drawImage(layer,x,y,width,height);
+  stage.save();stage.beginPath();stage.rect(x+1,y+1,width-2,height-2);stage.clip();
+  const {vehicles,actions}=zoneObjects(zone);
+  for(const o of vehicles){
+    const vehicle=positionOf(o,trafficClock,zone.width);
+    rect(stage,"#eb986e",mx(vehicle.x+vehicle.w/2)-.8,my(vehicle.y+vehicle.h/2)-.8,1.6,1.6);
+  }
+  for(const o of actions){
+    if(!doorDestination(o))continue;
+    rect(stage,"#eed4a7",mx(o.x+o.w/2)-.7,my(o.y+o.h/2)-.7,1.4,1.4);
+  }
+  if(waypoint)paintCampusWaypoint(stage,mx(waypoint.x+waypoint.w/2),my(waypoint.y+waypoint.h/2),.7);
+  const px=mx(playerX+.5),py=my(playerY+.5);
+  rect(stage,"#172331",px-2,py-2,4,4);
+  rect(stage,"#fff9de",px-1.25,py-1.25,2.5,2.5);
+  stage.restore();
+  return map;
 }
 
 const campusLandmarks=[
   ["giardino-uscita","Viale Romania · Ingresso","Viale Romania · Entrance"],
   ["giardino-evento","A200 · Aula Chiesa","A200 · Aula Chiesa"],
   ["giardino-terra","Edificio principale","Main building"],
-  ["giardino-dome","The Dome 1","The Dome 1"],
-  ["dome2-door","The Dome 2","The Dome 2"],
+  ["giardino-dome","The Dome 2","The Dome 2"],
+  ["dome2-door","Serra","Greenhouse"],
   ["polivalente-door","Aula Polivalente","Multipurpose hall"],
   ["giardino-caffe","Bar e terrazza giochi","Café and games terrace"],
   ["giardino-lettura","Pergola di lettura","Reading pergola"],
   ["campus-extra-1027","Ingresso di Via Panama","Via Panama entrance"],
   ["loft-entry","Aula studio · Portico","Study room · Portico"],
   ["navetta-sign","Piazzola navetta LUISS","LUISS shuttle stop"],
-  ["giardino-mensa","Mensa","Cafeteria"],
+  ["giardino-mensa","Atrio centrale","Central atrium"],
+  ["viale-luiss-shop","LUISS Shop","LUISS Shop"],
+  ["ada-gate","Villa Ada","Villa Ada"],
+  ["radio-luiss-van","Furgone Radio Luiss","Radio Luiss van"],
+  ["orto-luiss","Orto Luiss","Luiss garden"],
   ["panama-promenade","Vialetto interno di Via Panama","Via Panama inner path"],
   ["quartiere-sud","Giardino delle panchine","Garden benches"],
   ["bosco-studio","Tavoli sotto i pini","Tables under the pines"],
@@ -442,9 +619,12 @@ function updateCampusOverview(){
   const canvas=$("campusOverview");
   canvas.hidden=!zone;
   $("campusLegend").replaceChildren();
-  $("campusPosition").textContent=local(
+  $("campusPosition").textContent=state.zone!=="giardino"?local(
+    "Questa pianta mostra l’esterno di Viale Romania.",
+    "This map shows the Viale Romania grounds."):nextCampusWaypoint()?local(
     "Il punto bianco sei tu. Il rombo dorato indica la prossima tappa della storia.",
-    "The white dot is your position. The gold diamond marks your next story waypoint.");
+    "The white dot is your position. The gold diamond marks your next story waypoint."):local(
+    "Il punto bianco sei tu.", "The white dot is your position.");
   if(!zone)return;
   if(overviewZone!==zone){
     overviewZone=zone;
@@ -504,35 +684,62 @@ function paintCover(){
   worldView(cover,"giardino",0,{x:0,y:0,w:zone.width*16,h:zone.height*16},{...layers,persone:false});
   cover.restore();
 }
-let lastWalk=-1000;
+const walkInterval=95;
+let lastWalk=-1000,walkStep=null;
+function walkPosition(now){
+  const {x,y}=state;
+  if(!walkStep||walkStep.state!==state||walkStep.zone!==state.zone||walkStep.toX!==x||walkStep.toY!==y){
+    walkStep=null;
+    return [x,y];
+  }
+  if(reducedMotion||state.ending||activeScene||minigame||$("campusSurprise").open)return [x,y];
+  const progress=clamp((now-walkStep.start)/walkInterval,0,1);
+  return [walkStep.x+(x-walkStep.x)*progress,walkStep.y+(y-walkStep.y)*progress];
+}
 const moves=[
   {control:"left",keys:["a","arrowleft"],dx:-1,dy:0},
   {control:"right",keys:["d","arrowright"],dx:1,dy:0},
   {control:"up",keys:["w","arrowup"],dx:0,dy:-1},
   {control:"down",keys:["s","arrowdown"],dx:0,dy:1}
 ];
+let movementPriority=[...moves],nextWalkSave=0,queuedTap=null;
+function clearCampusInputs(){
+  keys.clear();controls.clear();queuedTap=null;
+}
+function prioritizeMove(move){
+  movementPriority=movementPriority.filter(item=>item!==move);
+  movementPriority.unshift(move);
+}
 function frame(now){
   mapClock=reducedMotion?0:now;
   const delta=Math.min(40,now-(lastTrafficFrame||now));
   lastTrafficFrame=now;
   if(screen==="editor")drawEditor(now);
   if(screen==="game"){
-    if(!state.ending&&!minigame&&!activeScene&&!state.prologue&&!$("campusSurprise").open)trafficClock+=delta;
+    if(exploringCampus())trafficClock+=delta;
+    if(polaThrowAt!==null&&now-polaThrowAt<=1400)paintPolaCeremony(now);
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
+    tickVillaAda(now);
     nearbyTrafficSound(now);
     tickSmoking(now);
-    const move=moves.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)));
-    if(move && !state.prologue && !minigame && !activeScene && !$("campusSurprise").open && !state.ending && now-lastWalk>=95){
+    if(!exploringCampus())queuedTap=null;
+    const move=exploringCampus()&&(
+      movementPriority.find(m=>controls.has(m.control)||m.keys.some(key=>keys.has(key)))??queuedTap
+    );
+    if(move&&now-lastWalk>=walkInterval){
+      queuedTap=null;
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
-      if(!crossRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
+      if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
+        walkStep={state,zone:state.zone,x:state.x,y:state.y,toX:x,toY:y,start:now};
         state.x=x;state.y=y;dirty=true;
         if(cigarette)updateSmokingUI();
         const area=room(state.zone);
         const surface=terrainCache.get(area)?.get(x+y*area.width)?.kind??area.ground;
         sound(surface==="grass"?"grass":surface==="floor"?"floor":"pavement","map");
         collectCampusCoin();syncBackgroundMusic();
+        updateStoryWaypointHint();
         paintCampusOverview();
         trafficImpact();
         checkCampusSurprise();
@@ -541,7 +748,9 @@ function frame(now){
       }
       lastWalk=now;
     }
-    if(dirty&&(!move||activeScene||now-lastWalk>=300)){save();dirty=false;}
+    if(dirty&&(!move||now>=nextWalkSave)){
+      save();dirty=false;nextWalkSave=now+1500;
+    }
     if(!$("challengeAudio").open){
       if(minigame?.kind==="arcade")tickArcade(now);
       if(minigame?.kind==="calcetto")tickCalcetto(minigame,now);
@@ -570,36 +779,63 @@ function nearbyTrafficSound(now){
   if(close){lastTrafficSound=now;sound("traffic","map");}
 }
 const entranceMusic=$("entranceMusic"),campusMusic=$("campusMusic");
-let currentMusic=entranceMusic,musicStart=null,musicFailed=false;
+let currentMusic=entranceMusic,musicStart=null,musicFailed=false,musicStatus="";
 function applyMusicVolume(){
   entranceMusic.volume=campusMusic.volume=channelLevel("master")*channelLevel("music");
 }
 applyMusicVolume();
-function audioFeedback(message=""){
-  $("audioFeedback").textContent=message;
-  $("audioFeedback").hidden=!message;
+function renderMusicFeedback(){
+  const status=$("audioFeedback"),retry=$("musicRetry");
+  const message=musicStatus==="muted"?local("Musica silenziata.","Music muted."):
+    musicStatus==="unavailable"?local("Musica non disponibile.","Music unavailable."):"";
+  if(status.textContent!==message)status.textContent=message;
+  status.hidden=!message;
+  retry.textContent=local("Riprova musica","Retry music");
+  retry.hidden=musicStatus!=="unavailable";
+}
+function setMusicStatus(next){
+  if(musicStatus===next)return;
+  musicStatus=next;
+  renderMusicFeedback();
+}
+function pauseMusic(){
+  musicStart=null;
+  if(!currentMusic.paused)currentMusic.pause();
 }
 function syncBackgroundMusic(){
   const nextMusic=screen==="game"&&state&&!atViale(state)?campusMusic:entranceMusic;
   if(currentMusic!==nextMusic){
-    if(audioOn)currentMusic.pause();
-    currentMusic=nextMusic;musicStart=null;musicFailed=false;
-    if(audioOn)audioFeedback();
+    pauseMusic();
+    currentMusic=nextMusic;
+    musicFailed=false;
   }
-  if(!audioOn||musicStart||musicFailed||!currentMusic.paused)return;
-  const selected=currentMusic,attempt=selected.play();
+  if(!audioOn||currentMusic.volume===0){
+    pauseMusic();
+    setMusicStatus(audioOn?"muted":"");
+    return;
+  }
+  setMusicStatus(musicFailed?"unavailable":"");
+  if(musicStart||musicFailed||!currentMusic.paused)return;
+  const attempt=currentMusic.play();
   musicStart=attempt;
   attempt?.then(()=>{
-    if(musicStart!==attempt||selected!==currentMusic||!audioOn)return;
-    musicStart=null;audioFeedback(selected.volume===0?"Volume della musica a zero.":"");
-  }, error=>{
-    if(musicStart!==attempt||selected!==currentMusic||!audioOn)return;
+    if(musicStart!==attempt)return;
     musicStart=null;
-    if(error.name==="AbortError")return;
+  },()=>{
+    if(musicStart!==attempt)return;
+    musicStart=null;
     musicFailed=true;
-    audioFeedback("Musica non disponibile. Premi Audio per riprovare.");
+    setMusicStatus("unavailable");
   });
 }
+function retryMusic(){
+  musicFailed=false;
+  syncBackgroundMusic();
+}
+$("musicRetry").onclick=()=>{
+  retryMusic();
+  $("audio").focus();
+};
 function enableAudio(){
   const Audio=window.AudioContext||window.webkitAudioContext;
   if(Audio){
@@ -612,17 +848,20 @@ function chime(notes,spacing=.12,volume=.065){
 }
 $("audio").onclick=()=>{
   if(audioOn){
-    audioOn=false;musicStart=null;audioFeedback();
+    audioOn=false;
     $("audio").textContent=tr("Audio spento");
     $("audio").setAttribute("aria-pressed","false");
-    currentMusic.pause();stopEffects();
+    stopEffects();
   }else{
-    enableAudio();sound("menu","interface");musicFailed=false;syncBackgroundMusic();
+    enableAudio();sound("menu","interface");musicFailed=false;
   }
+  syncBackgroundMusic();
 };
 window.addEventListener("keydown",event=>{
   if(screen!=="game"||$("campusSurprise").open||event.ctrlKey||event.altKey||event.metaKey)return;
   const key=event.key.toLowerCase();
+  const field=event.target instanceof Element&&event.target.closest("input,select,textarea,[contenteditable]:not([contenteditable=false])");
+  if(field&&!(minigame&&key==="escape"))return;
   if(minigame){
     if($("challengeAudio").open){
       if(key==="escape"){event.preventDefault();$("challengeAudio").open=false;}
@@ -668,36 +907,65 @@ window.addEventListener("keydown",event=>{
     choices[next].focus();
     return;
   }
-  if(["arrowleft","arrowright","arrowup","arrowdown","a","d","w","s","e","escape"].includes(key))event.preventDefault();
-  keys.add(key);
-  if(key==="e"&&!event.repeat&&!activeScene)interact();
-  if(key==="escape"&&activeScene){
-    activeScene=null;state.chatTopic=null;state.freeMoment=null;
-    keys.clear();controls.clear();renderScene();$("interact").focus();
+  if(key==="escape"&&activeScene&&!state.ending){
+    event.preventDefault();closeScene();return;
+  }
+  if(!exploringCampus())return;
+  if(key==="e"){
+    event.preventDefault();
+    if(!event.repeat)interact();
+    return;
+  }
+  const move=moves.find(item=>item.keys.includes(key));
+  if(move){
+    event.preventDefault();
+    if(!event.repeat){keys.add(key);prioritizeMove(move);}
   }
 });
 window.addEventListener("keyup",event=>keys.delete(event.key.toLowerCase()));
-window.addEventListener("blur",()=>{keys.clear();controls.clear();if(dirty){save();dirty=false;}});
+function releaseCampusControls(){
+  clearCampusInputs();
+  if(dirty){save();dirty=false;}
+}
+window.addEventListener("blur",releaseCampusControls);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)releaseCampusControls();});
 for(const button of document.querySelectorAll("[data-move]")){
   const direction=button.dataset.move;
-  button.onpointerdown=event=>{button.setPointerCapture(event.pointerId);controls.add(direction);};
+  const move=moves.find(item=>item.control===direction);
+  function holdDirection(){
+    controls.add(direction);
+    queuedTap=move;
+    prioritizeMove(move);
+  }
+  button.onpointerdown=event=>{
+    if(event.button!==0||!exploringCampus())return;
+    button.setPointerCapture(event.pointerId);
+    holdDirection();
+  };
   button.onlostpointercapture=()=>controls.delete(direction);
   button.onpointerup=()=>controls.delete(direction);
-  button.onpointercancel=()=>controls.delete(direction);
+  button.onpointercancel=()=>{
+    controls.delete(direction);
+    if(queuedTap===move)queuedTap=null;
+  };
   button.onkeydown=event=>{
     if(event.key!==" "&&event.key!=="Enter")return;
-    event.preventDefault();controls.add(direction);
+    event.preventDefault();
+    if(!event.repeat&&exploringCampus())holdDirection();
   };
   button.onkeyup=event=>{
     if(event.key===" "||event.key==="Enter")controls.delete(direction);
   };
   button.onblur=()=>controls.delete(direction);
 }
-$("interact").onclick=interact;
+$("interact").onclick=()=>{
+  if(exploringCampus())interact();
+  else if(activeScene&&finishCaption())focusScene();
+};
 const surprisePreference="ultimo-posto-sorprese";
 const campusSurprises=[
-  {zone:"giardino",x:13,y:39,id:"Fantasma del fuoricorso",voice:"Guagliò!",line:"Da Napoli, il fantasma del fuoricorso. Gli rimane un esame dal 1998.",theme:"ghost"},
-  {zone:"giardino",x:47,y:14,id:"Custode delle zucchine",voice:"Guagliò, lascia stare le zucchine!",line:"Il custode dell’orto difende l’ultima zucchina con una torcia e un verbale.",theme:"garden"},
+  {zone:"giardino",x:13,y:39,id:"Fantasma del fuoricorso",voice:"Uagliò! Chi ha lasciato gli appunti?",line:"Dal buio sbuca il fantasma del fuoricorso con una cartellina. «Uagliò, so’ vent’anni che aspetto l’appello. Almeno tu hai portato gli appunti?»",theme:"ghost"},
+  {zone:"giardino",x:47,y:26,id:"Custode delle zucchine",voice:"Guagliò, lascia stare le zucchine!",line:"Il custode dell’orto difende l’ultima zucchina con una torcia e un verbale.",theme:"garden"},
   {zone:"dome2",x:19,y:3,id:"Tecnico del Dome",voice:"Guagliò, il microfono è acceso!",line:"Il tecnico del Dome era nascosto dietro l’ultima fila. L’aula lo ha sentito benissimo.",theme:"dome"},
   {zone:"loft",x:16,y:8,id:"Conduttore fantasma",voice:"Guagliò, siamo in onda!",line:"Il conduttore fantasma presenta una trasmissione che nessuno ha acceso.",theme:"radio"},
   {zone:"pola-cortile",x:25,y:12,id:"Ospite del brindisi",voice:"Guagliò, aspetta il brindisi!",line:"Un compagno esce da dietro il tavolo con una corona d’alloro grande quanto lui.",theme:"party"}
@@ -725,12 +993,18 @@ function checkCampusSurprise(){
   $("surpriseLine").textContent=encounter.line;
   $("campusSurprise").showModal();
   if(audioOn&&channelLevel("master")&&channelLevel("voices")&&window.speechSynthesis&&typeof SpeechSynthesisUtterance==="function"){
-    surpriseVoice=new SpeechSynthesisUtterance(encounter.voice);
-    surpriseVoice.lang="it-IT";
-    const italian=window.speechSynthesis.getVoices().filter(voice=>/^it(-|_)/i.test(voice.lang));
-    const voice=italian.find(candidate=>candidate.localService&&/enhanced|premium|natural/i.test(candidate.name))??italian.find(candidate=>candidate.localService)??italian[0];
+    const spoken=encounter.id==="Fantasma del fuoricorso"?"Uagliò! Ma che staje facenno ccà?":
+      encounter.voice.replace(/^Guagliò/i,"Uagliò");
+    surpriseVoice=new SpeechSynthesisUtterance(spoken);
+    const voices=window.speechSynthesis.getVoices();
+    const neapolitan=voices.find(voice=>/^nap(?:[-_]|$)/i.test(voice.lang)||/napoletan|neapolitan|napoli/i.test(voice.name));
+    const italian=voices.filter(voice=>/^it(?:[-_]|$)/i.test(voice.lang));
+    const voice=neapolitan??italian.find(candidate=>candidate.localService&&/enhanced|premium|natural/i.test(candidate.name))??
+      italian.find(candidate=>candidate.localService)??italian[0];
+    surpriseVoice.lang=voice?.lang??"it-IT";
     if(voice)surpriseVoice.voice=voice;
-    surpriseVoice.rate=1.04;
+    surpriseVoice.rate=.98;
+    surpriseVoice.pitch=.94;
     surpriseVoice.volume=.55*channelLevel("master")*channelLevel("voices");
     window.speechSynthesis.speak(surpriseVoice);
   }
@@ -740,7 +1014,12 @@ $("homeButton").onclick=()=>{if(screen==="game")save();show("home");};
 function openMode(mode){
   selectedMode=mode;testMode=false;
   const prior=stored(mode);
-  if(prior){state=prior;activeScene=null;show("game");return;}
+  if(prior){
+    state=prior;dirty=false;
+    activeScene=resumableScene(prior.resumeScene);
+    if(state.chatTopic?.uid!==activeScene)state.chatTopic=null;
+    show("game");focusScene();return;
+  }
   show("creator");
 }
 $("start").onclick=()=>openMode("story");

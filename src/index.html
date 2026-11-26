@@ -3,7 +3,7 @@
 <!-- BUILD_STYLES -->
 </style>
 <main>
-<header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><span id="audioFeedback" class="hint" role="status" hidden></span><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
+<header><span class="brand">VIALE ROMANIA <span class="gold">32</span></span><div class="soundbar"><button id="audio" aria-pressed="false">Audio spento</button><span id="audioFeedback" class="hint" role="status" hidden></span><button id="musicRetry" aria-describedby="audioFeedback" hidden>Riprova musica</button><button id="testBack" hidden>Torna all’editor</button><button id="homeButton" hidden>Menu</button></div></header>
 <section id="home" class="hero"><canvas id="cover" width="320" height="192" aria-hidden="true"></canvas><div class="hero-copy"><span class="eyebrow">LUISS · Viale Romania 32</span><h1 class="arcade-title" aria-label="Ultimo Posto"><svg viewBox="0 0 347 118" aria-hidden="true" focusable="false">
 <defs><path id="ultimo-posto-lettering" d="
 M14 12V36Q14 46 24 46H36Q46 46 46 36V12
@@ -37,7 +37,7 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <p class="actions"><button id="observer">Profilo investigativo</button><button id="mediator">Profilo diplomatico</button><button id="reckless">Profilo spericolato</button></p>
 <button id="play" class="primary">Entra a Viale Romania</button></section>
 </div></div></section>
-<section id="game" hidden><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><span class="zone" id="zone"></span><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong></div><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
+<section id="game" hidden><div class="map-status"><span class="zone" id="zone"></span><span class="wallet-coins" id="walletCoins" aria-live="polite">0 monete</span></div><div class="frame"><canvas id="stage" width="640" height="384" aria-label="Mappa dall’alto del campus di Viale Romania"></canvas></div><div class="hud"><div class="task-card"><span id="taskChapter" hidden></span><strong id="objective"></strong><small id="storyWaypointHint" aria-live="polite" hidden></small><small id="radioTapeHint" class="hint" hidden></small></div><span class="hint" id="status"></span></div><div class="touch" role="group" aria-label="Comandi del campus">
 <div class="direction-pad" role="group" aria-label="Movimento">
 <button data-move="up" aria-label="Cammina in alto">↑</button>
 <button data-move="left" aria-label="Cammina a sinistra">←</button>
@@ -45,20 +45,20 @@ M266 69H282Q292 69 292 79V93Q292 103 282 103H266Q256 103 256 93V79Q256 69 266 69
 <button data-move="right" aria-label="Cammina a destra">→</button>
 </div>
 <div id="smokingTools" class="actions"><button id="smokingAction">Fuma</button><button id="smokingAsh" hidden></button><button id="smokingEnd" hidden></button><small id="smokingStatus" role="status"></small></div>
-<button id="interact" class="primary">Interagisci <kbd>E</kbd></button>
+<button id="interact" class="primary" aria-keyshortcuts="E">Interagisci <kbd>E</kbd></button>
 </div><details id="controlGuide" class="control-guide">
 <summary>Guida ai comandi</summary>
 <p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> o frecce per muoverti. <kbd>E</kbd> o clic sull’oggetto evidenziato per interagire. Nei dialoghi usa <kbd>1</kbd>–<kbd>9</kbd> o frecce e <kbd>Invio</kbd>. <kbd>E</kbd> completa il testo e <kbd>Esc</kbd> torna alla mappa.</p>
 </details>
 <p id="gateWarning" class="gate-warning" role="status" hidden>Guardia: «Fermati alla linea gialla. Mostrami il badge, poi passa dal tornello.»</p>
-<section class="panel scene" aria-live="polite"><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><div id="tobaccoCounter" class="tobacco-counter" hidden aria-hidden="true"><i></i><span id="tobaccoHandoff"></span></div><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
+<section class="panel scene" aria-live="polite"><div class="scene-toolbar"><button id="closeConversation" type="button" aria-keyshortcuts="Escape" hidden><span aria-hidden="true">‹ </span><span id="closeConversationLabel">Torna al campus</span> <kbd>Esc</kbd></button></div><canvas id="guardOutcome" width="320" height="128" aria-label="Scena Game Over al tornello" hidden></canvas><div id="tobaccoCounter" class="tobacco-counter" hidden aria-hidden="true"><i></i><span id="tobaccoHandoff"></span></div><canvas id="polaCeremony" width="480" height="224" role="img" aria-label="Cerimonia nel giardino di Villa Alberoni con gli invitati" hidden></canvas><canvas id="speakerPortrait" width="384" height="144" hidden aria-hidden="true"></canvas><h3 id="sceneTitle" tabindex="-1"></h3><p id="playerLine" hidden></p><p id="sceneText" aria-hidden="true"></p><span id="sceneTranscript" class="visually-hidden"></span><button id="skipCaption" type="button" hidden>Mostra tutto · E</button><div class="actions" id="choices"></div></section><details class="journal" id="campusOverviewPanel"><summary>Mappa del campus</summary>
 <canvas id="campusOverview" width="440" height="370" role="img" aria-label="Mappa panoramica del campus" aria-describedby="campusLegend campusPosition"></canvas>
 <ol id="campusLegend" class="hint"></ol><p id="campusPosition" class="hint"></p>
 <details id="surpriseHint">
 <summary>Dov’è il «Guagliò!»?</summary>
 <ol class="surprise-locations">
 <li><strong>Giardino delle panchine</strong> · dalla targa, 5 passi a sinistra e 2 in basso (13, 39).</li>
-<li><strong>Orto Luiss</strong> · oltre il cartello degli impollinatori, sul lato sud-est (47, 14).</li>
+<li><strong>Orto Luiss</strong> · oltre il cartello degli impollinatori, sul lato sud-est (47, 26).</li>
 <li><strong>The Dome 2</strong> · entra nel padiglione ovest e risali fino all’angolo in alto a destra (19, 3).</li>
 <li><strong>LOFT</strong> · all’ultimo piano, oltre il cabinato, verso destra (16, 8).</li>
 <li><strong>Pola</strong> · entra nel cortile della festa e vai verso l’estremità in basso a destra (25, 12).</li>

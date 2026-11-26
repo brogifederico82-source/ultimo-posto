@@ -15,6 +15,7 @@ Object.assign(english,{
   "Gomiti sul tavolo. Preparati.":"Elbows on the table. Get ready.",
   "Spingi quando il cursore è nella fascia verde.":"Push when the cursor is in the green zone.",
   "Sfida Riccardo a braccio di ferro":"Challenge Riccardo to arm wrestling","Schiaccia":"Smash","Schiacciata!":"Smash!","Timing perfetto!":"Perfect timing!",
+  "Atrio centrale":"Central atrium","Serra · Spazio polifunzionale":"Greenhouse · Multipurpose space",
   "Navetta LUISS":"LUISS shuttle","Mensa · Sala e chiostro":"Cafeteria · Dining room and cloister",
   "Mensa · Ingresso dal primo piano":"Cafeteria · First-floor entrance",
   "Mensa · Ingresso dal cortile":"Cafeteria · Courtyard entrance","Banco del pranzo":"Lunch counter",
@@ -31,6 +32,7 @@ function refreshLanguage(){
   document.documentElement.lang=locale;
   $("challengeAudioLabel").textContent=local("Opzioni audio","Audio options");
   renderMixers();
+  renderMusicFeedback();
   $("langIt").setAttribute("aria-pressed",String(locale==="it"));
   $("langEn").setAttribute("aria-pressed",String(locale==="en"));
   const nodes=["home","creator","game","challenge"].flatMap(id=>[...$(id).querySelectorAll("button,h2,p,label,option,li,th,td,summary,span")]);
@@ -72,7 +74,7 @@ const options = {
   meta:["Passare l’esame","Salvare la media","Trovare una presa","Evitare il gruppo WhatsApp"]
 };
 const labels={profilo:"Profilo",dettaglio:"Dettaglio",taglio:"Capo",pantaloni:"Pantaloni",scarpe:"Scarpe",zaino:"Borsa",tinta:"Tinta dei capelli",espressione:"Espressione",baffi:"Barba e baffi",motivo:"Tessuto",passato:"Mestiere",meta:"Perché sei qui",corpo:"Corporatura",volto:"Volto",capelli:"Capelli",occhi:"Occhi",pelle:"Pelle",abito:"Abito",accessorio:"Accessorio"};
-const totalSecrets=14;
+const totalSecrets=16;
 const challengeNames={arm:"Braccio di ferro",dance:"Trend di ballo",ping:"Ping pong",foos:"Biliardino",bris:"Briscola",scopa:"Scopa",poker:"Texas Hold’em",cavalli:"Cavalli virtuali",virtuali:"Virtuali · Calcio",calcetto:"Calcetto · The Dome 2",mattoni:"Pixel Mattoni",nastri:"Salva i nastri"};
 const unlocks={ping:"Limonata al bar",foos:"Primo piano",bris:"Pergola di lettura"};
 const won=id=>Boolean(state?.wins[id]);
@@ -81,20 +83,28 @@ const keys = new Set();
 const controls = new Set();
 let screen="home", state=null, activeScene=null, dirty=false, selectedMode="story";
 const isFree=()=>state?.mode==="free";
-const gateLocked=id=>Boolean(id&&!isFree()&&!won(id));
+const gateLocked=(id,profile=state)=>Boolean(id&&profile?.mode!=="free"&&!profile?.wins?.[id]);
+const resumableStories=new Set(["parenzo-seminario","pola-festa","tutor-orientamento","storia","loft-progetto"]);
+function resumableScene(id){
+  if(typeof id!=="string"||state.prologue||state.ending)return null;
+  const object=zoneObjects(room(state.zone)).byId.get(id);
+  if(object?.action!=="native"||!resumableStories.has(object.native)||gateLocked(object.gate))return null;
+  return nearbyIn(state.zone,state.x,state.y,mapClock)?.uid===id?id:null;
+}
 
 function stored(mode="story"){
   try{
     const data=JSON.parse(localStorage.getItem(saveProfileKey(mode)));
     if(data?.version!==1 || !data.avatar || !data.traits || !Array.isArray(data.log))return null;
+    data.mode=mode;
     if(data.zone==="td2"&&!Object.hasOwn(campus.zones,"td2")&&room("giardino").objects.some(o=>o.uid==="dome2-calcetto")){
       data.zone="giardino";
-      [data.x,data.y]=reachEntry("giardino","dome2");
+      [data.x,data.y]=reachEntry("giardino","dome2",data);
       data.campusGateOpen=true;
     }
     if(!Object.hasOwn(campus.zones,data.zone))data.zone="ingresso";
     if(data.zone==="ingresso"&&!data.streetVisited&&room("ingresso").width===30){
-      [data.x,data.y]=reachEntry("ingresso");data.streetVisited=true;
+      [data.x,data.y]=reachEntry("ingresso",undefined,data);data.streetVisited=true;
     }
     const garden=room("giardino");
     const enlarged=garden.objects.some(o=>o.uid==="entry-from-panama");
@@ -102,11 +112,11 @@ function stored(mode="story"){
     if(data.zone==="giardino"&&layout&&(!data.campusLayout||data.campusLayout<layout)){
       if(data.campusLayout===2&&Number.isFinite(data.x)&&Number.isFinite(data.y)&&data.x>=0&&data.y>=0){
         if(data.x>=72||data.y>=79){
-          [data.x,data.y]=reachEntry("giardino",data.x>=72?"panama":"ingresso");
+          [data.x,data.y]=reachEntry("giardino",data.x>=72?"panama":"ingresso",data);
         }else{
           data.x=Math.floor((data.x+.5)*4/3);data.y=Math.floor((data.y+.5)*4/3);
         }
-      }else [data.x,data.y]=reachEntry("giardino","ingresso");
+      }else [data.x,data.y]=reachEntry("giardino","ingresso",data);
     }else if(data.zone==="giardino"&&!data.campusExpanded){data.x=8;data.y=32;}
     if(layout&&(!data.campusLayout||data.campusLayout<layout))data.campusLayout=layout;
     if(data.zone==="giardino"&&data.x===26&&data.y===22&&!data.wins)data.y=24;
@@ -117,14 +127,14 @@ function stored(mode="story"){
       data.campusGateOpen=false;
     }
     if(hasIntegratedEntrance()&&data.zone==="giardino"&&typeof data.campusGateOpen!=="boolean")data.campusGateOpen=true;
-    [data.x,data.y]=freeTile(data.zone,Number.isFinite(data.x)?data.x:2,Number.isFinite(data.y)?data.y:2);
-    return {...data,mode,freeMoment:null,campusExpanded:true,wins:data.wins??{},events:Array.isArray(data.events)?data.events:[],
+    [data.x,data.y]=freeTile(data.zone,Number.isFinite(data.x)?data.x:2,Number.isFinite(data.y)?data.y:2,data);
+    return {...data,freeMoment:null,campusExpanded:true,wins:data.wins??{},events:Array.isArray(data.events)?data.events:[],
       completedEvents:Array.isArray(data.completedEvents)?data.completedEvents:[],mission:typeof data.mission==="string"?data.mission:"",missionTarget:typeof data.missionTarget==="string"?data.missionTarget:""};
   }catch{return null;}
 }
 function save(){
   if(testMode||!state)return true;
-  try{localStorage.setItem(saveProfileKey(state.mode),JSON.stringify(state));return true;}
+  try{localStorage.setItem(saveProfileKey(state.mode),JSON.stringify({...state,resumeScene:resumableScene(activeScene)}));return true;}
   catch{return false;}
 }
 function updateHomeActions(){
@@ -140,7 +150,7 @@ function updateHomeActions(){
 function show(next){
   if(minigame)closeChallenge();
   if(next!=="game"&&cigarette)stopSmoking();
-  keys.clear();controls.clear();screen=next;
+  clearCampusInputs();screen=next;
   for(const id of ["home","creator","game","editor"]) $(id).hidden=id!==next;
   $("homeButton").hidden=next==="home"||testMode;
   $("testBack").hidden=!testMode||next!=="game";
@@ -330,36 +340,39 @@ function carry(item){
 }
 function has(item){return state.pockets.includes(item);}
 function scene(title,text,...choices){return {title,text,choices};}
-const touchGameplay=matchMedia("(max-width: 760px), (pointer: coarse) and (max-height: 600px)");
 function interact(){
-  if(screen!=="game"||state.ending||state.prologue||$("campusSurprise").open)return;
+  if(!exploringCampus())return;
   const spot=nearby();
   if(!spot){sound("error","interface");return;}
+  clearCampusInputs();
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
     sound("gate","map");
-    state.campusGateOpen=true;activeScene=null;keys.clear();controls.clear();
+    state.campusGateOpen=true;activeScene=null;
     if(state.x===spot.x&&state.y===spot.y+1&&!blocked(state.zone,spot.x,spot.y))state.y=spot.y;
     syncBackgroundMusic();save();renderScene();$("interact").focus();
     return;
   }
-  if(spot.uid==="viale-ingresso-varco"){sound("error","interface");warnAtGate();}
+  if(spot.uid==="viale-ingresso-varco"&&!has("Via libera")&&!isFree()){
+    sound("error","interface");
+    state.gateConfrontation=1;warnAtGate();
+  }
   const destination=doorDestination(spot);
   if(destination){
     sound(spot.kind==="stairs"||spot.target.endsWith("#scale")?"stairs":"door","map");
-    keys.clear();controls.clear();
     travel(...destination);save();renderScene();$("interact").focus();
     return;
   }
   if(spot.uid!=="viale-ingresso-varco"){
     sound(gateLocked(spot.gate)?"error":kindLayer(spot)==="persone"?"talk":"inspect","map");
   }
-  state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);renderScene();
-  if(!$("speakerPortrait").hidden||touchGameplay.matches)$("sceneTitle").focus();
+  state.chatTopic=null;activeScene=spot.uid;completeObjective(spot);
+  if(resumableScene(activeScene))save();
+  renderScene();focusScene();
 }
 const nativeDoors={uscita:"ingresso",giardino:"giardino",terra:"terra",caffe:"caffe",primo:"primo",terzo:"terzo"};
 function doorDestination(spot){
-  if(gateLocked(spot.gate))return null;
+  if(gateLocked(spot.gate)||(spot.uid==="pola-inside"&&!polaAuthorized()))return null;
   if(spot.action==="portal"){
     const destination=spot.target.split("#");
     return Object.hasOwn(campus.zones,destination[0])?destination:null;
@@ -370,6 +383,43 @@ function doorDestination(spot){
   const destination=nativeDoors[spot.native];
   return destination&&Object.hasOwn(campus.zones,destination)?[destination]:null;
 }
+
+function gateConfrontation(){
+  const armed=!$("unarmedGuard").checked;
+  const stop=["Fermati e torna dalla guardia",()=>{
+    state.gateConfrontation=0;state.guardWarned=false;activeScene=null;
+  }];
+  if(state.gateConfrontation===2)return scene("Tornello · Ultimo avvertimento",
+    "La guardia taglia il passaggio e porta la mano al fianco. «Indietro. Adesso.» Il brusio del viale sembra spegnersi.",
+    stop,
+    ["Oltrepassa la linea",()=>{
+      const x=vialeEntrance.x+15,y=vialeEntrance.gateY;
+      state.gateConfrontation=0;warnAtGate();
+      if(crossRestrictedLine(x,y)&&state.ending?.guard){
+        state.ending.text=(armed
+          ?"La guardia ha sparato. Sul pavimento resta una chiazza scura."
+          :"La guardia ti ha immobilizzato. Un filo di sangue ti scende dal labbro.")+
+          " Dovevi fermarti alla linea gialla, tornare dalla guardia e mostrare il badge.";
+      }
+    }]);
+  return scene("Tornello · Fermati alla linea",
+    "La guardia alza una mano. «Fermo. Mostrami il badge prima di passare.» Le sbarre restano immobili.",
+    stop,
+    ["Arretra di un passo",()=>{
+      state.gateConfrontation=0;state.guardWarned=false;activeScene=null;
+      if(!blocked(state.zone,state.x,state.y+1))state.y++;
+    }],
+    ["Insisti per passare",()=>{state.gateConfrontation=2;record("Tornello · Hai insistito dopo il primo avvertimento.");}]);
+}
+function stopAtRestrictedLine(x,y){
+  if(testMode||isFree()||state.campusGateOpen||has("Via libera")||!atViale(state)||!hasIntegratedEntrance())return false;
+  if(x!==vialeEntrance.x+15||y!==vialeEntrance.gateY||state.y!==y+1)return false;
+  state.gateConfrontation=1;
+  warnAtGate();activeScene="viale-ingresso-varco";keys.clear();controls.clear();
+  renderScene();$("sceneTitle").focus();
+  return true;
+}
+
 function badge(reason){
   carry("Via libera");record(reason);
 }
@@ -396,6 +446,100 @@ function storyObjective(){
   const step=storySteps.find(([item])=>!has(item));
   return step?local(step[1],step[2]):local("Laurea festeggiata · Esplora le sedi","Graduation celebrated · Explore the campuses");
 }
+
+const seminarPrep={
+  timeline:{label:"Metti in ordine i messaggi",trait:"pragmatismo",log:"Hai costruito una cronologia con gli appunti."},
+  voices:{label:"Rileggi le due versioni",trait:"autocontrollo",log:"Hai lasciato spazio alle due versioni prima di concludere."}
+};
+const seminarResponses={
+  prove:{label:"Chiedo quale messaggio chiuda davvero l’accordo",trait:"razionalita",log:"Hai distinto le prove da ciò che ciascuno stava deducendo."},
+  ascolto:{label:"Riformulo la sua obiezione e propongo due letture",trait:"empatia",log:"Hai accolto l’obiezione e mostrato due letture plausibili."},
+  insisto:{label:"Resto sulla mia tesi e passo oltre",trait:"coraggio",log:"Hai difeso la tua tesi, lasciando irrisolto il messaggio decisivo."}
+};
+const seminarOutcomes={
+  A:{title:"A · Una tesi che regge",why:"La cronologia rende visibile il passaggio tra trattativa e presunto accordo. La domanda puntuale mette alla prova il messaggio decisivo."},
+  B:{title:"B · Due letture in aula",why:"Hai dato spazio all’obiezione. Chi ascolta capisce che la conclusione cambia a seconda di come si legge lo stesso messaggio."},
+  C:{title:"C · Tesi da rivedere",why:"Hai preso posizione con chiarezza. Rimane da spiegare quale prova sostenga la conclusione scelta."}
+};
+function seminarChoice(stage,id,option){
+  state.parenzoAttempt[stage]=id;
+  const effects=state.parenzoEffects??=[];
+  const key=stage+"-"+id;
+  const changed=!effects.includes(key);
+  if(changed){effects.push(key);change(option.trait,3);}
+  record("Parenzo · "+option.log+(changed?" +3 "+traits[option.trait]+".":" Effetto sul tratto già acquisito."));
+}
+function parenzoSeminar(){
+  const attempt=state.parenzoAttempt??={
+    prep:state.seminarRole==="messaggi"?"timeline":state.seminarRole==="versioni"?"voices":null,
+    response:state.seminarArgument==="prove"?"prove":state.seminarArgument==="interpretazioni"?"ascolto":null,
+    outcome:has("Seminario Parenzo")?"legacy":null
+  };
+  const reset=["Riprova il seminario",()=>{
+    state.parenzoAttempt={prep:null,response:null,outcome:null};
+    record("Parenzo · Hai aperto una nuova prova del seminario.");
+  }];
+  if(attempt.outcome){
+    const result=seminarOutcomes[attempt.outcome];
+    const text=result?result.title+". "+result.why+" Preparazione: "+seminarPrep[attempt.prep].log+" Confronto: "+seminarResponses[attempt.response].log:
+      "Il seminario risulta già completato nel tuo diario. Puoi rifare il caso dall’inizio.";
+    return scene("Parenzo · Esito del seminario",text+" La tappa resta completata e Green Mobility è disponibile a Romania.",reset);
+  }
+  if(!attempt.prep)return scene("Parenzo · Preparazione",
+    "Via Parenzo 11. In T02 il docente riapre il caso della bici concordata in chat. Consegna un foglio a testa. «Avete cinque minuti. Da dove iniziate?»",
+    ...Object.entries(seminarPrep).map(([id,option])=>[option.label,()=>seminarChoice("prep",id,option)]));
+  if(!attempt.response)return scene("Parenzo · L’obiezione di Dario",
+    (attempt.prep==="timeline"?"Hai segnato l’ordine dei messaggi. ":"Hai annotato le differenze fra i due racconti. ")+
+    "Dario, uno studente al tavolo, indica il telefono. «Aspetta. Che il prezzo fosse chiaro non vuol dire che si fossero già messi d’accordo.»",
+    ...Object.entries(seminarResponses).map(([id,option])=>[option.label,()=>seminarChoice("response",id,option)]));
+  return scene("Parenzo · Presentazione","Il docente ti passa il pennarello. Dario resta al tavolo ad ascoltare. Hai una frase per la tesi e una per il dubbio.",
+    ["Presenta il caso",()=>{
+      attempt.outcome=attempt.prep==="timeline"&&attempt.response==="prove"?"A":attempt.response==="ascolto"?"B":"C";
+      const result=seminarOutcomes[attempt.outcome];
+      record("Parenzo · "+result.title+". "+result.why);
+      checkpoint("Seminario Parenzo");
+    }],reset);
+}
+
+
+const partyChoices={
+  chairs:{label:"Sistema le sedie vicino alla fontana",speech:"persone",line:"Hai tenuto una sedia per chi arriva tardi. Viola avrebbe approvato."},
+  tape:{label:"Prepara la registrazione del LOFT",speech:"progetto",line:"Hai sistemato il registratore. Tommaso ti ricorda di lasciare un secondo di silenzio."},
+  card:{label:"Lascia un foglio per un messaggio a chi arriva",speech:"matricole",line:"Sul primo foglio hai scritto dove trovare una presa e una persona a cui chiedere."},
+  invite:{label:"Raggiungi chi è rimasto in disparte",speech:"persone",line:"Hai riportato al tavolo chi esitava a entrare. Il brindisi aspetta tutti."}
+};
+const graduationSpeeches={
+  persone:"«A Romania cercavo un posto libero. Ho trovato persone che spostavano lo zaino senza che dovessi chiederlo. Oggi lascio una sedia libera anch’io.»",
+  progetto:"«Nel mio primo podcast si sentiva più il tornello di me. Alla fine ho imparato ad ascoltare: anche mezzo secondo di silenzio può far parlare qualcun altro.»",
+  matricole:"«A chi comincia: chiedete dove sono le prese, ma chiedete anche come sta chi vi siede accanto. Il primo consiglio salva una slide. Il secondo, a volte, un semestre.»"
+};
+function polaAuthorized(){
+  return isFree()||(has("Seminario Parenzo")&&has("Abilitazione Green Mobility"));
+}
+function polaParty(){
+  if(!polaAuthorized())return scene("Pola · Accesso",
+    "La festa è nel cortile riservato agli invitati. Completa il seminario e l’abilitazione Green Mobility per arrivare con la tua tessera.");
+  if(has("Festa a Pola"))return scene("Pola · Dopo il brindisi",
+    "Gli invitati applaudono davanti al Tinello Alberoni. La villa resta chiusa. Viola, Serra e Tommaso ti aspettano ancora a Romania.",
+    [local(state.polaCapThrown?"Rilancia il tocco":"Lancia il tocco",state.polaCapThrown?"Throw the cap again":"Throw your graduation cap"),()=>{
+      if(!state.polaCapThrown)record("Pola · Hai lanciato il tocco tra gli applausi.");
+      state.polaCapThrown=true;
+      polaThrowAt=performance.now();
+      chime([60,64,67,76],.085);
+    }]);
+  if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
+    "Mostri la tessera all’accesso della festa. La villa resta chiusa. In giardino, Chiara ti indica la fontana e una scatola di sedie pieghevoli. «Mi dai una mano prima del discorso?»",
+    ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
+      state.graduationSpeech=choice.speech;state.polaPreparation=id;record("Pola · "+choice.line);
+    }]));
+  const preparation=partyChoices[state.polaPreparation]?.line??"Chiara abbassa la musica e ti passa il microfono.";
+  return scene("Pola · Il discorso",preparation+" "+graduationSpeeches[state.graduationSpeech],
+    ["Brinda con gli altri",()=>{
+      checkpoint("Festa a Pola");record("Pola · Hai fatto il discorso e lasciato il microfono sul tavolo.");
+    }],
+    ["Torna ai preparativi",()=>{state.graduationSpeech=null;state.polaPreparation=null;}]);
+}
+
 function nativeScene(id){
   const t=state.traits;
   if(nativeDoors[id])return scene(room(nativeDoors[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(nativeDoors[id])]);
@@ -436,32 +580,14 @@ function nativeScene(id){
       return scene("LOFT · Consegna del progetto",has("Progetto LOFT")?"«Progetto consegnato. La navetta ti aspetta alla piazzola del giardino.»":
         has("Lezione A200")&&has("Colloquio tutor")?"«Registra un minuto di vita a Romania per il tuo progetto di fine triennale.»":"«Prima passa dal tutorato e completa la lezione in Aula Chiesa.»",
         ...(!has("Progetto LOFT")&&(isFree()||has("Lezione A200")&&has("Colloquio tutor"))?[["Consegna il podcast",()=>checkpoint("Progetto LOFT")]]:[]));
-    case "parenzo-seminario":
-      if(has("Seminario Parenzo"))return scene("Parenzo · Seminario di diritto","«Bel lavoro. A Romania puoi chiedere l’abilitazione al car sharing.»");
-      if(!state.seminarRole)return scene("Parenzo · Seminario di diritto","«Due studenti si accordano in chat per vendere una bici. Il giorno dopo uno dice che stava solo trattando. Da dove parti?»",
-        ["Rileggi i messaggi",()=>{state.seminarRole="messaggi";}],
-        ["Ascolta le due versioni",()=>{state.seminarRole="versioni";}]);
-      return scene("Parenzo · Discussione del caso",state.seminarRole==="messaggi"?
-        "Nei messaggi il prezzo è chiaro. L’ultimo «ci sentiamo» lascia aperta una domanda: l’accordo era già concluso?":
-        "Le due versioni coincidono sul prezzo. Divergono su ciò che ciascuno intendeva confermare con l’ultimo messaggio.",
-        ["Distinguo ciò che sappiamo da ciò che deduciamo",()=>{state.seminarArgument="prove";}],
-        ["Confronto le interpretazioni prima di concludere",()=>{state.seminarArgument="interpretazioni";}],
-        ...(state.seminarArgument?[["Presenta il caso al seminario",()=>{checkpoint("Seminario Parenzo");change(state.seminarArgument==="prove"?"razionalita":"empatia",4);}]]:[]));
+    case "parenzo-seminario":return parenzoSeminar();
+    case "pola-festa":return polaParty();
     case "pola-foto":
       if(state.completedEvents.includes("pola-foto"))return scene("Foto di laurea","«È venuta bene. Sullo sfondo il buffet è ancora intero. Nessuno ci crederà.»");
       return scene("Foto di laurea","La fotografa ti fa cenno verso le luci del cortile. «Facciamola prima che arrivi qualcuno a chiederti la tesi.»",
         ["Scatta la foto",()=>{
           state.completedEvents.push("pola-foto");record("Pola · Foto di laurea sotto le luci del cortile.");sound("inspect","map");
         }]);
-    case "pola-festa":
-      if(has("Festa a Pola"))return scene("Pola · Festa di laurea","Le luci sono accese. Dal cortile qualcuno ti chiede se dopo la festa gli mandi gli appunti.");
-      if(!state.graduationSpeech)return scene("Pola · Ultime parole prima della festa","Il cortile si fa silenzioso. Tocca a te raccontare in una frase cosa porti via da questi anni.",
-        ["Ringrazio chi mi ha fatto posto",()=>{state.graduationSpeech="persone";record("Laurea · Hai ringraziato chi ti ha fatto posto.");}],
-        ["Racconto il progetto che mi ha cambiato",()=>{state.graduationSpeech="progetto";record("Laurea · Hai raccontato il tuo progetto.");}]);
-      return scene("Pola · Il brindisi",state.graduationSpeech==="persone"?
-        "Dal fondo qualcuno solleva una sedia: «Stavolta un posto per te c’è». La musica riparte.":
-        "Parte la sigla del podcast. Gli amici riconoscono il tornello al primo rumore e scoppiano a ridere.",
-        ["Brinda con gli altri",()=>checkpoint("Festa a Pola")]);
     case "navetta":
       if(!isFree()&&!romaniaComplete())return scene("Navetta Luiss · Parenzo","La navetta sarà disponibile dopo le attività di Romania. Segui gli obiettivi nel diario.");
       return scene("Navetta Luiss · Parenzo",state.shuttleTicket?
@@ -469,20 +595,22 @@ function nativeScene(id){
         state.shuttleTicket?["Mostra il QR e sali",()=>{state.shuttleTicket=false;record("Navetta · Arrivo a Parenzo");travel("parenzo","shuttle");}]:
           ["Prenota Romania → Parenzo",()=>{state.shuttleTicket=true;record("Navetta · Prenotazione confermata, QR disponibile.");}]);
     case "sociologia":
-      return scene("Arianna · Osservazione sul campo",
+      return scene("Arianna · Sociologia della comunicazione",
         has("Taccuino di Goffman")?"«Al prossimo seminario porto la tua nota. Anche la fila al bar ha un retroscena.»":
           "«Sto osservando come cambia il modo di parlare quando passa un professore. Tu dove cercheresti il retroscena?»",
         ["Vicino alla macchinetta del caffè",()=>{carry("Taccuino di Goffman");discover("goffman","Il retroscena della macchinetta");}],
+        ["Perché lo stesso messaggio politico divide il pubblico?",()=>{state.chatTopic={uid:activeScene,prompt:"Perché lo stesso messaggio politico divide il pubblico?",reply:"«Chi ascolta seleziona indizi diversi. Un titolo mette in primo piano il costo, un altro chi ne beneficia. La scelta di quel primo piano orienta la discussione.»"};}],
         ["Davanti al microfono di Radio Luiss",()=>{state.chatTopic={uid:activeScene,prompt:"Davanti al microfono di Radio Luiss.",reply:"«Ottimo esempio di ribalta. Prova a riascoltare quello che dicono quando il microfono si spegne.»"};}]);
     case "radio":
-      return scene("Radio Luiss · Fuori onda","«Stiamo registrando i rumori del campus. Per il momento il tornello è il nostro miglior ospite.»",
+      return scene("Tommaso · Radio Luiss","«Conduco una trasmissione della radio studentesca. Stamattina il tornello ha fatto una prova microfono senza avvisarci.»",
+        ["Che cos’è Luiss Weekend?",()=>{state.chatTopic={uid:activeScene,prompt:"Che cos’è Luiss Weekend?",reply:"«Il podcast settimanale dell’Ufficio stampa, con commenti dei docenti. Su Radio Luiss va in onda il lunedì alle 13:00. La prova che il weekend, se lo monti bene, arriva fino a lunedì.»"};}],
         ["Da dove viene la sigla?",()=>{state.chatTopic={uid:activeScene,prompt:"Da dove viene la sigla?",reply:"«Tre note al sintetizzatore, una porta che sbatte e il barista che dice: chi è il prossimo?»"};}],
         ["Racconta un fatto dal campus",()=>{carry("Pass Radio Luiss");record("Radio Luiss · La leggenda della presa occupata.");state.chatTopic={uid:activeScene,prompt:"Ti racconto della presa occupata.",reply:"«Dai, siediti. Puntata speciale sulle risorse scarse: tre prese, ventidue fuorisede.»"};}]);
     case "carsharing":
       if(!isFree()&&!has("Seminario Parenzo"))return scene("Luiss Green Mobility","Partecipa al seminario di Parenzo prima di richiedere l’abilitazione.");
-      if(!isFree()&&!has("Abilitazione Green Mobility"))return scene("Luiss Green Mobility","Prima corsa? Controlla la batteria e riconsegna l’auto alla stazione di Pola.",
+      if(!isFree()&&!has("Abilitazione Green Mobility"))return scene("Luiss Green Mobility","Il servizio è riservato alla comunità Luiss con patente valida. Nel gioco l’abilitazione simula il controllo della patente e la prenotazione dall’app Green Mobility.",
         ["Completa l’abilitazione",()=>checkpoint("Abilitazione Green Mobility")]);
-      return scene("Luiss Green Mobility","Veicolo elettrico disponibile. Riconsegnalo alla stazione di Pola.",
+      return scene("Luiss Green Mobility","Renault 5 elettrica disponibile. Arrivi all’area di sosta di Pola e mostri la tessera per la festa nel cortile.",
         ["Vai a Viale Pola",()=>{record("Green Mobility · Auto riconsegnata a Pola");travel("pola","car");}]);
     case "shop":return shopScene();
     case "storia":
@@ -499,6 +627,7 @@ function nativeScene(id){
     case "bacheca":return scene("Bacheca del campus","Tra un seminario sul futuro e un volantino per ripetizioni di micro c’è una nota sui posti al Dome.",
       ["Leggi il retro",()=>{carry("Nota del Dome");discover("bacheca","Il retro della locandina");}]);
     case "varco":
+      if(activeScene==="viale-ingresso-varco"&&!has("Via libera")&&!isFree())return gateConfrontation();
       return scene("Tornello",has("Via libera")||isFree()?"Badge riconosciuto. Il tornello è aperto.":"Presenta il badge alla guardia, a sinistra del tornello.",
         ...((isFree()||has("Via libera"))?[["Entra nel campus",()=>travel("giardino")]]:[]));
     case "dome":
@@ -637,6 +766,7 @@ function paintSpeaker(now){
   const o=currentObject();
   if(!o)return;
   const c=canvas.getContext("2d");
+  if(o.kind==="boar"){drawBoarPortrait(c,canvas.width,canvas.height,reducedMotion?0:Math.floor(now/170)%4);return;}
   const colors=["#6c5d87","#77614d","#476c73","#5e7255"];
   const seed=characterSeed(o.uid);
   const beat=reducedMotion?0:Math.floor(now/170)%4;
@@ -652,14 +782,51 @@ function paintSpeaker(now){
   sprite(c,a,middle+gesture,baseline-(moving&&beat%2?6:0),moving?beat%3:0,"down",4.55,
     characterCoat(o));
 }
+let polaThrowAt=null;
+function paintPolaCeremony(now){
+  const panel=$("polaCeremony");
+  if(panel.hidden)return;
+  const c=panel.getContext("2d");
+  rect(c,"#243b46",0,0,480,224);
+  rect(c,"#385849",0,52,480,172);
+  c.fillStyle="#aa9d84";c.beginPath();c.ellipse(240,155,224,72,0,0,Math.PI*2);c.fill();
+  c.fillStyle="#647f82";c.beginPath();c.ellipse(240,76,103,21,0,0,Math.PI*2);c.fill();
+  c.fillStyle="#7ca8ac";c.beginPath();c.ellipse(240,72,94,14,0,0,Math.PI*2);c.fill();
+  for(const [x,y,w,h] of [[214,51,48,13],[233,35,16,20],[169,49,17,17],[294,49,17,17]])rect(c,"#d8ccb2",x,y,w,h);
+  for(const x of [22,56,424,458]){
+    c.fillStyle="#203b39";c.beginPath();c.ellipse(x,59,24,40,0,0,Math.PI*2);c.fill();
+  }
+  rect(c,"#64404b",159,100,162,34);
+  rect(c,"#a76a6b",159,100,162,4);
+  const launched=polaThrowAt!==null;
+  const t=launched?(reducedMotion?1:clamp((now-polaThrowAt)/1350,0,1)):0;
+  for(let row=0;row<2;row++)for(let i=0;i<8;i++){
+    const x=53+i*52+(row?10:0),y=168+row*30;
+    rect(c,"#655047",x-10,y-5,20,9);
+    sprite(c,{...student,capelli:i%4,pelle:(i+row)%4,abito:(i+row)%5},x,y,launched&&!reducedMotion&&t<1?Math.floor(now/110)%3:0,"up",1.5);
+  }
+  sprite(c,state.avatar,240,127,0,"down",2.1);
+  const capX=240+86*t,capY=91-190*t*(1-t)+31*t;
+  c.save();c.translate(capX,capY);c.rotate(t*Math.PI*2);
+  c.fillStyle="#172334";c.beginPath();c.moveTo(0,-6);c.lineTo(12,0);c.lineTo(0,6);c.lineTo(-12,0);c.closePath();c.fill();
+  rect(c,"#efc876",9,0,2,8);c.restore();
+  if(launched)for(let i=0;i<17;i++){
+    const age=reducedMotion?1:t;
+    rect(c,["#f4bd66","#e0838b","#b9dfbb"][i%3],205+(i*23%125)*age,110+(i*17%66)*age-40*age*(1-age),3,3);
+  }
+}
 function renderScene(){
   updateSmokingUI();
   const scene=getScene();
-  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
+  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard||state.ending?.boar)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
   const nextStep=isFree()?-1:storySteps.findIndex(([item])=>!has(item));
   const chapter=nextStep<0?"":nextStep<4?"Romania":nextStep===4?"Parenzo":"Pola";
   $("taskChapter").hidden=!chapter||Boolean(state.ending);
   $("taskChapter").textContent=chapter?chapter+" · "+(nextStep+1)+"/"+storySteps.length:"";
+  const radioHint=state.ending?"":radioTapeHint();
+  $("radioTapeHint").hidden=!radioHint;
+  $("radioTapeHint").textContent=radioHint;
+  updateStoryWaypointHint();
   $("zone").textContent=tr(room(state.zone).name);
   updateCampusOverview();
   $("campusMap").replaceChildren();
@@ -674,10 +841,13 @@ function renderScene(){
   $("journalTitle").textContent=local("Diario e tasche · ","Journal and inventory · ")+state.secrets.length+"/"+totalSecrets+local(" scoperte"," discoveries");
   $("sceneTitle").textContent=tr(scene.title);
   const speaker=currentObject();
-  const conversation=Boolean(speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
+  $("polaCeremony").hidden=speaker?.native!=="pola-festa"||(!state.graduationSpeech&&!has("Festa a Pola"))||Boolean(state.ending);
+  if($("polaCeremony").hidden)polaThrowAt=null;
+  paintPolaCeremony(performance.now());
+  const conversation=Boolean($("polaCeremony").hidden&&speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
   $("speakerPortrait").hidden=!conversation;
   $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
-  $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
+  $("game").classList.toggle("game-conversation",conversation||!$("polaCeremony").hidden||Boolean(state.ending?.guard));
   $("game").classList.toggle("game-reading",Boolean(activeScene||state.prologue||state.ending));
   $("guardOutcome").hidden=!state.ending?.guard;
   refreshGateWarning();paintGuardOutcome(performance.now());
@@ -694,13 +864,17 @@ function renderScene(){
       button.dataset.shortcut=String(index);
       button.setAttribute("aria-keyshortcuts",String(index));
     }
-    button.onclick=()=>{state.chatTopic=null;action();if(screen==="game"){save();renderScene();if(!minigame)(($("speakerPortrait").hidden&&!touchGameplay.matches)?$("interact"):$("sceneTitle")).focus();}};
+    button.onclick=()=>{
+      state.chatTopic=null;
+      action();
+      if(screen!=="game")return;
+      save();renderScene();
+      if(!minigame)focusScene();
+    };
     $("choices").append(button);
   }
-  if(activeScene && !state.ending){
-    const close=document.createElement("button");close.textContent=tr("Torna a esplorare");
-    close.onclick=()=>{activeScene=null;state.chatTopic=null;state.freeMoment=null;renderScene();$("interact").focus();};$("choices").append(close);
-  }
+  $("closeConversation").hidden=!activeScene||Boolean(state.ending);
+  $("closeConversationLabel").textContent=local("Torna al campus","Back to campus");
   $("log").replaceChildren();
   for(const entry of state.log){const li=document.createElement("li");li.textContent=tr(entry);$("log").append(li);}
   const pockets=document.createElement("li");

@@ -72,9 +72,9 @@ function improveDome2Entrance(map){
       solid:false,action:"",native:"",text:"",target:"",gate:"",missionTarget:"",auto:false,
       behavior:"idle",speed:1.7,route:[],...extra});
   };
-  add("dome2-forecourt","paving","Piazzetta The Dome 2",20,65,{w:5,h:2,color:"#b9ac95"});
+  add("dome2-forecourt","paving","Piazzetta della Serra",20,65,{w:5,h:2,color:"#b9ac95"});
   add("dome2-walk-edge","paving","Bordo del vialetto",21,67,{w:3,h:6,color:"#a89d8d"});
-  add("dome2-walk-center","paving","Vialetto The Dome 2",22,67,{w:1,h:7,color:"#c7bba4"});
+  add("dome2-walk-center","paving","Vialetto della Serra",22,67,{w:1,h:7,color:"#c7bba4"});
   add("dome2-calcetto","student","Matteo · Calcetto",22,65,
     {color:"#3f84a8",solid:true,action:"native",native:"calcetto"});
   return map;
