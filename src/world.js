@@ -116,6 +116,10 @@ function loadCampus(){
     const source=JSON.parse(localStorage.getItem(mapStorageKey)||embedded||"null");
     if(source){
       const map=normalizeCampus(source);
+      if(!embedded&&map.zones.giardino?.objects.some(o=>o.uid.startsWith("viale-prolungamento-"))){
+        layVialeRoad(map.zones.giardino);
+        map.zones.giardino=normalizeCampus({version:1,zones:{ingresso:map.zones.ingresso,giardino:map.zones.giardino}}).zones.giardino;
+      }
       const oldGarden=source.zones.giardino;
       if(!embedded&&oldGarden?.width===144&&oldGarden.height===144&&gardenFingerprint(oldGarden.objects)===1176053){
         map.zones.giardino.objects=structuredClone(originalMap.zones.giardino.objects);
@@ -241,7 +245,7 @@ function terrainMap(zone){
 }
 const isVehicle=o=>["car","scooter","bus","shuttle"].includes(o.kind);
 function positionOf(o,now,width){
-  if(width>94&&o.uid==="viale-bus-360"&&o.behavior==="loop")return vialeBusAt(o,now);
+  if(width>=144&&o.behavior==="loop"&&Object.hasOwn(vialeTraffic,o.uid))return vialeVehicleAt(o,now,vialeTraffic[o.uid]);
   if(width&&isVehicle(o)&&o.behavior==="loop"){
     const integrated=o.uid.startsWith("viale-");
     const start=integrated?vialeEntrance.x:0;
@@ -342,7 +346,7 @@ function drawObject(c,o,now=0,editing=false){
   if(o.kind==="entrance"&&!editing)return;
   const x=o.x*16,y=o.y*16,w=o.w*16,h=o.h*16;
   const color=colorVariant(o.color,o.variant);
-  c.save();c.translate(x+w/2,y+h/2);c.rotate(o.rotation*Math.PI/180);
+  c.save();c.translate(x+w/2,y+h/2);c.rotate(o.rotation*Math.PI/180+(o.bend??0));
   if(o.rotation%180)c.scale(h/w,w/h);
   c.translate(-w/2,-h/2);
   c.scale(w/16,h/16);
@@ -351,6 +355,11 @@ function drawObject(c,o,now=0,editing=false){
   if(isVehicle(o)){
     if(o.look==="left"){c.translate(16,0);c.scale(-1,1);}
     box("#17212688",1,11,14,3);
+    if(o.bend!==undefined&&o.kind!=="scooter"){
+      for(const axle of [2,12]){
+        box("#20252c",axle,2,3,3);box("#20252c",axle,11,3,3);
+      }
+    }
     if(o.kind==="bus"||o.kind==="shuttle"){
       const bus=o.kind==="bus";
       box("#292e30",0,2,16,12);box(bus?"#a24746":color,.3,3,15.4,10);
@@ -358,17 +367,24 @@ function drawObject(c,o,now=0,editing=false){
       for(const px of [1,4,7,10,13])box("#93aab0",px,4,2,4);
       box("#3f5860",15,4,.65,7);
       box("#181f21",2,1,2,2);box("#181f21",11,12,2,2);
-      box("#fff0ad",15,9,.6,1.5);box("#e8644e",0,9,.55,1.5);
+      box("#fff0ad",14,7,2,2);box(o.braking?"#ff9874":"#bd5349",0,9,1,2);
+      box("#db9d86",1,3,12,1);box("#f3c0a2",9,4,2,1);
       c.scale(16/w,16/h);
       if(o.look==="left"){c.translate(w,0);c.scale(-1,1);}
       c.fillStyle=bus?"#fff1b9":"#f4ead2";c.font="bold 6px monospace";
       c.textAlign="center";c.fillText(bus?"360":"LUISS",w/2,h*.71);
     }else if(o.kind==="car"){
       box(shadow,0,3,16,10);box(color,1,4,14,8);box("#b1cad0",8,5,3,6);box("#435960",4,5,3,6);
-      box("#242a2b",3,2,2,2);box("#242a2b",11,12,2,2);box("#fff0ac",14,5,1,2);box("#e85d50",1,5,1,2);
+      box("#242a2b",3,2,2,2);box("#242a2b",11,12,2,2);
+      box("#dae5e1",7,5,2,1);box("#9baaa9",5,10,6,1);
+      box("#fff0ac",14,5,1,2);box("#fff0ac",14,9,1,1);
+      box(o.braking?"#ff9874":"#e85d50",1,5,1,2);box(o.braking?"#ff9874":"#e85d50",1,9,1,1);
     }else{
       box(shadow,1,7,4,4);box(shadow,11,7,4,4);box(color,3,6,11,4);
-      box("#3d4e57",5,5,5,5);box("#ddad83",9,4,3,3);box("#fff1ad",13,6,1,2);
+      const lean=reducedMotion||o.bend===undefined?0:Math.sign(o.bend);
+      box("#3d4e57",5,5+lean,5,5);box("#ddad83",9,4+lean,3,3);
+      box("#e7dfc5",10,4+lean,2,1);box("#fff1ad",13,6,2,1);
+      box(o.braking?"#ff9874":"#e85d50",3,7,1,2);
     }
   }else if(spec[2]==="persone"){
     const appearance=characterAppearance(o);
@@ -547,24 +563,31 @@ function paintRomaniaEdges(c){
     c.lineWidth=3.65;c.strokeStyle="#535d66";c.stroke();
     c.lineWidth=.07;c.strokeStyle="#f1d9a298";c.setLineDash([.55,.48]);c.stroke();c.setLineDash([]);
   };
-  if(hasIntegratedEntrance()){
-    c.beginPath();
-    for(const [index,[x,y]] of vialeRoad.entries()){
-      if(index===0)c.moveTo(x,y+.5);
-      else c.lineTo(x,y+.5);
-    }
-    c.lineWidth=4.1;c.strokeStyle="#a29a88";c.stroke();
-    c.lineWidth=3.6;c.strokeStyle="#c2b4a0";c.stroke();
-    c.lineWidth=3.25;c.strokeStyle="#48545f";c.stroke();
-    c.lineWidth=3.02;c.strokeStyle="#505c69";c.stroke();
-    c.lineCap="butt";c.lineWidth=.1;c.strokeStyle="#efdf9c";c.setLineDash([.65,.52]);c.stroke();c.setLineDash([]);
-    for(const x of [40,51,72,88]){
-      const y=vialeRoadY(x)+.5;
-      c.fillStyle="#afbac5";c.fillRect(x,y-1.16,.65,.1);c.fillRect(x,y+1.08,.65,.1);
-    }
-    c.lineCap="round";
-  }else street(()=>{c.moveTo(2,78);c.bezierCurveTo(17,80,28,84,41,88);c.lineTo(79,98);c.lineTo(91,101);});
+  if(!hasIntegratedEntrance())street(()=>{c.moveTo(2,78);c.bezierCurveTo(17,80,28,84,41,88);c.lineTo(79,98);c.lineTo(91,101);});
   street(()=>{c.moveTo(22,3);c.bezierCurveTo(55,9,75,25,82,42);c.bezierCurveTo(91,56,92,66,89,79);});
+  c.restore();
+}
+// Use the same road centerline for asphalt, lane markings and traffic.
+function paintVialeRoad(c,left,right){
+  c.save();
+  c.scale(16,16);
+  const start=Math.max(-1,left-3),end=Math.min(vialeRoad.at(-1)[0]+1,right+3);
+  const trace=(from,to)=>{
+    c.beginPath();
+    c.moveTo(from,vialeRoadY(from)+.5);
+    for(let x=from+.5;x<to;x+=.5)c.lineTo(x,vialeRoadY(x)+.5);
+    c.lineTo(to,vialeRoadY(to)+.5);
+  };
+  trace(start,end);
+  c.lineJoin="round";c.lineCap="butt";
+  for(const [width,color] of [[3.65,"#a79e8d"],[3.23,"#d0c2a8"],[3.04,"#3d4854"],[2.8,"#4b5663"]]){
+    c.lineWidth=width;c.strokeStyle=color;c.stroke();
+  }
+  c.lineWidth=.09;c.strokeStyle="#d5c89f";c.setLineDash([.58,.48]);
+  for(const [from,to] of [[start,Math.min(end,21)],[Math.max(start,25),end]]){
+    if(to<=from)continue;
+    trace(from,to);c.lineDashOffset=from;c.stroke();
+  }
   c.restore();
 }
 // Resurface the straight stretch at the gate using its existing walkable tiles.
@@ -574,7 +597,7 @@ function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
   const integrated=id==="giardino"&&z.objects.some(o=>o.uid==="viale-ingresso-start"&&o.x===22&&o.y===86);
   if(id!=="ingresso"&&!integrated)return;
   const ox=integrated?vialeEntrance.x:0,oy=integrated?vialeEntrance.y:0;
-  const from=integrated?ox+8:0,to=integrated?ox+28:z.width;
+  const from=integrated?ox+9:0,to=integrated?ox+29:z.width;
   if(left>=to||right<=from||top>=oy+17||bottom<=oy+12)return;
   const crossing=z.objects.find(o=>o.uid===(integrated?"viale-":"")+"crosswalk-14"&&o.y===oy+14&&o.rotation===0);
   for(let y=Math.max(top,oy+12);y<Math.min(bottom,oy+17);y++){
@@ -633,6 +656,9 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   }
   if(visible.terreno&&id==="giardino"&&!editing&&z.width===144&&
       z.objects.some(o=>o.uid==="entry-from-panama"&&o.x===72&&o.y===47))paintRomaniaEdges(c);
+  if(tiles&&id==="giardino"&&top<98&&bottom>78&&z.width>=144&&hasIntegratedEntrance()){
+    paintVialeRoad(c,left,right);
+  }
   if(tiles)paintEntranceStreet(c,id,z,tiles,left,top,right,bottom);
   // Connect the existing garden walks around the planted islands north of the bar.
   if(visible.terreno && id==="giardino" &&
@@ -681,7 +707,16 @@ function trafficImpact(){
   const hit=sceneObjects(zone).find(o=>{
     if(!isVehicle(o)||o.behavior==="idle")return false;
     const at=positionOf(o,trafficClock,zone.width);
-    return !at.parked&&insideObject(at,state.x+.5,state.y+.5);
+    if(at.parked)return false;
+    let x=state.x+.5,y=state.y+.5;
+    if(at.bend){
+      const cx=at.x+at.w/2,cy=at.y+at.h/2;
+      const dx=x-cx,dy=y-cy;
+      const cos=Math.cos(at.bend),sin=Math.sin(at.bend);
+      x=cx+dx*cos+dy*sin;
+      y=cy-dx*sin+dy*cos;
+    }
+    return insideObject(at,x,y);
   });
   if(!hit)return;
   state.ending={traffic:true,title:"Game Over",text:hit.kind==="bus"?"Il 360 ti ha sorpreso mentre attraversavi Viale Romania.":hit.kind==="car"?"Ti ha colpito un’auto su Viale Romania.":state.zone==="giardino"?"Ti ha colpito un motorino in cerca di parcheggio.":"Ti ha colpito un motorino su Viale Romania."};
