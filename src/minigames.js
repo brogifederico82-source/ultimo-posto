@@ -1,4 +1,5 @@
 let minigame=null;
+const touchGameplay=window.matchMedia?.("(max-width: 760px), (pointer: coarse) and (max-height: 600px)")??{matches:false};
 const court=$("challengeCourt");
 const courtInk=court.getContext("2d");
 court.tabIndex=0;
