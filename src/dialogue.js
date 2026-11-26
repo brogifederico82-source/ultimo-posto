@@ -485,6 +485,8 @@ function getScene(){
   if(state.freeMoment)return scene(state.freeMoment.title,state.freeMoment.text);
   const ideeEvento=ideeEventScene();
   if(ideeEvento)return ideeEvento;
+  const segretiScena=segretiScene();
+  if(segretiScena)return segretiScena;
   const o=currentObject();
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
   if(!o&&atViale(state))return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
@@ -829,6 +831,7 @@ function frame(now){
     trafficImpact();
     tickVillaAda(now);
     tickIdee(now);
+    tickSegreti(now);
     nearbyTrafficSound(now);
     tickSmoking(now);
     if(!exploringCampus())queuedTap=null;
@@ -851,6 +854,7 @@ function frame(now){
         paintCampusOverview();
         trafficImpact();
         checkCampusSurprise();
+        segretiPasso();
         const encounter=state.ending||$("campusSurprise").open?null:nearby();
         if(encounter)autoEncounter(encounter);
       }

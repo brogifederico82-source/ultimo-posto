@@ -123,6 +123,7 @@ traceRomaniaCampus(originalMap.zones.giardino);
 installVillaAda(originalMap);
 installLore(originalMap);
 installIdee(originalMap);
+installSegreti(originalMap);
 updateCampusPlaces(originalMap);
 furnishCampusGardens(originalMap);
 const firstFloor=originalMap.zones.primo;
@@ -298,7 +299,7 @@ function loadCampus(){
       }
       if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);addRadioVan(map);installPola(map);}
       if(!embedded)furnishCampusGardens(map);
-      return embedded?map:normalizeCampus(installLore(installIdee(installVillaAda(refineRomania(map)))));
+      return embedded?map:normalizeCampus(installSegreti(installLore(installIdee(installVillaAda(refineRomania(map))))));
     }
   }catch{}
   return freshMap();

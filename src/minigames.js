@@ -272,6 +272,7 @@ court.onlostpointercapture=()=>{if(minigame)minigame.pointerAim=null;};
 
 function endChallenge(g,result){
   g.result=result;
+  segretiFineSfida(g,result);
   $("challenge").dataset.result=result;
   if(g.practice){
     $("challengeStatus").textContent=result==="win"?local("Allenamento vinto. Premi Rivincita per riprovare.","Practice won. Select Rematch to play again."):local("Allenamento concluso. Premi Rivincita per riprovare.","Practice finished. Select Rematch to play again.");
