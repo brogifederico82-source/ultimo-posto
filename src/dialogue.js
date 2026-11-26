@@ -587,6 +587,7 @@ function draw(now){
   const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
   const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
   vividGrade(state.zone);
+  realismoGiocatore.x=drawX;realismoGiocatore.y=drawY;
   stage.setTransform(2,0,0,2,0,0);
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);

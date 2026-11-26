@@ -51,7 +51,8 @@ function realismoEnvelope(punti){
 }
 
 // Ombre: chiamata da worldView prima di disegnare gli oggetti (coordinate in pixel di mondo, tile da 16).
-function realismoOmbre(c,z,id,left,top,right,bottom){
+var realismoGiocatore={x:0,y:0};
+function realismoOmbre(c,z,id,left,top,right,bottom,now){
   if(!realismoAttivo||z.ground==="floor"||!realismoEsterno(z,id))return;
   const luce=realismoLuce();
   if(luce.ombre<=.02)return;
@@ -62,6 +63,15 @@ function realismoOmbre(c,z,id,left,top,right,bottom){
   const alpha=.30*luce.ombre;
   c.save();
   c.fillStyle="rgba(22,28,52,"+alpha.toFixed(3)+")";
+  // persone e animali: ombra ovale ai piedi, inclinata come le altre
+  const piedi=(fx,fy,r)=>{c.beginPath();c.ellipse(fx*16+dx*5,fy*16+1.5+dy*2,r*(1+Math.abs(t)*.6),r*.38,0,0,Math.PI*2);c.fill();};
+  piedi(realismoGiocatore.x+.5,realismoGiocatore.y+.9,5.5);
+  for(const o of zoneObjects(z).objects){
+    if(isVehicle(o)||kindLayer(o)!=="persone")continue;
+    let p=o;try{p=positionOf(o,now||0,z.width);}catch{}
+    if(p.x+1<left||p.x>right||p.y+1<top||p.y>bottom)continue;
+    piedi(p.x+(p.w||1)/2,p.y+(p.h||1)*.94,o.kind==="boar"?8:5.5);
+  }
   for(const o of zoneObjects(z).objects){
     const alt=realismoAltezza[o.kind];
     if(!alt)continue;

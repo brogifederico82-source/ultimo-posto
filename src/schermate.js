@@ -553,6 +553,7 @@ function opzioniCostruisci(){
     const fs=schSwitch(local("Schermo intero","Full screen"),local("Il gioco occupa tutta la finestra.","The game fills the whole window."),{get:schFsOn,set:()=>schermateSchermoIntero()});
     fs.dataset.fs="1";game.append(fs);refreshers.push(fs.sync);
   }
+  if(typeof profiloRiga==="function")game.append(profiloRiga());
   root.refresh=()=>{
     for(const f of refreshers)f();
     for(const b of root.querySelectorAll(".sch-seg button"))b.setAttribute("aria-pressed",String(locale===b.dataset.lang));
