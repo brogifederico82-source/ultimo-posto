@@ -172,6 +172,68 @@ function addRadioVan(map){
   return map;
 }
 
+const campusPlanting={
+  giardino:{
+    landmark:"entry-from-panama",
+    plants:[
+      ["orangeTree",24,42,2,2],["orangeTree",36,37,2,2],["orangeTree",61,48,2,2],
+      ["orangeTree",48,12,2,2],["orangeTree",15,42,2,2],["orangeTree",28,43,2,2],
+      ["roseBed",36,39,2,1],["roseBed",26,46,3,1],["roseBed",48,35,2,1],
+      ["roseBed",15,35,2,1],["roseBed",62,53,2,1],["roseBed",34,42,2,1],
+      ["flowerMeadow",21,44,1,1],["flowerMeadow",30,44,2,1],["flowerMeadow",47,15,2,1],
+      ["flowerMeadow",49,34,2,1],["flowerMeadow",64,52,2,1],["flowerMeadow",17,42,2,1],
+      ["flowerMeadow",29,40,2,1],["flowerMeadow",36,40,2,1]
+    ],
+    people:[
+      ["marta", "cleaner", "Marta · Cura del giardino",21,43,[[23,43]],"#587d6a"],
+      ["bar", "student", "Lea · Pausa al bar",50,35,[],"#af7175"],
+      ["orto", "student", "Karim · Orto Luiss",47,14,[],"#5a7b94"],
+      ["dome", "student", "Eva · Gruppo studio",65,50,[],"#a67c54"],
+      ["radio", "student", "Dario · Radio Luiss",45,35,[],"#9f5655"]
+    ]
+  },
+  pola:{
+    landmark:"pola-villa",
+    plants:[
+      ["orangeTree",11,22,2,2],["orangeTree",27,20,2,2],["orangeTree",26,15,2,2],
+      ["roseBed",16,22,2,1],["roseBed",9,21,2,1],["flowerMeadow",32,18,2,1]
+    ],
+    people:[["pola", "student", "Noemi · Giardino di Villa Alberoni",28,18,[[31,18]],"#a2865c"]]
+  },
+  "pola-cortile":{
+    landmark:"pola-cortile-buffet",
+    plants:[["roseBed",9,9,2,1],["roseBed",26,16,2,1],["flowerMeadow",18,11,2,1]],
+    people:[["festa", "student", "Irene · Amica del laureando",6,9,[],"#9c6386"]]
+  }
+};
+function furnishCampusGardens(map){
+  for(const [id,{landmark,plants,people}] of Object.entries(campusPlanting)){
+    const area=map.zones[id];
+    if(!area||!area.objects.some(o=>o.uid===landmark)||area.objects.some(o=>o.uid.startsWith("giardini-vivi-")))continue;
+    const occupied=(x,y,w,h)=>area.objects.some(o=>
+      (o.kind==="entrance"||assets[o.kind]?.[2]!=="terreno")&&
+      o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+h&&o.y+(o.h??1)>y);
+    const add=(key,kind,name,x,y,w,h,color,route=[],action="")=>{
+      if(x+w>area.width||y+h>area.height||occupied(x,y,w,h))return;
+      area.objects.push({uid:"giardini-vivi-"+key,kind,name,x,y,w,h,color,solid:kind==="orangeTree",
+        rotation:0,variant:0,action,native:"",text:"",target:"",gate:"",missionTarget:"",
+        auto:false,behavior:route.length?"patrol":"idle",speed:1.05,route});
+    };
+    for(const [i,[kind,x,y,w,h]] of plants.entries()){
+      const spec=assets[kind];
+      add(id+"-"+i,kind,spec[1],x,y,w,h,spec[3]);
+    }
+    for(const [key,kind,name,x,y,route,color] of people){
+      const safeRoute=route.filter(([endX,endY])=>{
+        const left=Math.min(x,endX),top=Math.min(y,endY);
+        return !occupied(left,top,Math.abs(endX-x)+1,Math.abs(endY-y)+1);
+      });
+      add(key,kind,name,x,y,1,1,color,safeRoute,"dialog");
+    }
+  }
+  return map;
+}
+
 function hasIntegratedEntrance(){
   return Boolean(campus.zones.giardino?.objects.some(o=>o.uid==="viale-ingresso-start"));
 }

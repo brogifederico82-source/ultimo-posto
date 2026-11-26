@@ -1,4 +1,40 @@
 const conversations={
+  "giardini-vivi-marta":[
+    "«Hai visto gli aranci? Li riconosci da lontano. I cestini invece continuiamo a cercarli con la cartina.»",
+    ["Che cosa hai piantato qui?","«Aranci accanto ai vialetti, rose dove ci si ferma e fiori più bassi vicino alle panchine. Se cade un petalo, lasciaglielo fare.»"],
+    ["Dove mi siedo per ripassare?","«Prova il giardino delle panchine. Se trovi una borsa su ogni sedia, fai un giro verso il portico.»"],
+    ["Chi annaffia quando chiude il campus?","«Noi. Gli studenti del gruppo studio si sono proposti, ma hanno aperto un sondaggio sugli orari.»"]],
+  "giardini-vivi-bar":[
+    "«Avevo chiesto un caffè al volo. Ho già assistito a una rivincita, a un appello delle presenze e all’arrivo del furgone della radio.»",
+    ["Che succede sulla terrazza?","«A ping pong hanno finito. Al biliardino sono ancora alle presentazioni. Ognuno vuole spiegare come gioca.»"],
+    ["Hai trovato un posto libero?","«Sul vialetto dietro il bar sì. Al tavolo vicino alla porta tutti aspettano uno che deve ancora uscire di casa.»"],
+    ["Che cosa hai ordinato?","«Un espresso. Mi hanno chiesto se volevo lo scontrino con l’aria di chi conosce già la risposta.»"]],
+  "giardini-vivi-orto":[
+    "«Mi hanno affidato l’aiuola mista. Qui almeno quando qualcosa cresce lo vedi anche senza aprire Excel.»",
+    ["Perché alterni le fioriture?","«Così l’aiuola cambia durante l’anno e gli impollinatori trovano qualcosa anche dopo il primo giro di fiori.»"],
+    ["Posso dare una mano?","«Chiedi a chi cura il giardino dove serve acqua. L’ultima volta hanno annaffiato la lavagna degli avvisi.»"],
+    ["Hai un consiglio per l’orale?","«Spiega un concetto mentre cammini. Se non riesci a finire la frase prima della prossima aiuola, riprova più semplice.»"]],
+  "giardini-vivi-dome":[
+    "«Ho prenotato la sala per ripetere. Il gruppo mi ha chiesto se possiamo farlo prima a voce nel gruppo WhatsApp.»",
+    ["Dove si trova il tuo gruppo?","«Vicino al Dome. Ci riconosci da uno che spiega e tre che cercano il caricatore.»"],
+    ["Qual è la domanda peggiore?","«“Faccia un esempio”. Quando ripasso sembra facile, quando me lo chiedono invento un mercato delle melanzane.»"],
+    ["Preferisci ripetere fuori?","«Oggi sì. Mi metto vicino ai fiori finché nessuno comincia a fare networking.»"]],
+  "giardini-vivi-radio":[
+    "«Siamo col furgone di fianco al bar. Dovevamo raccogliere due voci per una puntata e siamo a otto opinioni sulla briscola.»",
+    ["Chi è il prossimo ospite?","«Il primo volontario che riesce a raccontare una sessione d’esami in trenta secondi.»"],
+    ["Perché il furgone è qui?","«Ci serviva una presa per il mixer. Il barista ci ha indicato quella che usa per la macchinetta e ha detto di scegliere.»"],
+    ["Quale rumore useresti per la sigla?","«Il clic del cancello, una tazzina e il collega che dice “questa parte tagliala”.»"]],
+  "giardini-vivi-pola":[
+    "«Prima del brindisi faccio sempre un giro in giardino. Il Tinello è il posto dove nessuno mi chiede la media.»",
+    ["Come arrivo al ninfeo?","«Scendi alla salita e prendi a sinistra. Vedrai la vasca del Nilo davanti alla nicchia di pietra.»"],
+    ["Dove si fa la festa?","«Risali verso il villino. L’ingresso al cortile è sulla terrazza, davanti alla facciata.»"],
+    ["Perché sei arrivata in anticipo?","«Per riuscire a sentire la fontana prima che accendano la musica. E per scegliere un posto vicino alla torta.»"]],
+  "giardini-vivi-festa":[
+    "«Mi hanno chiesto di controllare la torta. L’ho controllata tre volte. Sta diventando più piccola.»",
+    ["Dove facciamo la foto?","«La fotografa è in fondo dalla parte del buffet. Cerca le lucine, non il gruppo che ha già iniziato a mangiare.»"],
+    ["Che cosa scrivo nel biglietto?","«Una cosa che è successa davvero. Anche solo quando ti hanno tenuto il posto mentre eri in fila al bar.»"],
+    ["Sei pronto per il brindisi?","«Il bicchiere c’è. Il discorso è: grazie a tutti e viva chi ha tenuto in vita il file condiviso.»"]],
+
   "sport-vince":[
     "Vince si sistema gli occhiali avvolgenti a specchio. «Stavo andando a lezione. Poi mi sono ricordato che passando dal bar il tragitto è quasi il doppio.»",
     ["Vai a correre dopo lezione?","«Oggi vado dal Dome alla mensa. Se chiude il banco della pasta, aumento il passo.»"],
@@ -146,7 +182,8 @@ const conversations={
     ["Hai trovato un posto per studiare?","«Sul lato di Via Panama c’è il portico. Se non trovi posto, chiedi del tavolo dopo pranzo.»"]],
   "radio-tommaso":["«Sto cercando un rumore riconoscibile per la sigla. Ho registrato il tornello, ma sembrava un frullatore.»",
     ["Perché non registri il biliardino?","«Buona idea. Se vinco una partita lo spaccio per giornalismo d’inchiesta.»"],
-    ["Che cosa mandate in onda?","«Interviste, musica e una rubrica sugli esami rimandati. L’ultima va fortissimo.»"]],
+    ["Che cosa mandate in onda?","«Interviste, musica e una rubrica sugli esami rimandati. L’ultima va fortissimo.»"],
+    ["Dove avete messo il furgone?","«Sul lato destro del bar. È quello rosso: se senti parlare del tornello nei microfoni, siamo noi.»"]],
   "campus-giada":["«Sono uscita per prendere aria. Adesso sto valutando se tornare a lezione passando dal bar.»",
     ["Ti sei ambientata a Roma?","«Abbastanza da distinguere il rumore della navetta da quello di un motorino. Il resto verrà.»"],
     ["Hai provato il ping pong?","«Sì. Ottimo per smettere di pensare al portatile. Meno ottimo per il mio polso.»"]],
@@ -164,7 +201,8 @@ const conversations={
     ["Come ripasso in poco tempo?","«Fatti una domanda per capitolo e prova a rispondere a voce. Dove ti fermi, riapri il libro.»"]],
   "mensa-vittorio":["«Mi ero messo in fila per il pranzo. A metà ho cominciato a ripassare e ormai questa è la mia aula.»",
     ["Com’è il piatto del giorno?","«Compatto. Se lo lasci nel piatto, conserva la forma.»"],
-    ["C’è un tavolo nel chiostro?","«Uno in fondo. Prima bisogna riportare due vassoi, poi è tutto tuo.»"]],
+    ["C’è un tavolo nel chiostro?","«Uno in fondo. Prima bisogna riportare due vassoi, poi è tutto tuo.»"],
+    ["Dove vai dopo pranzo?","«Faccio un giro fra gli aranci. Il mio obiettivo per oggi è vedere un albero prima di rivedere una slide.»"]],
   "walker-0":["«Se senti qualcuno chiedere se “l’esame sarà uguale all’anno scorso”, l’ho già chiesto io.»",
     ["Che cosa vi hanno risposto?","«Che dipende da come interpretiamo “uguale”. Da allora abbiamo un’altra domanda.»"]],
   "walker-1":["«Cerco la presa dietro il ficus. Se non funziona passo al piano B. Ho portato una penna.»",
@@ -193,7 +231,8 @@ const localTopics=[
 const nativeConversations={
   "trend":[["Com’è nata la coreografia?","«Ci siamo persi cercando l’aula e l’ultimo passo è come abbiamo schivato la guardia.»"]],
   "spazzino":[["Lo trovi sempre così il cortile?","«Il mattino è immacolato. Poi passano la lezione di Economia e il gruppo della brioche.»"]],
-  "barista":[["Chi è il più forte a biliardino?","«Quello che perde e chiede subito la rivincita. A fine giornata ha giocato più di tutti.»"]],
+  "barista":[["Chi è il più forte a biliardino?","«Quello che perde e chiede subito la rivincita. A fine giornata ha giocato più di tutti.»"],
+    ["Cos’è quel furgone rosso?","«Radio Luiss. Hanno chiesto di registrare la macchina del caffè. È stata la prima ospite a finire l’intervista in orario.»"]],
   "coppia":[["Quante prese avete trovato?","«Una. E con tre dispositivi è diventata un referendum.»"]],
   "ospite":[["Com’è il panel?","«Doveva durare un’ora. Siamo ancora alle presentazioni, ma ci danno il caffè.»"]],
   "silenzio":[["Come hai trovato questo posto?","«Sono salita finché ho smesso di sentire gente dire “mandami il file”.»"]]
