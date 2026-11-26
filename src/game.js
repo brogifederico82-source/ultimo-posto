@@ -475,6 +475,7 @@ function scene(title,text,...choices){return {title,text,choices};}
 function interact(){
   if(!exploringCampus())return;
   const spot=nearby();
+  if(segretiInteragisci(spot))return;
   if(!spot){sound("error","interface");return;}
   ambienteInteragisci(spot);
   clearCampusInputs();
