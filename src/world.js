@@ -440,6 +440,75 @@ function groundTile(c,kind,x,y,hex,variant=0){
     rect(c,"#fff0bf19",x*16+1,y*16+1,15,1);
   }
 }
+const vialeShopFronts={
+  rosticceria:{sign:"ROSTICCERIA",roof:"#a7654d",trim:"#723d34",stucco:"#b99775",cloth:"#a54e42",light:"#f8cf8b",display:"#a66a46"},
+  cavalli:{sign:"CORSE 360",roof:"#62536d",trim:"#292649",stucco:"#7d707e",cloth:"#665392",light:"#eed4fa",display:"#394665"},
+  tabaccheria:{sign:"TABACCHI",roof:"#5b7670",trim:"#294643",stucco:"#95a193",cloth:"#415d58",light:"#e9edd4",display:"#4c6461"}
+};
+function paintVialeShop(c,o,w,h,now){
+  const theme=vialeShopFronts[o.native];
+  const ink=(color,x,y,width,height)=>{
+    c.fillStyle=color;c.fillRect(x,y,width,height);
+  };
+  // Keep the existing collision rectangle. The roof and cornice project behind it.
+  ink("#252a2a66",1,13.4,14.7,2.2);
+  ink("#4c4b41",.55,-5.4,14.9,3.6);
+  ink(theme.roof,1.1,-5.1,13.8,2.9);
+  ink("#e2c7a37a",1.4,-5.1,13.2,.5);
+  for(let x=2;x<14;x+=1.5)ink("#30262a32",x,-4.55,.16,2.1);
+  ink("#554a45",.25,-3.1,15.5,17.6);
+  ink(theme.stucco,.7,-1,14.6,14.8);
+  for(const x of [.9,9.95,14.6]){
+    ink("#e1c7a477",x,7.2,.35,5.9);
+    ink("#574b443c",x+.35,8.8,.22,3.9);
+  }
+  ink(theme.roof,.75,-3.6,14.5,2.7);
+  ink("#e1c4a477",1.1,-3.6,13.8,.6);
+  ink(theme.trim,1,.1,14,4.5);
+  ink(theme.light,1,4.15,14,.45);
+  ink("#282b2d",.8,6.1,14.4,1.05);
+  for(let i=0;i<8;i++)ink(i%2?theme.cloth:theme.light,1+i*1.75,4.65,1.75,1.55);
+  ink("#6b5847",1.15,7.35,8.7,5);
+  ink(theme.display,1.55,7.7,7.9,4.2);
+  ink(theme.trim,10.55,7.05,3.9,6.8);
+  ink("#4a5b61",11,7.65,3,3.1);
+  ink("#aac0b5",11.1,7.8,2.7,.5);
+  ink(theme.light,13.35,11.05,.45,.5);
+  ink("#e0c6a2",1.1,12.1,8.8,.6);
+  ink("#cabb9f",.9,13.7,14.25,.7);
+  if(o.native==="rosticceria"){
+    for(const [i,tone] of ["#f5b563","#d88c4b","#e9c080"].entries()){
+      ink("#71503b",2+i*2.5,10.45,2.1,.7);
+      ink(tone,2.15+i*2.5,9.55,1.8,.9);
+      ink("#efce8a",2.4+i*2.5,9.3,1.1,.35);
+    }
+    ink("#efd79b",1.8,8,7.2,.45);
+  }else if(o.native==="cavalli"){
+    for(const [i,tone] of ["#83a8dc","#a79ad7","#79baa6"].entries()){
+      const x=1.9+i*2.45;
+      ink("#29303c",x,8,2,3.6);
+      ink(tone,x+.25,8.35,1.5,1.25);
+      ink("#bac8cf",x+.35,10.1,1.2,.32);
+    }
+    const light=Math.floor(now/600)%2===0;
+    ink(light?"#c4a5e1":"#9881b6",1.3,.35,.7,3.45);
+    ink(light?"#c4a5e1":"#9881b6",14,.35,.7,3.45);
+  }else{
+    ink("#bfc6ae",2,8.35,6.8,.4);
+    for(const [i,tone] of ["#c18b77","#dcd2ae","#90a8a7","#bbb1c5"].entries()){
+      ink(tone,2.1+i*1.7,9.2,1.15,1.9);
+      ink("#dfd8bb",2.15+i*1.7,9.3,.8,.35);
+    }
+    ink("#293c3a",14.55,7.7,1.2,2.45);
+    ink("#ebede0",14.75,8.1,.8,.4);
+    ink("#ebede0",15.04,8.1,.25,1.35);
+  }
+  c.save();c.scale(16/w,16/h);
+  c.textAlign="center";c.fillStyle=theme.light;
+  c.font="bold "+Math.max(2,Math.min(6,h*.31,w*.9/theme.sign.length*1.55))+"px monospace";
+  c.fillText(theme.sign,w/2,h*.226,w*.86);
+  c.restore();
+}
 function drawObject(c,o,now=0,editing=false){
   const spec=assets[o.kind];
   if(!spec||spec[2]==="terreno")return;
@@ -536,21 +605,16 @@ function drawObject(c,o,now=0,editing=false){
         box("#20303666",.7,2.4,15.3,13.6);
         box("#574740",0,.7,16,14.3);box(color,.55,1.1,14.9,13.7);
         box("#edd9b1",.4,1,15.2,.65);box("#374345",2,7,5.5,5);box("#725746",10,7,3.6,7.4);
-        if(o.native==="shop"||o.native==="tabaccheria"){
-          const shop=o.native==="shop",navy=shop?"#26345b":"#18394a";
-          box(navy,.65,1.65,14.7,4.2);
-          box(shop?"#d8af69":"#8bbac5",.7,5.8,14.6,.55);
-          for(let i=0;i<6;i++)box(i%2?navy:shop?"#d8be91":"#d2e3da",1+i*2.35,6.35,2.35,1);
+        if(Object.hasOwn(vialeShopFronts,o.native))paintVialeShop(c,o,w,h,now);
+        else if(o.native==="shop"){
+          box("#26345b",.65,1.65,14.7,4.2);box("#d8af69",.7,5.8,14.6,.55);
+          for(let i=0;i<6;i++)box(i%2?"#26345b":"#d8be91",1+i*2.35,6.35,2.35,1);
           box("#f5d99d",1.9,7.55,6.8,4.7);box("#385462",2.25,7.9,6.1,4);
-          for(let i=0;i<3;i++)box(shop?["#e9c487","#aa7f96","#7898bb"][i]:["#bcd0cc","#c99b73","#ad7777"][i],2.8+i*1.75,9.5,1.25,1.8);
+          for(let i=0;i<3;i++)box(["#e9c487","#aa7f96","#7898bb"][i],2.8+i*1.75,9.5,1.25,1.8);
           box("#c7a984",10,7.65,3.7,6.65);box("#45636e",10.4,8,2.9,4.5);
           box("#f2d08a",12.8,11,.35,.48);box("#aa957c",.8,13.6,14.4,.9);
           c.textAlign="center";c.font="bold 2.6px monospace";c.fillStyle="#fff1ce";
-          c.fillText(shop?"LUISS SHOP":"TABACCHI",8,4.75,13.7);
-        }else if(o.native==="cavalli"){
-          box("#1b234c",.5,1,15,5);box("#506dff",.5,1,15,.65);box("#c45ed9",.5,5.5,15,.45);
-          box("#151d31",2,7,5,3.5);box("#6b87f3",2.5,7.5,4,1.5);box("#262b4e",10,6.5,3,6.5);
-          c.textAlign="center";c.font="bold 2.5px monospace";c.fillStyle="#e7f3ff";c.fillText("CORSE 360",8,4.7,13);
+          c.fillText("LUISS SHOP",8,4.75,13.7);
         }
         break;
       case "orangeTree":{
@@ -563,6 +627,11 @@ function drawObject(c,o,now=0,editing=false){
         crown(color,7.5,6,6.3,5.3);
         crown("#527d4c",5.6,4.5,3.6,3.4);
         crown("#426d49",10.3,6.5,4,3.9);
+        crown("#638854",4.7,3.7,2.4,1.65);
+        crown("#385b43",8.2,9.2,4.1,2.55);
+        for(const [x,y] of [[3,5],[5,8],[7,4],[9,6],[11,5],[13,8],[7,11]]){
+          box("#6f9255",x,y,2,1);box("#4c7749",x+1,y+1,1,1);
+        }
         for(const [x,y] of [[4,4],[7,2],[10,4],[6,7],[12,7],[8,10],[3,8]]){
           box("#b97039",x,y,2,2);box("#e9a44d",x,y,2,1);box("#ffd079",x,y,1,1);
         }
@@ -572,12 +641,16 @@ function drawObject(c,o,now=0,editing=false){
         const roses=o.kind==="roseBed";
         box("#36463370",1,11,14,3);box("#695543",1,7,14,6);
         box("#88705a",1,7,14,1);
+        box("#9b8466",1,12,14,1);
+        box("#416146",2,8,12,4);box("#5d8050",2,9,12,2);
         for(const [i,[x,y]] of [[2,7],[4,4],[6,8],[8,5],[10,7],[12,4],[13,9]].entries()){
           box("#4c7551",x,y+1,2,4);
           box("#73905d",x-1,y+2,2,1);
           const bloom=roses?(i%3===0?"#a34058":color):[color,"#d9ccaf","#a490bd"][i%3];
           box(bloom,x-1,y,3,2);
-          box(roses?"#f1a3a6":"#f0d292",x+(i%2),y,1,1);
+          if(roses){box(bloom,x,y-1,2,1);box("#f1a3a6",x,y,1,1);}
+          else{box(bloom,x,y-1,1,4);box("#f1d690",x,y+1,1,1);}
+          box("#92a370",x-1,y+3,1,1);
         }
         break;
       }

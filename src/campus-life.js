@@ -129,8 +129,26 @@ function addVialeArcade(map){
     if(area.objects.some(o=>o.solid&&o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+1&&o.y+(o.h??1)>y))continue;
     area.objects.push({uid,kind:"booth",name,x,y,w,h:1,color,solid:true,action:"native",native,gate:"",target:"",route:[],rotation:0,variant:0});
   }
+  if(integrated)plantVialeShopfronts(garden);
   return map;
 }
+function plantVialeShopfronts(garden){
+  if(garden.objects.some(o=>o.uid.startsWith("botteghe-viale-")))return;
+  for(const [key,kind,x,y,w,h] of [
+    ["arancio-ovest","orangeTree",60,97,2,2],["arancio-est","orangeTree",70,97,2,2],
+    ["rosiere","roseBed",66,97,2,1],["vasche-tabacchi","flowerMeadow",69,99,2,1],
+    ["roseto-sala","roseBed",67,102,2,1],["aiuola-sud","flowerMeadow",69,101,2,1]
+  ]){
+    if(x+w>garden.width||y+h>garden.height||y-vialeRoadY(x+w/2)<2.1)continue;
+    if(garden.objects.some(o=>(o.kind==="entrance"||assets[o.kind]?.[2]!=="terreno"||o.kind==="road")&&
+      o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+h&&o.y+(o.h??1)>y))continue;
+    const spec=assets[kind];
+    garden.objects.push({uid:"botteghe-viale-"+key,kind,name:spec[1],x,y,w,h,color:spec[3],solid:Boolean(spec[6]),
+      rotation:0,variant:0,action:"",native:"",text:"",target:"",gate:"",missionTarget:"",
+      auto:false,behavior:"idle",speed:1.7,route:[]});
+  }
+}
+
 function furnishCampusFountains(map){
   const garden=map.zones.giardino;
   if(!garden||garden.width!==144||garden.height!==144||
