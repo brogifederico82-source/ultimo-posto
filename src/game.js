@@ -764,6 +764,7 @@ function renderScene(){
   const radioHint=state.ending?"":radioTapeHint();
   $("radioTapeHint").hidden=!radioHint;
   $("radioTapeHint").textContent=radioHint;
+  updateStoryWaypointHint();
   $("zone").textContent=tr(room(state.zone).name);
   updateCampusOverview();
   $("campusMap").replaceChildren();

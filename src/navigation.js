@@ -9,7 +9,8 @@ const campusWaypoints={
     return has("Seminario Parenzo")?"carsharing-romania":"navetta-sign";
   },
   tutorato:()=>has("Colloquio tutor")?"tutor-out":"tutor-viola",
-  "aula-chiesa":()=>has("Lezione A200")?"a200-stair-exit":"prof-storia",
+  "aula-chiesa":()=>!has("Lezione A200")?"prof-storia":
+    has("Colloquio tutor")&&!has("Progetto LOFT")?"a200-stair-exit":"a200-out",
   "aula-toti":()=>"a203-exit",
   dome:()=>"dome-out",
   terra:()=>"terra-primo",
@@ -26,15 +27,54 @@ const campusWaypoints={
   "pola-cortile":()=>"pola-cortile-npc"
 };
 const floorOrder=["terra","primo","secondo","terzo","quarto","quinto","loft"];
-function nextCampusWaypoint(){
-  if(!state||state.prologue||state.ending||isFree()||has("Festa a Pola"))return null;
-  const zone=state.zone;
+function localStoryWaypoint(zone){
   const downstairs={terra:"terra-giardino",primo:"primo-terra",secondo:"secondo-down",terzo:"terzo-down",
     quarto:"quarto-down",quinto:"quinto-down",loft:"loft-down"};
-  let uid=campusWaypoints[zone]?.();
+  let uid=Object.hasOwn(campusWaypoints,zone)?campusWaypoints[zone]():null;
   if(floorOrder.includes(zone)&&(has("Progetto LOFT")||!has("Colloquio tutor")))uid=downstairs[zone];
   if(floorOrder.indexOf(zone)>floorOrder.indexOf("secondo")&&!has("Lezione A200"))uid=downstairs[zone];
-  return uid?room(zone).objects.find(o=>o.uid===uid)??null:null;
+  const waypoint=zoneObjects(room(zone)).byId.get(uid);
+  return waypoint&&!gateLocked(waypoint.gate)?waypoint:null;
+}
+function nextCampusWaypoint(){
+  if(!state||state.prologue||state.ending||isFree()||has("Festa a Pola"))return null;
+  const localWaypoint=localStoryWaypoint(state.zone);
+  if(localWaypoint)return localWaypoint;
+  // A detour can span multiple rooms. Keep the first usable door on the shortest route back.
+  const visited=new Set([state.zone]);
+  const roomsToVisit=[{zone:state.zone,firstDoor:null}];
+  for(const {zone,firstDoor} of roomsToVisit){
+    for(const door of zoneObjects(room(zone)).actions){
+      const destination=doorDestination(door)?.[0];
+      if(!destination||visited.has(destination))continue;
+      visited.add(destination);
+      const wayBack=firstDoor??door;
+      if(localStoryWaypoint(destination))return wayBack;
+      roomsToVisit.push({zone:destination,firstDoor:wayBack});
+    }
+  }
+  return null;
+}
+function updateStoryWaypointHint(){
+  const hint=$("storyWaypointHint"),waypoint=nextCampusWaypoint();
+  const label=waypoint?local("Qui cerca ","Look for ")+tr(waypoint.name):"";
+  if(hint.textContent!==label)hint.textContent=label;
+  hint.hidden=!label;
+}
+function paintWaypointOnStage(context,px,py,withMinimap){
+  const x=clamp(px,10,310);
+  const y=clamp(py,10,182);
+  if(x===px&&y===py){paintCampusWaypoint(context,x,y);return;}
+  context.save();
+  context.translate(x,withMinimap&&x>=224&&y<67?67:y);
+  context.rotate(Math.atan2(py-96,px-160));
+  context.beginPath();
+  context.moveTo(6,0);context.lineTo(-4,-4);context.lineTo(-2,0);context.lineTo(-4,4);context.closePath();
+  context.fillStyle="#f0be75";
+  context.strokeStyle="#172331";
+  context.lineWidth=1.5;
+  context.fill();context.stroke();
+  context.restore();
 }
 function paintCampusWaypoint(context,x,y){
   context.save();

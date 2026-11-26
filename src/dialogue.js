@@ -404,7 +404,7 @@ function draw(now){
   if(waypoint&&!activeScene){
     const px=((waypoint.x+waypoint.w/2)*16-cameraX)*zoom;
     const py=((waypoint.y-.5)*16-cameraY)*zoom;
-    paintCampusWaypoint(stage,clamp(px,9,311),clamp(py,9,183));
+    paintWaypointOnStage(stage,px,py,z.width>20||z.height>12);
   }
   const nearest=nearby();
   stageInteraction=null;
@@ -483,9 +483,12 @@ function updateCampusOverview(){
   const canvas=$("campusOverview");
   canvas.hidden=!zone;
   $("campusLegend").replaceChildren();
-  $("campusPosition").textContent=local(
+  $("campusPosition").textContent=state.zone!=="giardino"?local(
+    "Questa pianta mostra l’esterno di Viale Romania.",
+    "This map shows the Viale Romania grounds."):nextCampusWaypoint()?local(
     "Il punto bianco sei tu. Il rombo dorato indica la prossima tappa della storia.",
-    "The white dot is your position. The gold diamond marks your next story waypoint.");
+    "The white dot is your position. The gold diamond marks your next story waypoint."):local(
+    "Il punto bianco sei tu.", "The white dot is your position.");
   if(!zone)return;
   if(overviewZone!==zone){
     overviewZone=zone;
@@ -591,6 +594,7 @@ function frame(now){
         const surface=terrainCache.get(area)?.get(x+y*area.width)?.kind??area.ground;
         sound(surface==="grass"?"grass":surface==="floor"?"floor":"pavement","map");
         collectCampusCoin();syncBackgroundMusic();
+        updateStoryWaypointHint();
         paintCampusOverview();
         trafficImpact();
         checkCampusSurprise();
