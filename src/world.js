@@ -12,7 +12,7 @@ const catalog={
   "Università":[["classroom","Aula","edifici","#a67762",3,2,true],["board","Lavagna","arredi","#487062"],["vending","Distributore","arredi","#9b6456",1,1,true],["turnstile","Tornello","edifici","#84958a"],["library","Biblioteca","edifici","#897460",3,2,true]],
   "Intrattenimento":[["foos","Biliardino","arredi","#48866d",2,1,true],["ping","Ping pong","arredi","#397d82",2,1,true],["bris","Tavolo da briscola","arredi","#80694b",2,1,true],["poker","Tavolo da poker","arredi","#33725e",2,1,true]],
   "Personaggi":[["athlete","Gymbro","persone","#a94e47"],["heatedStudent","Studente con IQOS","persone","#af6380"],["sportGlasses","Studente con occhiali sportivi","persone","#527f87"],["student","Studente","persone","#bb6268"],["guard","Guardia","persone","#6089aa"],["creator","Influencer","persone","#9966a3"],["bartender","Barista","persone","#ae775e"],["professor","Professore","persone","#b09461"],["cleaner","Spazzino","persone","#80a471"]],
-  "Decorazioni":[["sign","Cartello","decori","#d1ae72"],["bin","Cestino","decori","#71877c",1,1,true],["lamp","Lampione","decori","#d2ac66"],["fountain","Fontana","decori","#699b9b",2,2,true],["rope","Cordone","decori","#a94057"],["entrance","Ingresso","decori","#d1af6d"],["event","Evento","decori","#c67668"],["goal","Obiettivo","decori","#d6bb74"]]
+  "Decorazioni":[["sign","Cartello","decori","#d1ae72"],["bin","Cestino","decori","#71877c",1,1,true],["lamp","Lampione","decori","#d2ac66"],["fountain","Fontana","decori","#699b9b",2,2,true],["nasone","Nasone romano","decori","#465556"],["rope","Cordone","decori","#a94057"],["entrance","Ingresso","decori","#d1af6d"],["event","Evento","decori","#c67668"],["goal","Obiettivo","decori","#d6bb74"]]
 };
 const assets=Object.fromEntries(Object.values(catalog).flat().map(row=>[row[0],row]));
 const assetVariants=["Classica","Chiara","Scura"];
@@ -50,7 +50,7 @@ function updateGardenStudentNames(map){
     if(names&&student.name===names[0])student.name=names[1];
   }
 }
-const originalMap=normalizeCampus(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))));
+const originalMap=normalizeCampus(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,13],
@@ -206,7 +206,7 @@ function loadCampus(){
           }
         }
       }
-      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);}
+      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);}
       return map;
     }
   }catch{}
@@ -526,7 +526,28 @@ function drawObject(c,o,now=0,editing=false){
         break;
       case "lamp":box(shadow,7,5,2,10);box(color,5,2,6,5);box(white,6,3,4,2);break;
       case "bin":box(shadow,4,5,8,10);box(color,4,4,8,8);box(light,3,4,10,2);break;
-      case "fountain":box(shadow,1,4,14,10);box(color,2,4,12,8);box("#aed4c6",6,6,4,4);box(white,7+(Math.floor(now/250)%2),5,2,2);break;
+      case "fountain":{
+        const ripple=Math.floor(now/180)%4;
+        box("#293d3a65",0,6,16,8);box("#354b48",2,4,12,10);
+        box("#354b48",1,6,14,6);box("#ded2b2",2,4,12,8);
+        box("#ded2b2",1,6,14,4);box("#9e9d86",2,11,12,2);
+        box(color,3,6,10,5);box("#458688",4,7,8,3);
+        box("#c5c5a8",7,7,2,3);box("#aed4c6",6,6,4,1);
+        box("#e4f4e8",7,3,1,3);box("#a2dce1",8,2+ripple%2,1,4);
+        box("#9ccdce",4,8+ripple%2,2,1);box("#b6e8e8",10,9-ripple%2,2,1);
+        if(ripple>0){box("#d5eeee",6,4+ripple%2,1,1);box("#a2dce1",9,4,1,1);}
+        break;
+      }
+      case "nasone":{
+        const drop=Math.floor(now/110)%4;
+        box("#293d3a65",3,13,11,2);box("#b5a88d",3,12,11,2);
+        box("#394345",5,12,7,1);box("#202e33",6,3,4,10);
+        box(color,7,3,3,9);box("#859294",7,4,1,7);
+        box("#657778",7,2,3,2);box("#495a5a",8,3,4,2);
+        box("#ad9671",11,4,2,1);box("#566568",12,5,1,1);
+        box("#98d7df",12,6,1,2);box("#b6e7e6",12,8+drop,1,1);
+        break;
+      }
       case "rope":for(const a of [1,7,14])box(light,a,2,1,12);box(color,1,5,14,2);break;
       default:
         box(shadow,3,3,10,11);box(color,4,4,8,8);box(light,7,8,2,6);
@@ -580,8 +601,23 @@ function paintVialeRoad(c,left,right){
   };
   trace(start,end);
   c.lineJoin="round";c.lineCap="butt";
-  for(const [width,color] of [[3.65,"#a79e8d"],[3.23,"#d0c2a8"],[3.04,"#3d4854"],[2.8,"#4b5663"]]){
+  for(const [width,color] of [[4.38,"#817e70"],[4.16,"#a69f90"],[3.32,"#d2c6ae"],[3.14,"#343e48"],[2.9,"#4a5562"]]){
     c.lineWidth=width;c.strokeStyle=color;c.stroke();
+  }
+  for(let x=Math.ceil(start);x<end;x++){
+    if(x>=17&&x<37)continue;
+    const center=vialeRoadY(x+.5)+.5;
+    c.fillStyle="#8f8b7e";
+    c.fillRect(x,center-2.04,.045,.42);
+    c.fillRect(x,center+1.65,.045,.42);
+    c.fillStyle="#57616c";
+    c.fillRect(x+.24,center-.72,.14,.045);
+    c.fillRect(x+.7,center+.94,.12,.045);
+    if(x%5===0){
+      c.fillStyle="#323f47";c.fillRect(x+.35,center+1.16,.47,.16);
+      c.fillStyle="#7d8588";
+      for(let slot=0;slot<4;slot++)c.fillRect(x+.41+slot*.1,center+1.19,.035,.1);
+    }
   }
   c.lineWidth=.09;c.strokeStyle="#d5c89f";c.setLineDash([.58,.48]);
   for(const [from,to] of [[start,Math.min(end,21)],[Math.max(start,25),end]]){
