@@ -516,7 +516,7 @@ function paintVialeShop(c,o,w,h,now){
   }
   c.save();c.scale(16/w,16/h);
   c.textAlign="center";c.fillStyle=theme.light;
-  c.font="bold "+Math.max(2,Math.min(6,h*.31,w*.9/theme.sign.length*1.55))+"px monospace";
+  c.font=insegnaFont(Math.max(2,Math.min(6,h*.31,w*.9/theme.sign.length*1.55)));
   c.fillText(theme.sign,w/2,h*.226,w*.86);
   c.restore();
 }
@@ -561,8 +561,10 @@ function drawObject(c,o,now=0,editing=false){
       box("#db9d86",1,3,12,1);box("#f3c0a2",9,4,2,1);
       c.scale(16/w,16/h);
       if(o.look==="left"){c.translate(w,0);c.scale(-1,1);}
-      c.fillStyle=bus?"#fff1b9":"#f4ead2";c.font="bold 6px monospace";
-      c.textAlign="center";c.fillText(bus?"360":"LUISS",w/2,h*.71);
+      c.fillStyle=bus?"#fff1b9":"#f4ead2";c.font=insegnaFont(6);
+      c.textAlign="center";c.fillText(bus?"360":"LUISS",w/2,h*.8);
+      c.restore();c.save();c.translate(x+w/2,y+h/2);c.rotate(o.rotation*Math.PI/180+(o.bend??0));if(o.rotation%180)c.scale(h/w,w/h);c.translate(-w/2,-h/2);c.scale(w/16,h/16);if(o.look==="left"){c.translate(16,0);c.scale(-1,1);}
+      insegnaAutobus(c,o,w,h,now);
     }else if(o.kind==="car"){
       const shell=(tone,inset)=>{
         c.beginPath();
@@ -637,9 +639,10 @@ function drawObject(c,o,now=0,editing=false){
           for(let i=0;i<3;i++)box(["#e9c487","#aa7f96","#7898bb"][i],2.8+i*1.75,9.5,1.25,1.8);
           box("#c7a984",10,7.65,3.7,6.65);box("#45636e",10.4,8,2.9,4.5);
           box("#f2d08a",12.8,11,.35,.48);box("#aa957c",.8,13.6,14.4,.9);
-          c.textAlign="center";c.font="bold 2.6px monospace";c.fillStyle="#fff1ce";
+          c.textAlign="center";c.font=insegnaFont(2.8);c.fillStyle="#fff1ce";
           c.fillText("LUISS SHOP",8,4.75,13.7);
         }
+        insegnaEdificio(c,o,w,h,now);
         break;
       case "orangeTree":{
         box("#24372c70",2,11,13,4);
@@ -694,7 +697,7 @@ function drawObject(c,o,now=0,editing=false){
       case "cypress":
         box("#303f38",7,10,2,6);box(color,5,3,6,11);box(color,7,0,2,4);box("#78915c",6,5,2,6);break;
       case "luiss":
-        c.font="bold 5px Georgia";c.textAlign="center";c.fillStyle="#101923";c.fillText("LUISS",8,10.4);c.fillStyle="#f4ede0";c.fillText("LUISS",8,9.7);break;
+        c.font=insegnaFont(5,true);c.textAlign="center";c.fillStyle="#101923";c.fillText("LUISS",8,10.4);c.fillStyle="#f4ede0";c.fillText("LUISS",8,9.7);break;
       case "zebra":
         if(/^(viale-)?crosswalk-(13|14|15)$/.test(o.uid)&&o.w===4&&o.h===1){
           const upper=o.uid.endsWith("-13"),lower=o.uid.endsWith("-15");
@@ -711,8 +714,7 @@ function drawObject(c,o,now=0,editing=false){
           box(white,9,2,3,2);box(white,8,4,5,2);
           box("#39434a",10,9,1,6);box("#23333d",8,14,5,1);
         }else{
-          box(shadow,3,3,10,11);box(color,4,4,8,8);box(light,7,8,2,6);
-          c.fillStyle=shadow;c.font="bold 7px monospace";c.textAlign="center";c.fillText("·",8,10);
+          const cart=insegnaCartello(c,o,box);insegnaCartelloTesto(c,cart.txt,w,h);
         }
         break;
       case "domeHall":{
@@ -725,6 +727,7 @@ function drawObject(c,o,now=0,editing=false){
         for(let i=1;i<14;i+=1.7)box("#42596366",.3,i,15.2,.12);
         box("#384f54",.5,14,15,1.4);
         for(let i=1;i<16;i+=2)box("#b5c2b4",i,14,.18,1.4);
+        insegnaEdificio(c,o,w,h,now);
         break;
       }
       case "faculty":case "chapel":case "roof":{
@@ -747,10 +750,11 @@ function drawObject(c,o,now=0,editing=false){
         if(o.uid==="main-gatehouse"&&o.name==="LUISS Shop"){
           box("#30253c",2.7,11.6,10.6,2.6);
           c.save();c.scale(16/w,16/h);
-          c.fillStyle="#fff1d7";c.textAlign="center";c.font="bold 9px sans-serif";
+          c.fillStyle="#fff1d7";c.textAlign="center";c.font=insegnaFont(9);
           c.fillText(o.name,w/2,h*.84,w*.62);
           c.restore();
         }
+        insegnaEdificio(c,o,w,h,now);
         if(o.kind==="chapel"){box("#ebd9b3",6,13.5,4,2.2);box("#66574c",7,14,2,1.7);}
         break;
       }
@@ -777,7 +781,7 @@ function drawObject(c,o,now=0,editing=false){
         box("#c5c1b1",3,2,5,2);box("#e6dec9",3,2,4,1);
         box("#f0ca87",15,8,1,1);box("#eb826e",0,7,1,1);
         c.save();c.scale(16/w,16/h);
-        c.fillStyle="#fff3df";c.textAlign="center";c.font="bold "+Math.min(7,w/6.5)+"px sans-serif";
+        c.fillStyle="#fff3df";c.textAlign="center";c.font=insegnaFont(Math.min(7,w/6.5));
         c.fillText("Radio Luiss",w*.47,h*.66,w*.86);
         c.restore();
         break;
