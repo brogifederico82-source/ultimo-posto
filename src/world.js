@@ -425,7 +425,26 @@ function drawObject(c,o,now=0,editing=false){
         box("#303f38",7,10,2,6);box(color,5,3,6,11);box(color,7,0,2,4);box("#78915c",6,5,2,6);break;
       case "luiss":
         c.font="bold 5px Georgia";c.textAlign="center";c.fillStyle="#101923";c.fillText("LUISS",8,10.4);c.fillStyle="#f4ede0";c.fillText("LUISS",8,9.7);break;
-      case "zebra":box(color,0,3,16,8);break;
+      case "zebra":
+        if(/^(viale-)?crosswalk-(13|14|15)$/.test(o.uid)&&o.w===4&&o.h===1){
+          const upper=o.uid.endsWith("-13"),lower=o.uid.endsWith("-15");
+          const top=upper?2:0,height=16-top-(lower?2:0);
+          for(let band=0;band<8;band++){
+            c.fillStyle=color;
+            c.fillRect(.5+band*2,top,1.16,height);
+          }
+        }else box(color,0,3,16,8);
+        break;
+      case "sign":
+        if(o.uid==="viale-bus-360-stop"||o.uid==="bus-360-stop"){
+          box("#182a39",6,0,9,9);box("#315b8e",7,1,7,6);
+          box(white,9,2,3,2);box(white,8,4,5,2);
+          box("#39434a",10,9,1,6);box("#23333d",8,14,5,1);
+        }else{
+          box(shadow,3,3,10,11);box(color,4,4,8,8);box(light,7,8,2,6);
+          c.fillStyle=shadow;c.font="bold 7px monospace";c.textAlign="center";c.fillText("·",8,10);
+        }
+        break;
       case "domeHall":{
         // Barrel roof: a continuous curved highlight and transverse ribs.
         box(shadow,0,.6,16,15.4);
@@ -496,7 +515,7 @@ function drawObject(c,o,now=0,editing=false){
       default:
         box(shadow,3,3,10,11);box(color,4,4,8,8);box(light,7,8,2,6);
         c.fillStyle=shadow;c.font="bold 7px monospace";c.textAlign="center";
-        c.fillText(({entrance:"↳",event:"!",goal:"★",sign:"·"})[o.kind]??"·",8,10);
+        c.fillText(({entrance:"↳",event:"!",goal:"★"})[o.kind]??"·",8,10);
     }
   }
   const stairDirection=o.uid==="terra-primo"||/^(primo|secondo|terzo|quarto|quinto)-up$/.test(o.uid)?-1:
@@ -548,13 +567,64 @@ function paintRomaniaEdges(c){
   street(()=>{c.moveTo(22,3);c.bezierCurveTo(55,9,75,25,82,42);c.bezierCurveTo(91,56,92,66,89,79);});
   c.restore();
 }
+// Resurface the straight stretch at the gate using its existing walkable tiles.
+function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
+  if(id!=="ingresso"&&(id!=="giardino"||top>=vialeEntrance.y+17||bottom<=vialeEntrance.y+12||
+      right<=vialeEntrance.x+8||left>=vialeEntrance.x+28))return;
+  const integrated=id==="giardino"&&z.objects.some(o=>o.uid==="viale-ingresso-start"&&o.x===22&&o.y===86);
+  if(id!=="ingresso"&&!integrated)return;
+  const ox=integrated?vialeEntrance.x:0,oy=integrated?vialeEntrance.y:0;
+  const from=integrated?ox+8:0,to=integrated?ox+28:z.width;
+  if(left>=to||right<=from||top>=oy+17||bottom<=oy+12)return;
+  const crossing=z.objects.find(o=>o.uid===(integrated?"viale-":"")+"crosswalk-14"&&o.y===oy+14&&o.rotation===0);
+  for(let y=Math.max(top,oy+12);y<Math.min(bottom,oy+17);y++){
+    const row=y-oy;
+    for(let x=Math.max(left,from);x<Math.min(right,to);x++){
+      const tile=tiles.get(x+y*z.width);
+      if(!tile||!tile.uid.startsWith(integrated?"viale-romania-":"romania-"))continue;
+      const px=x*16,py=y*16;
+      const crosswalk=crossing&&x>=crossing.x&&x<crossing.x+crossing.w;
+      if(tile.kind==="road"&&row>=13&&row<=15){
+        const atJoin=integrated&&(x===from||x===to-1);
+        rect(c,atJoin?"#505c69":row===14?"#4a5562":"#4e5966",px,py,16,16);
+        const fleck=(x*7+y*5)%13;
+        rect(c,"#5b6571",px+fleck,py+5,2,1);
+        rect(c,"#3f4854",px+(fleck+7)%13,py+12,2,1);
+        if(row===13&&!atJoin)rect(c,"#394550",px,py,16,2);
+        if(row===15&&!atJoin)rect(c,"#394550",px,py+14,16,2);
+        if(row===14&&x%2===0&&!crosswalk)rect(c,"#d5c89f",px+2,py+8,12,1);
+        if((x===ox+10||x===ox+24)&&row!==14){
+          const east=row===13,tip=px+(east?12:3);
+          rect(c,"#abb7bd",px+3,py+8,10,1);
+          for(let step=0;step<3;step++){
+            rect(c,"#abb7bd",tip+(east?-step:step),py+8-step,1,step*2+1);
+          }
+        }
+      }else if(tile.kind==="paving"&&(row===12||row===16)){
+        const edge=row===12?13:0;
+        rect(c,"#aba294",px,py,16,16);
+        rect(c,"#8b857a",px,py+6,16,1);
+        rect(c,"#8b857a",px+(x%2?10:5),py+7,1,6);
+        rect(c,crosswalk?"#be9e66":"#d1c5ab",px,py+edge,16,3);
+        if(crosswalk){
+          const ramp=row===12?8:4;
+          rect(c,"#c6a16b",px,py+ramp,16,4);
+          for(const dot of [2,6,10,14])rect(c,"#725c43",px+dot,py+ramp+1,1,2);
+        }else{
+          rect(c,"#908575",px+15,py+edge,1,3);
+        }
+      }
+    }
+  }
+}
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
   const margin=2,left=Math.max(0,Math.floor(view.x/16)-margin),top=Math.max(0,Math.floor(view.y/16)-margin);
   const right=Math.min(z.width,Math.ceil((view.x+view.w)/16)+margin);
   const bottom=Math.min(z.height,Math.ceil((view.y+view.h)/16)+margin);
+  let tiles;
   if(visible.terreno){
-    let tiles=editing?null:terrainCache.get(z);
+    tiles=editing?null:terrainCache.get(z);
     if(!tiles){tiles=terrainMap(z);if(!editing)terrainCache.set(z,tiles);}
     for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
       const tile=tiles.get(x+y*z.width);
@@ -563,6 +633,7 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   }
   if(visible.terreno&&id==="giardino"&&!editing&&z.width===144&&
       z.objects.some(o=>o.uid==="entry-from-panama"&&o.x===72&&o.y===47))paintRomaniaEdges(c);
+  if(tiles)paintEntranceStreet(c,id,z,tiles,left,top,right,bottom);
   // Connect the existing garden walks around the planted islands north of the bar.
   if(visible.terreno && id==="giardino" &&
       left<78 && right>11 && top<74 && bottom>13 &&
