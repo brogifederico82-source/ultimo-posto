@@ -15,6 +15,7 @@ Object.assign(english,{
   "Gomiti sul tavolo. Preparati.":"Elbows on the table. Get ready.",
   "Spingi quando il cursore è nella fascia verde.":"Push when the cursor is in the green zone.",
   "Sfida Riccardo a braccio di ferro":"Challenge Riccardo to arm wrestling","Schiaccia":"Smash","Schiacciata!":"Smash!","Timing perfetto!":"Perfect timing!",
+  "Atrio centrale":"Central atrium","Serra · Spazio polifunzionale":"Greenhouse · Multipurpose space",
   "Navetta LUISS":"LUISS shuttle","Mensa · Sala e chiostro":"Cafeteria · Dining room and cloister",
   "Mensa · Ingresso dal primo piano":"Cafeteria · First-floor entrance",
   "Mensa · Ingresso dal cortile":"Cafeteria · Courtyard entrance","Banco del pranzo":"Lunch counter",

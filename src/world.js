@@ -57,10 +57,13 @@ function updateGardenStudentNames(map){
     if(names&&student.name===names[0])student.name=names[1];
   }
 }
-const campusOutline=[[20,8],[24,9],[29,12],[34,14],[42,17],[49,19],[61,25],[73,38],[84,49],[85,60],[83,73],[68,91],[9,78],[5,53],[13,28],[17,15]];
-function insideCampusOutline(x,y){
-  return campusOutline.reduce((inside,[ax,ay],i)=>{
-    const [bx,by]=campusOutline[(i+1)%campusOutline.length];
+const legacyCampusOutline=[[20,8],[24,9],[29,12],[34,14],[42,17],[49,19],[61,25],[73,38],[84,49],[85,60],[83,73],[68,91],[9,78],[5,53],[13,28],[17,15]];
+function campusOutlineFor(zone){
+  return zoneObjects(zone).byId.has("cinta-plan-22:8")?romaniaBoundary:legacyCampusOutline;
+}
+function insideCampusOutline(x,y,outline=romaniaBoundary){
+  return outline.reduce((inside,[ax,ay],i)=>{
+    const [bx,by]=outline[(i+1)%outline.length];
     return (ay>y)!==(by>y)&&x<(bx-ax)*(y-ay)/(by-ay)+ax?!inside:inside;
   },false);
 }
@@ -103,7 +106,7 @@ function refineRomania(map){
   }
   return map;
 }
-const originalMap=normalizeCampus(installVillaAda(refineRomania(furnishCampusGardens(addRadioVan(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))))))));
+const originalMap=normalizeCampus(refineRomania(installPola(addRadioVan(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,25],
@@ -113,6 +116,18 @@ for(const [uid,x,y] of [
   const object=originalMap.zones.giardino.objects.find(item=>item.uid===uid);
   Object.assign(object,{x,y});
 }
+
+arrangeRomaniaSurfaces(originalMap.zones.giardino);
+traceRomaniaCampus(originalMap.zones.giardino);
+installVillaAda(originalMap);
+updateCampusPlaces(originalMap);
+furnishCampusGardens(originalMap);
+const firstFloor=originalMap.zones.primo;
+firstFloor.objects=firstFloor.objects.filter(o=>!(o.kind==="grass"||o.uid==="primo-31"||o.uid==="primo-32"));
+Object.assign(originalMap.zones,normalizeCampus({version:1,zones:{
+  ingresso:originalMap.zones.ingresso,giardino:originalMap.zones.giardino,
+  "villa-ada":originalMap.zones["villa-ada"],mensa:originalMap.zones.mensa
+}}).zones);
 
 const oldEntrance=[{"uid":"ingresso-guardia","kind":"guard","name":"Guardia","x":4,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#6089aa","solid":true,"action":"native","native":"guardia","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-bacheca","kind":"sign","name":"Bacheca","x":10,"y":5,"w":1,"h":1,"rotation":0,"variant":0,"color":"#d1ae72","solid":true,"action":"native","native":"bacheca","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-varco","kind":"turnstile","name":"Tornello","x":17,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#84958a","solid":true,"action":"native","native":"varco","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-start","kind":"entrance","name":"Punto di ingresso","x":3,"y":6,"w":1,"h":1,"rotation":0,"variant":0,"color":"#d1af6d","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-4","kind":"paving","name":"Pavimentazione","x":3,"y":2,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-5","kind":"paving","name":"Pavimentazione","x":16,"y":2,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-6","kind":"paving","name":"Pavimentazione","x":3,"y":3,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-7","kind":"paving","name":"Pavimentazione","x":16,"y":3,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-8","kind":"paving","name":"Pavimentazione","x":0,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-9","kind":"paving","name":"Pavimentazione","x":1,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-10","kind":"paving","name":"Pavimentazione","x":2,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-11","kind":"paving","name":"Pavimentazione","x":3,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-12","kind":"paving","name":"Pavimentazione","x":4,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-13","kind":"paving","name":"Pavimentazione","x":5,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-14","kind":"paving","name":"Pavimentazione","x":6,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-15","kind":"paving","name":"Pavimentazione","x":7,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-16","kind":"paving","name":"Pavimentazione","x":8,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-17","kind":"paving","name":"Pavimentazione","x":9,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-18","kind":"paving","name":"Pavimentazione","x":10,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-19","kind":"paving","name":"Pavimentazione","x":11,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-20","kind":"paving","name":"Pavimentazione","x":12,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-21","kind":"paving","name":"Pavimentazione","x":13,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-22","kind":"paving","name":"Pavimentazione","x":14,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-23","kind":"paving","name":"Pavimentazione","x":15,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-24","kind":"paving","name":"Pavimentazione","x":16,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-25","kind":"paving","name":"Pavimentazione","x":17,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-26","kind":"paving","name":"Pavimentazione","x":18,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-27","kind":"paving","name":"Pavimentazione","x":19,"y":4,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-28","kind":"paving","name":"Pavimentazione","x":3,"y":5,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-29","kind":"paving","name":"Pavimentazione","x":16,"y":5,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-30","kind":"paving","name":"Pavimentazione","x":3,"y":6,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-31","kind":"paving","name":"Pavimentazione","x":16,"y":6,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-32","kind":"paving","name":"Pavimentazione","x":0,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-33","kind":"paving","name":"Pavimentazione","x":1,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-34","kind":"paving","name":"Pavimentazione","x":2,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-35","kind":"paving","name":"Pavimentazione","x":3,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-36","kind":"paving","name":"Pavimentazione","x":4,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-37","kind":"paving","name":"Pavimentazione","x":5,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-38","kind":"paving","name":"Pavimentazione","x":6,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-39","kind":"paving","name":"Pavimentazione","x":7,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-40","kind":"paving","name":"Pavimentazione","x":8,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-41","kind":"paving","name":"Pavimentazione","x":9,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-42","kind":"paving","name":"Pavimentazione","x":10,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-43","kind":"paving","name":"Pavimentazione","x":11,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-44","kind":"paving","name":"Pavimentazione","x":12,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-45","kind":"paving","name":"Pavimentazione","x":13,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-46","kind":"paving","name":"Pavimentazione","x":14,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-47","kind":"paving","name":"Pavimentazione","x":15,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-48","kind":"paving","name":"Pavimentazione","x":16,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-49","kind":"paving","name":"Pavimentazione","x":17,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-50","kind":"paving","name":"Pavimentazione","x":18,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-51","kind":"paving","name":"Pavimentazione","x":19,"y":7,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-52","kind":"paving","name":"Pavimentazione","x":3,"y":8,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-53","kind":"paving","name":"Pavimentazione","x":16,"y":8,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-54","kind":"paving","name":"Pavimentazione","x":3,"y":9,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-55","kind":"paving","name":"Pavimentazione","x":16,"y":9,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-56","kind":"paving","name":"Pavimentazione","x":3,"y":10,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-57","kind":"paving","name":"Pavimentazione","x":16,"y":10,"w":1,"h":1,"rotation":0,"variant":0,"color":"#a59a87","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-58","kind":"road","name":"Asfalto","x":0,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-59","kind":"road","name":"Asfalto","x":1,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-60","kind":"road","name":"Asfalto","x":2,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-61","kind":"road","name":"Asfalto","x":3,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-62","kind":"road","name":"Asfalto","x":4,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-63","kind":"road","name":"Asfalto","x":5,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-64","kind":"road","name":"Asfalto","x":6,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-65","kind":"road","name":"Asfalto","x":7,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-66","kind":"road","name":"Asfalto","x":8,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-67","kind":"road","name":"Asfalto","x":9,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-68","kind":"road","name":"Asfalto","x":10,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-69","kind":"road","name":"Asfalto","x":11,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-70","kind":"road","name":"Asfalto","x":12,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-71","kind":"road","name":"Asfalto","x":13,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-72","kind":"road","name":"Asfalto","x":14,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-73","kind":"road","name":"Asfalto","x":15,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-74","kind":"road","name":"Asfalto","x":16,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-75","kind":"road","name":"Asfalto","x":17,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-76","kind":"road","name":"Asfalto","x":18,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-77","kind":"road","name":"Asfalto","x":19,"y":11,"w":1,"h":1,"rotation":0,"variant":0,"color":"#687078","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-78","kind":"tree","name":"Albero","x":0.0625,"y":9.7,"w":1.15,"h":1.4,"rotation":0,"variant":0,"color":"#4c7553","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-79","kind":"tree","name":"Albero","x":2.9375,"y":9.7,"w":1.15,"h":1.4,"rotation":0,"variant":0,"color":"#4c7553","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-80","kind":"tree","name":"Albero","x":5.125,"y":9.7,"w":1.15,"h":1.4,"rotation":0,"variant":0,"color":"#4c7553","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-81","kind":"tree","name":"Albero","x":13.875,"y":9.7,"w":1.15,"h":1.4,"rotation":0,"variant":0,"color":"#4c7553","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-82","kind":"tree","name":"Albero","x":17.25,"y":9.7,"w":1.15,"h":1.4,"rotation":0,"variant":0,"color":"#4c7553","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]},{"uid":"ingresso-83","kind":"tree","name":"Albero","x":18.75,"y":9.7,"w":1.15,"h":1.4,"rotation":0,"variant":0,"color":"#4c7553","solid":false,"action":"","native":"","text":"","target":"","gate":"","missionTarget":"","auto":false,"behavior":"idle","speed":1.7,"route":[]}];
 let campus=loadCampus();
@@ -259,16 +274,20 @@ function loadCampus(){
           }
         }
       }
-      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);addRadioVan(map);}
       if(!embedded){
-        const prior=Object.fromEntries(polaZones.map(id=>[id,map.zones[id]?.width]));
-        installPola(map);
-        for(const id of polaZones){
-          if(prior[id]===map.zones[id]?.width)continue;
-          map.zones[id]=normalizeCampus({version:1,zones:{ingresso:map.zones.ingresso,[id]:map.zones[id]}}).zones[id];
+        if(map.zones.dome?.name==="The Dome · Sala studio")map.zones.dome.name=originalMap.zones.dome.name;
+        if(map.zones.dome2?.name==="The Dome 2 · Padiglione ovest")map.zones.dome2.name=originalMap.zones.dome2.name;
+        const revisedZones={giardino:[3770965331,785279541,2540694351,2053466179],primo:[1116216150,713528194],mensa:[4059249112]};
+        for(const [id,hashes] of Object.entries(revisedZones)){
+          const prior=map.zones[id], latest=originalMap.zones[id];
+          if(!prior||(id!=="mensa"&&(prior.width!==latest.width||prior.height!==latest.height))||
+              !hashes.includes(gardenFingerprint(prior.objects)))continue;
+          map.zones[id]={...structuredClone(latest),name:id==="mensa"?latest.name:prior.name,plan:prior.plan};
         }
         furnishCampusGardens(map);
       }
+      if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);addRadioVan(map);installPola(map);}
+      if(!embedded)furnishCampusGardens(map);
       return embedded?map:normalizeCampus(installVillaAda(refineRomania(map)));
     }
   }catch{}
@@ -411,10 +430,13 @@ function groundTile(c,kind,x,y,hex,variant=0){
     rect(c,"#ead4ac65",x*16+seed,y*16+4,2,1);
     rect(c,"#705c4440",x*16+2,y*16+seed,1,1);
   }else if(kind==="road"){
-    if(x%2===0)rect(c,"#e9d8a77a",x*16+1,y*16+8,14,1);
+    const fleck=(x*7+y*5)%13;
+    rect(c,"#acb5be29",x*16+fleck,y*16+5,2,1);
   }else{
+    const seam=kind==="paving"?(y%2)*8:0;
     rect(c,"#272a3836",x*16,y*16,16,1);
-    if(kind==="paving"||kind==="floor")rect(c,"#fff0bf19",x*16+7+(y%2)*5,y*16,1,16);
+    rect(c,"#272a3830",x*16+seam,y*16+1,1,15);
+    rect(c,"#fff0bf19",x*16+1,y*16+1,15,1);
   }
 }
 function drawObject(c,o,now=0,editing=false){
@@ -624,6 +646,13 @@ function drawObject(c,o,now=0,editing=false){
         face("#6e423833",tall?[sw,r2,se]:[ne,se,r2]);
         const bays=Math.max(3,Math.round(w/14));
         for(let i=0;i<bays;i++)box("#515654",(i+.34)*16/bays,14,5/bays,.9);
+        if(o.uid==="main-gatehouse"&&o.name==="LUISS Shop"){
+          box("#30253c",2.7,11.6,10.6,2.6);
+          c.save();c.scale(16/w,16/h);
+          c.fillStyle="#fff1d7";c.textAlign="center";c.font="bold 9px sans-serif";
+          c.fillText(o.name,w/2,h*.84,w*.62);
+          c.restore();
+        }
         if(o.kind==="chapel"){box("#ebd9b3",6,13.5,4,2.2);box("#66574c",7,14,2,1.7);}
         break;
       }
@@ -655,7 +684,7 @@ function drawObject(c,o,now=0,editing=false){
         c.restore();
         break;
       }
-      case "wall":box(shadow,0,1,16,14);box(color,0,2,16,10);box(light,0,2,16,2);box("#141d213a",0,9,16,1);break;
+      case "wall":box(shadow,0,0,16,16);box(color,0,2,16,10);box(light,0,2,16,2);box("#141d213a",0,9,16,1);break;
       case "door":case "turnstile":
         box(shadow,2,2,12,13);
         if(o.gate&&!gateLocked(o.gate)&&!editing)box(color,2,2,3,12);
@@ -722,26 +751,6 @@ function drawObject(c,o,now=0,editing=false){
   }
   c.restore();
 }
-// Campus perimeter and street alignment traced against the reference plan.
-function paintRomaniaEdges(c){
-  c.save();c.scale(16,16);
-  c.beginPath();c.rect(0,0,144,144);
-  c.moveTo(23,5);c.bezierCurveTo(46,11,60,17,70,28);
-  c.bezierCurveTo(81,41,88,56,86,70);
-  c.lineTo(83,87);c.lineTo(64,92);c.lineTo(9,78);
-  c.lineTo(7,45);c.bezierCurveTo(8,28,15,15,23,5);c.closePath();
-  c.fillStyle="#34464a45";c.fill("evenodd");
-  c.lineCap="round";c.lineJoin="round";
-  const street=(trace)=>{
-    c.beginPath();trace();
-    c.lineWidth=4.5;c.strokeStyle="#ad9c82";c.stroke();
-    c.lineWidth=3.65;c.strokeStyle="#535d66";c.stroke();
-    c.lineWidth=.07;c.strokeStyle="#f1d9a298";c.setLineDash([.55,.48]);c.stroke();c.setLineDash([]);
-  };
-  if(!hasIntegratedEntrance())street(()=>{c.moveTo(2,78);c.bezierCurveTo(17,80,28,84,41,88);c.lineTo(79,98);c.lineTo(91,101);});
-  street(()=>{c.moveTo(22,3);c.bezierCurveTo(55,9,75,25,82,42);c.bezierCurveTo(91,56,92,66,89,79);});
-  c.restore();
-}
 // Use the same road centerline for asphalt, lane markings and traffic.
 function paintVialeRoad(c,left,right){
   c.save();
@@ -759,7 +768,6 @@ function paintVialeRoad(c,left,right){
     c.lineWidth=width;c.strokeStyle=color;c.stroke();
   }
   for(let x=Math.ceil(start);x<end;x++){
-    if(x>=17&&x<37)continue;
     const center=vialeRoadY(x+.5)+.5;
     c.fillStyle="#8f8b7e";
     c.fillRect(x,center-2.04,.045,.42);
@@ -782,29 +790,24 @@ function paintVialeRoad(c,left,right){
 }
 // Resurface the straight stretch at the gate using its existing walkable tiles.
 function paintEntranceStreet(c,id,z,tiles,left,top,right,bottom){
-  if(id!=="ingresso"&&(id!=="giardino"||top>=vialeEntrance.y+17||bottom<=vialeEntrance.y+12||
-      right<=vialeEntrance.x+8||left>=vialeEntrance.x+28))return;
-  const integrated=id==="giardino"&&z.objects.some(o=>o.uid==="viale-ingresso-start"&&o.x===22&&o.y===86);
-  if(id!=="ingresso"&&!integrated)return;
-  const ox=integrated?vialeEntrance.x:0,oy=integrated?vialeEntrance.y:0;
-  const from=integrated?ox+9:0,to=integrated?ox+29:z.width;
+  if(id!=="ingresso")return;
+  const ox=0,oy=0,from=0,to=z.width;
   if(left>=to||right<=from||top>=oy+17||bottom<=oy+12)return;
-  const crossing=z.objects.find(o=>o.uid===(integrated?"viale-":"")+"crosswalk-14"&&o.y===oy+14&&o.rotation===0);
+  const crossing=z.objects.find(o=>o.uid==="crosswalk-14"&&o.y===oy+14&&o.rotation===0);
   for(let y=Math.max(top,oy+12);y<Math.min(bottom,oy+17);y++){
     const row=y-oy;
     for(let x=Math.max(left,from);x<Math.min(right,to);x++){
       const tile=tiles.get(x+y*z.width);
-      if(!tile||!tile.uid.startsWith(integrated?"viale-romania-":"romania-"))continue;
+      if(!tile||!tile.uid.startsWith("romania-"))continue;
       const px=x*16,py=y*16;
       const crosswalk=crossing&&x>=crossing.x&&x<crossing.x+crossing.w;
       if(tile.kind==="road"&&row>=13&&row<=15){
-        const atJoin=integrated&&(x===from||x===to-1);
-        rect(c,atJoin?"#505c69":row===14?"#4a5562":"#4e5966",px,py,16,16);
+        rect(c,row===14?"#4a5562":"#4e5966",px,py,16,16);
         const fleck=(x*7+y*5)%13;
         rect(c,"#5b6571",px+fleck,py+5,2,1);
         rect(c,"#3f4854",px+(fleck+7)%13,py+12,2,1);
-        if(row===13&&!atJoin)rect(c,"#394550",px,py,16,2);
-        if(row===15&&!atJoin)rect(c,"#394550",px,py+14,16,2);
+        if(row===13)rect(c,"#394550",px,py,16,2);
+        if(row===15)rect(c,"#394550",px,py+14,16,2);
         if(row===14&&x%2===0&&!crosswalk)rect(c,"#d5c89f",px+2,py+8,12,1);
         if((x===ox+10||x===ox+24)&&row!==14){
           const east=row===13,tip=px+(east?12:3);
@@ -874,138 +877,42 @@ function paintCampusBoundary(c,zone,left,top,right,bottom){
   }
   c.restore();
 }
-// Trace continuous stonework from the original wall cells, leaving the mapped
-// gates and collision footprints in place.
-const perimeterCache=new WeakMap();
-function isPerimeterWall(o){
-  return o.kind==="wall"&&o.rotation===0&&[o.x,o.y,o.w,o.h].every(Number.isInteger)&&
-    (o.uid.startsWith("cinta-")||o.uid.startsWith("viale-tornello-")||
-     /^viale-romania-25[12]$/.test(o.uid));
-}
-function perimeterArtwork(objects,width,editing){
-  if(!editing&&perimeterCache.has(objects))return perimeterCache.get(objects);
-  const cells=new Set();
-  for(const o of objects){
-    if(!isPerimeterWall(o))continue;
-    for(let y=o.y;y<o.y+o.h;y++)for(let x=o.x;x<o.x+o.w;x++)cells.add(x+y*width);
-  }
-  const outline=new Path2D(),footprint=new Path2D(),piers=[],edges=new Map();
-  const stride=width+1;
-  const edge=(a,b)=>{
-    if(!edges.has(a))edges.set(a,new Set());
-    edges.get(a).add(b);
-  };
-  for(const cell of cells){
-    const x=cell%width,y=Math.floor(cell/width),v=x+y*stride;
-    const n=cells.has(cell-width),s=cells.has(cell+width);
-    const w=x>0&&cells.has(cell-1),e=x+1<width&&cells.has(cell+1);
-    if(!n)edge(v,v+1);
-    if(!e)edge(v+1,v+stride+1);
-    if(!s)edge(v+stride+1,v+stride);
-    if(!w)edge(v+stride,v);
-    footprint.rect(x*16,y*16,16,16);
-    if(((n&&s&&!e&&(x+y)%8===0)||(w&&e&&!s&&(x+y)%8===0)))piers.push([x*16,y*16]);
-  }
-  const directions=[1,stride,-1,-stride];
-  while(edges.size){
-    const start=edges.keys().next().value,loop=[start];
-    let from=start,to=edges.get(start).values().next().value;
-    for(;;){
-      const outgoing=edges.get(from);
-      outgoing.delete(to);
-      if(!outgoing.size)edges.delete(from);
-      if(to===start)break;
-      const direction=directions.indexOf(to-from),next=edges.get(to);
-      loop.push(to);from=to;
-      to=[1,0,3,2].map(turn=>from+directions[(direction+turn)%4]).find(v=>next?.has(v));
-      if(to===undefined)break;
-    }
-    const corners=loop.filter((v,i)=>v-loop[(i+loop.length-1)%loop.length]!==loop[(i+1)%loop.length]-v);
-    const point=v=>[v%stride*16,Math.floor(v/stride)*16];
-    corners.forEach((v,i)=>{
-      const [x,y]=point(v),[px,py]=point(corners[(i+corners.length-1)%corners.length]);
-      const [nx,ny]=point(corners[(i+1)%corners.length]);
-      const enter=[x+Math.sign(px-x)*6,y+Math.sign(py-y)*6];
-      const leave=[x+Math.sign(nx-x)*6,y+Math.sign(ny-y)*6];
-      if(i===0)outline.moveTo(...enter);else outline.lineTo(...enter);
-      outline.quadraticCurveTo(x,y,...leave);
-    });
-    outline.closePath();
-  }
-  const artwork={outline,footprint,piers};
-  if(!editing)perimeterCache.set(objects,artwork);
-  return artwork;
-}
-function paintPerimeter(c,{outline,footprint,piers},left,top,right,bottom){
-  c.save();
-  c.clip(footprint);
-  c.fillStyle="#958873";c.fill(outline);
-  c.clip(outline);
-  c.lineJoin="round";
-  c.lineWidth=7;c.strokeStyle="#726b5c";c.stroke(outline);
-  c.translate(-1,-1);
-  c.lineWidth=3;c.strokeStyle="#cbbc9d";c.stroke(outline);
-  c.translate(1,1);
-  for(const [x,y] of piers){
-    if(x<left*16||x>=right*16||y<top*16||y>=bottom*16)continue;
-    rect(c,"#746858",x+3,y+3,11,11);
-    rect(c,"#baaa8e",x+3,y+3,10,9);
-    rect(c,"#d0c09e",x+4,y+3,8,2);
-  }
-  c.restore();
-}
+const grassEdges=[[0,-1,0,0,16,2],[1,0,14,0,2,16],[0,1,0,14,16,2],[-1,0,0,0,2,16]];
 function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   const z=room(id);
   const margin=2,left=Math.max(0,Math.floor(view.x/16)-margin),top=Math.max(0,Math.floor(view.y/16)-margin);
   const right=Math.min(z.width,Math.ceil((view.x+view.w)/16)+margin);
   const bottom=Math.min(z.height,Math.ceil((view.y+view.h)/16)+margin);
+  const curvedRoad=!editing&&id==="giardino"&&z.width>=144&&hasIntegratedEntrance();
   let tiles;
   if(visible.terreno){
+    const outline=id==="giardino"&&z.width===144?campusOutlineFor(z):null;
     tiles=editing?null:terrainCache.get(z);
     if(!tiles){tiles=terrainMap(z);if(!editing)terrainCache.set(z,tiles);}
     for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
       const tile=tiles.get(x+y*z.width);
-      const outside=id==="giardino"&&z.width===144&&(tile?.kind??z.ground)==="grass"&&!insideCampusOutline(x+.5,y+.5);
+      const outside=outline&&(tile?.kind??z.ground)==="grass"&&!insideCampusOutline(x+.5,y+.5,outline);
       if(outside)rect(c,"#53595b",x*16,y*16,16,16);
-      else groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
+      else if(curvedRoad&&tile?.uid.startsWith("romania-surface-carreggiata-")){
+        groundTile(c,"paving",x,y,"#a49a87");
+      }else groundTile(c,tile?.kind??z.ground,x,y,tile?.color,tile?.variant);
+      if(!outside&&(tile?.kind??z.ground)==="grass"){
+        for(const [dx,dy,px,py,w,h] of grassEdges){
+          const xx=x+dx,yy=y+dy;
+          if(xx<0||xx>=z.width||yy<0||yy>=z.height)continue;
+          const kind=tiles.get(xx+yy*z.width)?.kind??z.ground;
+          if(kind==="paving"||kind==="floor")rect(c,"#b6aa90",x*16+px,y*16+py,w,h);
+        }
+      }
     }
   }
-  const panama=editing?null:zoneObjects(z).byId.get("entry-from-panama");
-  if(visible.terreno&&id==="giardino"&&z.width===144&&panama?.x===72&&panama.y===47)paintRomaniaEdges(c);
-  if(tiles&&id==="giardino"&&top<98&&bottom>78&&z.width>=144&&hasIntegratedEntrance()){
+  if(tiles&&curvedRoad&&top<98&&bottom>78){
     paintVialeRoad(c,left,right);
   }
   if(tiles)paintEntranceStreet(c,id,z,tiles,left,top,right,bottom);
-  // Connect the existing garden walks around the planted islands north of the bar.
-  const bosco=editing?z.objects.find(o=>o.uid==="bosco-studio"):zoneObjects(z).byId.get("bosco-studio");
-  if(visible.terreno && id==="giardino" && left<78 && right>11 && top<74 && bottom>13 &&
-      bosco?.x===34 && bosco.y===24){
-    const tiles=editing?terrainMap(z):terrainCache.get(z);
-    c.save();c.beginPath();
-    for(let y=Math.max(top,13);y<Math.min(bottom,74);y++)
-      for(let x=Math.max(left,11);x<Math.min(right,78);x++)
-        if((tiles.get(x+y*z.width)?.kind??z.ground)==="grass")c.rect(x*16,y*16,16,16);
-    c.clip();c.scale(16,16);
-    c.beginPath();c.moveTo(16,40);c.bezierCurveTo(14,35,19,32,22,30);
-    c.bezierCurveTo(26,27,26,19,32,20);c.bezierCurveTo(38,20,39,24,42,24);
-    c.moveTo(22,30);c.bezierCurveTo(28,31,30,28,32,25);
-    c.moveTo(22,73);c.bezierCurveTo(21,62,16,58,16,40);
-    c.moveTo(42,24);c.bezierCurveTo(50,24,58,30,63,34);
-    c.bezierCurveTo(68,38,69,45,72,47);
-    c.moveTo(72,47);c.bezierCurveTo(76,52,77,60,74,64);
-    c.moveTo(22,73);c.bezierCurveTo(25,68,28,65,36,64);
-    c.moveTo(37,66);c.bezierCurveTo(38,70,43,76,48,79);
-    c.moveTo(42,35);c.bezierCurveTo(43,40,52,44,59,54);
-    c.bezierCurveTo(66,57,71,59,78,60);
-    c.lineCap="round";c.lineWidth=1.65;c.strokeStyle="#8c9470";c.stroke();
-    c.lineWidth=1.4;c.strokeStyle="#b9a584";c.stroke();c.restore();
-  }
-  // paintCampusBoundary (tratto a linee, branch story) è tenuta ma non attiva: il perimetro lo disegna paintPerimeter (main).
+  if(!editing&&visible.edifici)paintCampusBoundary(c,z,left,top,right,bottom);
   const foreground=[];
-  const objects=editing?z.objects:sceneObjects(z);
-  const connected=id==="giardino"&&visible.edifici;
-  if(connected)paintPerimeter(c,perimeterArtwork(objects,z.width,editing),left,top,right,bottom);
-  for(const raw of objects){
+  for(const raw of editing?z.objects:continuousWalls(z)){
     const layer=kindLayer(raw);
     if(!visible[layer]||layer==="terreno")continue;
     const o=positionOf(raw,editing?0:isVehicle(raw)?trafficClock:now,z.width);
@@ -1014,7 +921,6 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
       drawObject(c,o,now,editing);
       continue;
     }
-    if(connected&&isPerimeterWall(o))continue;
     foreground.push({row:o.y+o.h,draw:()=>drawObject(c,o,now,editing)});
   }
   if(player)foreground.push(player);
