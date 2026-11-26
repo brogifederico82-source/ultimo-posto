@@ -566,6 +566,7 @@ function loreStili(){
 .lore-toast small{display:block;font:700 11px var(--font-title);letter-spacing:.06em;color:#f2c968}
 .lore-toast b{display:block;font:700 18px/1.2 var(--font-ui)}
 .lore-toast em{display:block;font:400 14px/1.3 var(--font-ui);color:#a9c4d3;font-style:normal;margin-top:2px}
+@media (max-width:640px),(max-height:520px){.lore-toast{top:calc(max(14px,env(safe-area-inset-top)) + 60px);max-width:86vw;padding:8px 10px;gap:8px;pointer-events:none}.lore-toast b{font-size:14px}.lore-toast em{font-size:12px}.lore-toast small{font-size:9px}}
 .lt-gem{flex:none;position:relative;width:30px;height:30px;background:#f2c968;clip-path:polygon(50% 0,100% 38%,50% 100%,0 38%);animation:lt-gira 1.6s steps(8) infinite}
 .lt-gem::after{content:"";position:absolute;left:30%;top:18%;width:20%;height:20%;background:#fff}
 .lore-toast.lt-speciale{border-color:#7fc9bb}.lore-toast.lt-speciale .lt-gem{background:#7fc9bb}
