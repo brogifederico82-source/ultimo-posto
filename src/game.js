@@ -659,7 +659,8 @@ function polaParty(){
       state.polaCapThrown=true;
       polaThrowAt=performance.now();
       chime([60,64,67,76],.085);
-    }]);
+    }],
+    ["Ripensa al tuo semestre",ideeOpenRecap]);
   if(!state.graduationSpeech)return scene("Pola · Preparativi nel cortile",
     "Nel cortile Chiara conta le sedie pieghevoli e ne rimette una in fila. «Alla laurea di mia sorella sono arrivata quando stavano già sparecchiando. Da allora chiedo sempre chi deve ancora arrivare.» Ti porge la lista degli invitati. «Mi dai una mano prima del discorso?»",
     ...Object.entries(partyChoices).map(([id,choice])=>[choice.label,()=>{
@@ -1035,6 +1036,7 @@ function renderScene(){
   $("log").append(pockets);
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
   ambienteScena();
+  ideeRender();
 }
 const stage=$("stage").getContext("2d");
 const cover=$("cover").getContext("2d");

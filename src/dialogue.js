@@ -271,9 +271,9 @@ function conversationFor(o){
   const translatedIntro=Object.hasOwn(campusEnglishIntros,o.uid)?campusEnglishIntros[o.uid]:null;
   const profile=conversation&&translatedIntro&&locale==="en"
     ?[translatedIntro,...conversation.slice(1)]:conversation;
-  if(o.uid!=="cerca-sigaretta"||!has("Biglietto del 360 bis"))return profile;
-  return [local("Andrea controlla l’orologio. «Vedi? Anche oggi il 360 bis è perfettamente in ritardo.»",
-    "Andrea checks his watch. “See? The 360 bis is perfectly late again today.”"),...profile.slice(1)];
+  if(o.uid!=="cerca-sigaretta"||!has("Biglietto del 360 bis"))return ideeTune(o,profile);
+  return ideeTune(o,[local("Andrea controlla l’orologio. «Vedi? Anche oggi il 360 bis è perfettamente in ritardo.»",
+    "Andrea checks his watch. “See? The 360 bis is perfectly late again today.”"),...profile.slice(1)]);
 }
 function speechChoice(o,prompt,reply){
   return [prompt,()=>{state.chatTopic={uid:o.uid,prompt,reply};}];
@@ -448,6 +448,7 @@ function andreaChoice(o){
   }];
 }
 function campusOptionalScene(sceneData,o){
+  ideeChoices(sceneData,o);
   const andrea=andreaChoice(o);
   if(andrea)sceneData.choices.unshift(andrea);
   const tapeChoice=radioTapeChoice(o);
@@ -479,15 +480,19 @@ function getScene(){
     state.ending=null;[state.x,state.y]=reachEntry(state.zone,atViale(state)&&hasIntegratedEntrance()?"viale":state.zone==="giardino"?"ingresso":undefined);
     keys.clear();controls.clear();activeScene=null;
   }]);
-  if(state.ending)return scene(state.ending.title,state.ending.text,
+  if(state.ending)return scene(state.ending.title,state.ending.text+(has("Festa a Pola")&&!testMode?"\n\n"+ideeRecap():""),
     testMode?["Torna all’editor",()=>leaveTest()]:["Continua il percorso",()=>{state.ending=null;activeScene=null;}]);
   if(state.freeMoment)return scene(state.freeMoment.title,state.freeMoment.text);
+  const ideeEvento=ideeEventScene();
+  if(ideeEvento)return ideeEvento;
   const o=currentObject();
   if(!o&&isFree())return scene("Modalità libera","Gira per il campus, parla con chi incontri e gioca sulla terrazza. Premi E vicino a qualcuno per iniziare.");
   if(!o&&atViale(state))return scene("Viale Romania 32","Attraversa il viale quando si libera, poi mostra il badge alla guardia vicino ai pilastri. WASD o frecce per muoverti, E per parlare.");
   if(!o)return scene("Cerca un posto per studiare","Avvicinati a persone, porte e oggetti e premi E. Apri la mappa sotto i comandi per orientarti.");
   const villaScene=villaAdaScene(o);
   if(villaScene)return villaScene;
+  const ideeScena=ideeObjectScene(o);
+  if(ideeScena)return ideeScena;
   if(o.uid==="pola-inside"&&!polaAuthorized())return polaParty();
   if(gateLocked(o.gate))return scene(o.name,"Per sbloccarlo, vinci a "+challengeNames[o.gate].toLowerCase()+".");
   const note=o.text||"Sei vicino a "+o.name+".";
@@ -821,6 +826,7 @@ function frame(now){
     if(!reducedMotion&&!$("speakerPortrait").hidden&&Math.floor(now/85)!==Math.floor((now-delta)/85))paintSpeaker(now);
     trafficImpact();
     tickVillaAda(now);
+    tickIdee(now);
     nearbyTrafficSound(now);
     tickSmoking(now);
     if(!exploringCampus())queuedTap=null;
