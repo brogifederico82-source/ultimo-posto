@@ -689,6 +689,25 @@ function polaParty(){
     ["Torna ai preparativi",()=>{state.graduationSpeech=null;state.polaPreparation=null;}]);
 }
 
+let vialeEncounterEffect=null;
+function vialeEncounterScene(npc){
+  const purse=wallet(),cost=5;
+  const offer=npc.uid==="viale-nadia"
+    ?local("«Mi chiamo Nadia. Se cerchi compagnia, sono cinque monete.»","“I'm Nadia. If you're looking for company, it's five coins.”")
+    :local("«Sono Mila. Un momento in privato? Cinque monete.»","“I'm Mila. A moment in private? Five coins.”");
+  const balance=local("Saldo: ","Balance: ")+purse.coins;
+  if(purse.coins<cost)return scene(npc.name,offer+" "+balance+" · "+
+    local("Ti servono 5 monete.","You need 5 coins."));
+  return scene(npc.name,offer+" "+balance,
+    [local("Accetta · 5 monete","Accept · 5 coins"),()=>{
+      if(currentObject()?.uid!==npc.uid||wallet().coins<cost)return;
+      wallet().coins-=cost;
+      vialeEncounterEffect={zone:state.zone,x:state.x,y:state.y,start:performance.now()};
+      sound("buy","map");
+      activeScene=null;
+    }]);
+}
+
 function nativeScene(id){
   const t=state.traits;
   if(nativeDoors[id])return scene(room(nativeDoors[id]).name,"Da questa parte, secondo il cartello più ottimista.",["Vai",()=>travel(nativeDoors[id])]);
@@ -798,6 +817,7 @@ function nativeScene(id){
       "“Up for a one-on-one? First to five goals. We can warm up first if you like.”"),
       [local("Gioca a calcetto","Play football"),()=>openChallenge("calcetto")],
       [local("Allenati","Practice"),()=>openChallenge("calcetto",true)]);
+    case "incontro-viale":return vialeEncounterScene(currentObject());
     case "tabaccheria":return tobaccoShopScene();
     case "rosticceria":return scene(local("Rosticceria · Viale Romania","Rotisserie · Viale Romania"),
       local("«Supplì appena fritti! Se esci dal campus tardi, ti tengo da parte l’ultimo.»",

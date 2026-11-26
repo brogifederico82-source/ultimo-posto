@@ -598,10 +598,10 @@ function drawObject(c,o,now=0,editing=false){
     if(o.native==="trend"){
       sprite(c,{...appearance,capelli:5,tinta:2,abito:3},21,15,(Math.floor(now/170)+1)%3,"down",.89);
     }
-    if(o.kind==="heatedStudent"){
+    if(o.kind==="heatedStudent"||o.native==="incontro-viale"){
       box("#e9e0d4",12,6,2,1);box("#9b8c80",14,6,1,1);
       const cycle=(Math.floor(now/210)+o.x)%17;
-      if(now&&cycle<4){
+      if(now&&cycle<4&&(o.kind==="heatedStudent"||!reducedMotion)){
         box("#e5dec87a",14+cycle/2,5-cycle,2,1);
         if(cycle>1)box("#dfd8bb42",15+cycle/2,3-cycle,2,1);
       }
@@ -1032,6 +1032,24 @@ function worldView(c,id,now,view,visible=layers,editing=false,player=null){
   }
   if(player)foreground.push(player);
   foreground.sort((a,b)=>a.row-b.row).forEach(o=>o.draw());
+  const effect=editing?null:vialeEncounterEffect;
+  if(effect?.zone===id){
+    const progress=(performance.now()-effect.start)/700;
+    if(progress>=1)vialeEncounterEffect=null;
+    else{
+      const elapsed=reducedMotion ? .45 : progress;
+      const originX=(effect.x+.5)*16,originY=(effect.y+.5)*16;
+      c.save();
+      c.globalAlpha=1-progress;
+      for(let i=0;i<9;i++){
+        const angle=(i-4)*.15;
+        const distance=(18+i*2)*elapsed;
+        rect(c,"#fff",originX+Math.sin(angle)*distance,
+          originY-Math.cos(angle)*distance+22*elapsed*elapsed,i%2?2:3,2);
+      }
+      c.restore();
+    }
+  }
 }
 const systemReducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches??false;
 let reducedMotion=systemReducedMotion;

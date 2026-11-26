@@ -129,7 +129,19 @@ function addVialeArcade(map){
     if(area.objects.some(o=>o.solid&&o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+1&&o.y+(o.h??1)>y))continue;
     area.objects.push({uid,kind:"booth",name,x,y,w,h:1,color,solid:true,action:"native",native,gate:"",target:"",route:[],rotation:0,variant:0});
   }
-  if(integrated)plantVialeShopfronts(garden);
+  if(integrated){
+    plantVialeShopfronts(garden);
+    const roadEnd=vialeRoad.at(-1)[0];
+    for(const [uid,name,x,color] of [
+      ["viale-nadia","Nadia",roadEnd-5,"#a64070"],
+      ["viale-mila","Mila",roadEnd-3,"#396f87"]
+    ]){
+      const y=Math.round(vialeRoadY(x))+3;
+      if(x>=garden.width||y>=garden.height||garden.objects.some(o=>o.uid===uid))continue;
+      garden.objects.push({uid,name,x,y,color,kind:"student",w:1,h:1,action:"native",
+        native:"incontro-viale",behavior:"idle",rotation:0,variant:0,route:[]});
+    }
+  }
   return map;
 }
 function plantVialeShopfronts(garden){
