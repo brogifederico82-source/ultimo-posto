@@ -602,6 +602,7 @@ function draw(now){
   paintRestrictedLine(stage,state.zone);
   paintCampusCoins(stage,state.zone,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},time);
   paintVillaBoars(stage,state.zone,now);
+  paintLore(stage,state.zone,time);
   ambienteMondo(stage,state.zone,cameraX,cameraY,viewWidth,viewHeight,now,state.x,state.y);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
