@@ -7,8 +7,12 @@ const virtualMarkets=[
   {label:"1",wins:(home,away)=>home>away},
   {label:"X",wins:(home,away)=>home===away},
   {label:"2",wins:(home,away)=>home<away},
-  {label:"Over 2,5",wins:(home,away)=>home+away>=3},
-  {label:"Under 2,5",wins:(home,away)=>home+away<=2}
+  {label:"GG",wins:(home,away)=>home>0&&away>0},
+  {label:"NG",wins:(home,away)=>home===0||away===0},
+  ...[1.5,2.5,3.5,4.5].flatMap(line=>[
+    {label:"Over "+String(line).replace(".",","),wins:(home,away)=>home+away>line},
+    {label:"Under "+String(line).replace(".",","),wins:(home,away)=>home+away<line}
+  ])
 ];
 let virtualFixtureIndex=0;
 function virtualGoalWeights(average){
@@ -38,7 +42,12 @@ function updateVirtualTicket(g){
 function renderVirtualFootball(g){
   const markets=$("virtualMarkets");
   markets.replaceChildren();
-  for(const [label,indices] of [[local("Esito finale","Full-time result"),[0,1,2]],[local("Totale gol","Total goals"),[3,4]]]){
+  const rows=[
+    [local("Esito finale","Full-time result"),[0,1,2]],
+    [local("Entrambe a segno","Both teams to score"),[3,4]],
+    ...[1,2,3,4].map((line,index)=>[local("Totale gol ","Total goals ")+line+",5",[5+index*2,6+index*2]])
+  ];
+  for(const [label,indices] of rows){
     const row=document.createElement("div"), title=document.createElement("strong");
     title.textContent=label;row.append(title);
     for(const index of indices){
@@ -63,7 +72,10 @@ function renderVirtualFootball(g){
   $("virtualStart").textContent=local("Avvia la partita","Start match");
   $("challengeScore").textContent=local("Monete disponibili: ","Coins available: ")+(testMode?0:wallet().coins);
   $("challengeStatus").textContent=local("Calcio virtuale","Virtual football");
+  $("virtualLegend").textContent="🔵 "+g.teams[0]+" · 🟠 "+g.teams[1];
+  $("virtualPitch").setAttribute("aria-label",local("Televisione della partita virtuale","Virtual match television"));
   virtualScoreboard(g,null);
+  paintVirtualPitch(g,0);
   updateVirtualTicket(g);
   markets.querySelector("button").focus();
 }
@@ -83,15 +95,19 @@ $("virtualStart").onclick=()=>{
       return;
     }
   }
-  Object.assign(g,{stake,payout,hit,started:performance.now(),goals:[score.home,score.away].flatMap((count,team)=>
-    Array.from({length:count},()=>({team,minute:1+Math.floor(Math.random()*89)}))).sort((a,b)=>a.minute-b.minute)});
+  const minutes=shuffleCards(Array.from({length:87},(_,index)=>index+3));
+  const goals=[score.home,score.away].flatMap((count,team)=>
+    Array.from({length:count},()=>({team,minute:minutes.pop(),lane:.28+Math.random()*.44}))).sort((a,b)=>a.minute-b.minute);
+  Object.assign(g,{stake,payout,hit,started:performance.now(),goals});
   for(const button of $("virtualMarkets").querySelectorAll("button"))button.disabled=true;
   $("virtualTicket").hidden=true;
   $("challengeStatus").textContent=local("Partita in corso","Match in progress");
 };
 function tickVirtualFootball(g,now){
   if(g.started===null||g.result)return;
-  const minute=Math.min(90,Math.floor((now-g.started)/(reducedMotion?18:93)));
+  const clock=Math.min(90,(now-g.started)/(reducedMotion?100:210));
+  const minute=Math.floor(clock);
+  if(!reducedMotion||g.minute!==minute)paintVirtualPitch(g,reducedMotion?minute:clock);
   if(g.minute===minute)return;
   g.minute=minute;
   while(g.goals[g.nextGoal]?.minute<=minute){
@@ -112,4 +128,60 @@ function tickVirtualFootball(g,now){
   $("challengeReplay").textContent=local("Prossima partita","Next match");
   $("challengeReplay").hidden=false;
   $("challengeReplay").focus();
+}
+
+// Pitch animation illustrates the simulated match. The goal timeline drives both
+// the score and the direction of each attack.
+const virtualFormation=[
+  [.045,.5],[.18,.16],[.16,.39],[.16,.61],[.18,.84],
+  [.32,.24],[.31,.5],[.32,.76],[.43,.2],[.44,.5],[.43,.8]
+];
+function virtualBallAt(g,clock){
+  if(clock===0)return [.5,.5,null];
+  const goal=g.goals?.find(event=>clock>=event.minute-2.8&&clock<=event.minute+.8);
+  if(goal){
+    const direction=goal.team===0?1:-1;
+    const progress=Math.min(1,(clock-goal.minute+2.8)/2.8);
+    const x=.5+direction*(.48*progress+.035*progress**4);
+    const y=.5+(goal.lane-.5)*Math.sin(Math.PI*progress);
+    return [x,y,goal.team];
+  }
+  return [.5+.34*Math.sin(clock*.77)*Math.sin(clock*.22),
+    .5+.31*Math.sin(clock*.59)*Math.sin(clock*.31),null];
+}
+function paintVirtualPitch(g,clock){
+  const canvas=$("virtualPitch"),c=canvas.getContext("2d");
+  const left=21,top=17,width=438,height=226;
+  c.fillStyle="#0c1c29";c.fillRect(0,0,480,260);
+  for(let col=0;col<12;col++){
+    c.fillStyle=col%2?"#245846":"#27624b";
+    c.fillRect(left+width*col/12,top,width/12,height);
+  }
+  c.strokeStyle="#cef0d1";c.lineWidth=1.4;
+  c.strokeRect(left,top,width,height);
+  c.beginPath();c.moveTo(240,top);c.lineTo(240,top+height);c.stroke();
+  c.beginPath();c.arc(240,130,26,0,Math.PI*2);c.stroke();
+  for(const side of [0,1]){
+    c.strokeRect(side?left+width-59:left,82,59,96);
+    c.strokeRect(side?left+width-23:left,106,23,48);
+    c.strokeRect(side?left+width:left-13,115,13,30);
+  }
+  const [bx,by,attacking]=virtualBallAt(g,clock);
+  for(const team of [0,1]){
+    for(const [i,[x,y]] of virtualFormation.entries()){
+      const base=team===0?x:1-x;
+      const drift=clock===0?0:Math.sin(clock*.53+i*1.9+team)*.02;
+      const advance=i===0?0:(bx-.5)*.24;
+      let px=base+advance+drift;
+      let py=y+(clock===0?0:(by-.5)*.14+Math.cos(clock*.38+i)*.025);
+      if(attacking===team&&i===9){px=bx+(team===0?-.035:.035);py=by+.025;}
+      c.beginPath();
+      c.arc(left+width*Math.max(.025,Math.min(.975,px)),top+height*py,i===0?5:4.3,0,Math.PI*2);
+      c.fillStyle=team===0?"#46b9ff":"#ff9c52";c.fill();
+      c.strokeStyle="#102430";c.stroke();
+    }
+  }
+  c.beginPath();
+  c.arc(left+width*bx,top+height*by,3.6,0,Math.PI*2);
+  c.fillStyle="#fffcef";c.fill();c.strokeStyle="#111b24";c.stroke();
 }

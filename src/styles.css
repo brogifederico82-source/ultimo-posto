@@ -363,3 +363,14 @@ button, select, input { font-family: var(--interface); }
 .virtual-markets button[aria-pressed="true"] { border-color: #8ad5ff; background: #254b7f; }
 .virtual-goals { padding-inline-start: 1.6rem; max-height: 8rem; overflow: auto; }
 #virtualStake { width: 4rem; }
+
+.virtual-tv {
+  margin: .6rem 0;
+  padding: .5rem;
+  background: #0c1726;
+  border: 2px solid #5688b9;
+  border-radius: .55rem;
+}
+.virtual-tv .race-signal { margin: 0 0 .35rem; }
+.virtual-tv canvas { display: block; width: 100%; max-height: 31vh; object-fit: contain; }
+.virtual-legend { color: #d4e5f7; margin: .35rem 0 0; font-size: .82rem; text-align: center; }
