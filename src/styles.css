@@ -363,3 +363,75 @@ button, select, input { font-family: var(--interface); }
 .virtual-markets button[aria-pressed="true"] { border-color: #8ad5ff; background: #254b7f; }
 .virtual-goals { padding-inline-start: 1.6rem; max-height: 8rem; overflow: auto; }
 #virtualStake { width: 4rem; }
+
+.virtual-tv {
+  margin: .6rem 0;
+  padding: .5rem;
+  background: #0c1726;
+  border: 2px solid #5688b9;
+  border-radius: .55rem;
+}
+.virtual-tv .race-signal { margin: 0 0 .35rem; }
+.virtual-tv canvas { display: block; width: 100%; max-height: 31vh; object-fit: contain; }
+.virtual-legend { color: #d4e5f7; margin: .35rem 0 0; font-size: .82rem; text-align: center; }
+
+.tobacco-counter {
+  position: relative; height: 80px; overflow: hidden;
+  background: repeating-linear-gradient(90deg,#2b4a67 0 18px,#223b54 18px 22px);
+  border: 3px solid #354859; border-bottom: 22px solid #92734f;
+}
+.tobacco-counter i {
+  position: absolute; left: 48%; top: 12px; width: 18px; height: 18px;
+  background: #dfac80; border-top: 5px solid #493329; box-shadow: 0 17px #4a819c;
+}
+#tobaccoHandoff {
+  position: absolute; left: 48%; bottom: 5px; width: 15px; height: 10px;
+  background: #e8d38f; border: 2px solid #5e4b3a; opacity: 0;
+}
+#tobaccoHandoff.tobacco-handoff { animation: tobacco-handoff .72s steps(10,end); }
+@keyframes tobacco-handoff {
+  0% { opacity: 1; transform: translate(12px,-14px); }
+  75% { opacity: 1; transform: translate(-26px,2px); }
+  100% { opacity: 0; transform: translate(-34px,5px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tobaccoHandoff.tobacco-handoff { animation: none; opacity: 1; }
+}
+
+.audio-mixer { display: grid; gap: .4rem; margin-block: .55rem; }
+.mixer-row { display: grid; grid-template-columns: minmax(0,1.6fr) auto auto; align-items: center; gap: .45rem; }
+.mixer-row label:first-child { display: grid; gap: .15rem; }
+.mixer-row input[type=range] { width: 100%; min-width: 0; }
+.mixer-row button { padding: .35rem .55rem; }
+.challenge-audio { margin-top: .65rem; border-top: 1px solid #557089; padding-top: .45rem; }
+.challenge-audio summary { cursor: pointer; }
+
+#challenge[data-result="win"] .challenge-result { color: #b6f7d3; border-inline-start: 3px solid #6ee0b0; padding-inline-start: .5rem; }
+#challenge[data-result="loss"] .challenge-result { color: #ffd5a0; border-inline-start: 3px solid #ee9866; padding-inline-start: .5rem; }
+#cardHand button, .holdem-card, #scopaBoard button {
+  box-shadow: inset 0 0 0 2px #f9eac7, 0 2px 0 #142135;
+  animation: card-arrival .15s ease-out;
+}
+@keyframes card-arrival { from { opacity: .72; translate: 0 3px; } }
+.race-track { background: repeating-linear-gradient(90deg,#43674733 0 1px,transparent 1px 25%), linear-gradient(#293e37,#17372e); }
+.race-track .race-runner { top: 0; width: 30px; height: 23px; }
+.race-runner i { position: absolute; display: block; }
+.race-horse {
+  inset: 6px 2px 0; background: #be8052;
+  clip-path: polygon(0 41%,15% 24%,62% 24%,72% 1%,92% 11%,100% 32%,83% 48%,70% 48%,62% 73%,23% 71%,11% 89%,0 75%);
+}
+.race-rider { width: 9px; height: 10px; top: 1px; left: 11px; background: var(--runner-color); border-top: 3px solid #f2deb8; transform: skew(-15deg); }
+.race-hooves { width: 4px; height: 8px; top: 14px; left: 10px; background: #9c664e; box-shadow: 11px 0 #9c664e; transform-origin: center top; }
+.race-running .race-hooves { animation: race-stride .21s steps(2,end) infinite alternate; }
+@keyframes race-stride { from { transform: skew(-30deg); } to { transform: skew(32deg); } }
+@media (prefers-reduced-motion: reduce) {
+  #cardHand button, .holdem-card, #scopaBoard button, .race-running .race-hooves { animation: none; }
+}
+
+#cardHand button.trump-card { box-shadow: inset 0 -4px #b15d44, 0 2px 0 #142135; }
+#danceCue[data-beat="hit"] { color: #94f1c5; }
+#danceCue[data-beat="miss"] { color: #ffc391; }
+#challengeCanvas, #challengeCourt { border-color: #567690; }
+.race-photo { display: grid; gap: .2rem; margin-block: .45rem; padding-inline-start: 1.7rem; }
+.race-photo li { padding: .2rem .45rem; border-inline-start: 3px solid var(--runner-color); background: #13243c; }
+.race-photo li[data-winner] { color: #fff2bb; font-weight: bold; }

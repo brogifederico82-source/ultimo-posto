@@ -25,7 +25,8 @@ function calcettoShot(player,ball,direction){
   const aerial=player.y<calcettoGround-10;
   ball.vx=direction*((aerial?252:207)+Math.abs(player.vx)*.24);
   ball.vy=aerial?Math.max(-70,Math.min(98,ball.vy*.26+28)):-111;
-  chime(aerial?[69,81]:[64,74],.04);
+  ball.flash=.18;
+  sound("shot");
 }
 function stepCalcettoPlayer(player,move,speed,dt){
   if(player.jumpBuffer>0&&player.y===calcettoGround){
@@ -49,6 +50,7 @@ function calcettoContact(player,ball){
   if(dot<0){
     ball.vx-=1.72*dot*nx;
     ball.vy-=1.72*dot*ny;
+    if(dot< -38){ball.flash=.13;sound("bounce");}
     if(player.y<calcettoGround-7&&ny<-.35)ball.vy+=player.vy*.32;
   }
 }
@@ -71,12 +73,14 @@ function stepCalcetto(g,dt){
   stepCalcettoPlayer(r,Math.abs(g.rivalTarget-r.x)<4?0:Math.sign(g.rivalTarget-r.x),g.practice?77:114,dt);
   calcettoShot(g.you,b,1);calcettoShot(r,b,-1);
   for(const player of [g.you,r])player.shotBuffer=Math.max(0,player.shotBuffer-dt);
+  b.flash=Math.max(0,(b.flash??0)-dt);
   b.vy=Math.min(300,b.vy+440*dt);
   b.vx=clamp(b.vx,-330,330);
   b.x+=b.vx*dt;b.y+=b.vy*dt;
   calcettoContact(g.you,b);calcettoContact(r,b);
   if(b.y<calcettoRadius+5){b.y=calcettoRadius+5;b.vy=Math.abs(b.vy)*.78;}
   if(b.y>calcettoGround-calcettoRadius){
+    if(b.vy>60)sound("bounce");
     b.y=calcettoGround-calcettoRadius;b.vy=-Math.abs(b.vy)*.61;b.vx*=.89;
   }
   for(const x of [10,310]){
@@ -87,13 +91,13 @@ function stepCalcetto(g,dt){
     if(impact>=0)continue;
     b.vx-=1.82*impact*nx;b.vy-=1.82*impact*ny;
     b.x=x+nx*(calcettoRadius+2);b.y=calcettoBar+ny*(calcettoRadius+2);
-    chime([56],.04);
+    b.flash=.2;sound("post");
   }
   if(b.x<10||b.x>310){
     if(b.y>calcettoBar+calcettoRadius){
       const side=b.x>310?0:1;
       g.score[side]++;g.goal=side;
-      chime(side===0?[67,76,79]:[48,55],.05);
+      sound("goal");sound("crowd");
       resetCalcetto(g);
       g.delay=.8;
     }else{
@@ -128,11 +132,20 @@ function paintCalcetto(g){
   }
   for(const [player,color,direction] of [[g.you,"#61d8f4",1],[g.rival,"#fb8966",-1]]){
     const {x,y}=player;
+    rect(c,"#163f4077",x-9,calcettoGround+2,18,3);
     rect(c,color,x-8,y-18,16,14);
     rect(c,"#f2c08d",x-9,y-29,18,13);
     rect(c,"#223048",x-9,y-31,18,4);
     rect(c,"#202737",x+direction*4,y-24,2,2);
-    rect(c,"#dae7ed",x-8,y-5,player.kick?22:15,5);
+    const stride=reducedMotion?0:Math.sin(x*.35)*Math.min(4,Math.abs(player.vx)/35);
+    rect(c,"#dae7ed",x-8,y-5+stride,7,4);
+    rect(c,"#dae7ed",x,y-5-stride,player.kick?13:7,4);
+  }
+  const b=g.ball;
+  rect(c,"#103635aa",b.x-5,calcettoGround+3,10,2);
+  if(b.flash&&!reducedMotion)for(const [dx,dy] of [[-1,0],[1,0],[-.7,-.7],[.7,.7]]){
+    const spread=9+(1-b.flash/.2)*9;
+    rect(c,"#ffc975",b.x+dx*spread,b.y+dy*spread,2,2);
   }
   c.beginPath();c.arc(g.ball.x,g.ball.y,calcettoRadius,0,Math.PI*2);
   c.fillStyle="#fff0c2";c.fill();

@@ -29,6 +29,8 @@ const tr=text=>locale==="en"&&Object.hasOwn(english,text)?english[text]:text;
 const local=(it,en)=>locale==="en"?en:it;
 function refreshLanguage(){
   document.documentElement.lang=locale;
+  $("challengeAudioLabel").textContent=local("Opzioni audio","Audio options");
+  renderMixers();
   $("langIt").setAttribute("aria-pressed",String(locale==="it"));
   $("langEn").setAttribute("aria-pressed",String(locale==="en"));
   const nodes=["home","creator","game","challenge"].flatMap(id=>[...$(id).querySelectorAll("button,h2,p,label,option,li,th,td,summary,span")]);
@@ -137,6 +139,7 @@ function updateHomeActions(){
 }
 function show(next){
   if(minigame)closeChallenge();
+  if(next!=="game"&&cigarette)stopSmoking();
   keys.clear();controls.clear();screen=next;
   for(const id of ["home","creator","game","editor"]) $(id).hidden=id!==next;
   $("homeButton").hidden=next==="home"||testMode;
@@ -330,16 +333,19 @@ function interact(){
   keys.clear();controls.clear();
   if(spot.uid==="viale-ingresso-varco"&&(isFree()||has("Via libera"))){
     if(!state.campusGateOpen)record("Badge riconosciuto. Il tornello è aperto.");
+    sound("gate","map");
     state.campusGateOpen=true;activeScene=null;
     if(state.x===spot.x&&state.y===spot.y+1&&!blocked(state.zone,spot.x,spot.y))state.y=spot.y;
     syncBackgroundMusic();save();renderScene();$("interact").focus();
     return;
   }
   if(spot.uid==="viale-ingresso-varco"&&!has("Via libera")&&!isFree()){
+    sound("error","interface");
     state.gateConfrontation=1;warnAtGate();
   }
   const destination=doorDestination(spot);
   if(destination){
+    sound(spot.kind==="stairs"||spot.target.endsWith("#scale")?"stairs":"door","map");
     travel(...destination);save();renderScene();$("interact").focus();
     return;
   }
@@ -413,6 +419,7 @@ const storySteps=[
 ];
 const romaniaComplete=()=>storySteps.slice(0,4).every(([item])=>has(item));
 function checkpoint(item){
+  if(!has(item))sound("objective","map");
   if(has(item))return;
   carry(item);awardCoins(2);record("Percorso · "+item+" · +2 monete");
   chime([60,67,72]);
@@ -609,11 +616,12 @@ function nativeScene(id){
       "“Up for a one-on-one? First to five goals. We can warm up first if you like.”"),
       [local("Gioca a calcetto","Play football"),()=>openChallenge("calcetto")],
       [local("Allenati","Practice"),()=>openChallenge("calcetto",true)]);
+    case "tabaccheria":return tobaccoShopScene();
     case "rosticceria":return scene(local("Rosticceria · Viale Romania","Rotisserie · Viale Romania"),
       local("«Supplì appena fritti! Se esci dal campus tardi, ti tengo da parte l’ultimo.»",
         "“Fresh supplì! If you leave campus late, I’ll save you the last one.”"),
       ...(!has("Supplì")&&wallet().coins>0?[[local("Compra un supplì · 1 moneta","Buy a supplì · 1 coin"),()=>{
-        wallet().coins--;carry("Supplì");refreshWallet();chime([65,72]);save();
+        wallet().coins--;carry("Supplì");refreshWallet();sound("buy","map");save();
       }]]:[]));
     case "cavalli":return scene(local("Sala scommesse · Viale Romania","Betting arcade · Viale Romania"),
       local("Sul monitor ci sono quattro cavalli virtuali. Scegline uno e guarda la corsa. Puoi usare le monete del campus oppure correre gratis.",
@@ -745,6 +753,7 @@ function paintSpeaker(now){
     characterCoat(o));
 }
 function renderScene(){
+  updateSmokingUI();
   const scene=getScene();
   $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
   const nextStep=isFree()?-1:storySteps.findIndex(([item])=>!has(item));
@@ -770,6 +779,7 @@ function renderScene(){
   const speaker=currentObject();
   const conversation=Boolean(speaker&&kindLayer(speaker)==="persone"&&!isVehicle(speaker));
   $("speakerPortrait").hidden=!conversation;
+  $("tobaccoCounter").hidden=speaker?.native!=="tabaccheria"||Boolean(state.ending);
   $("game").classList.toggle("game-conversation",conversation||Boolean(state.ending?.guard));
   $("guardOutcome").hidden=!state.ending?.guard;
   refreshGateWarning();paintGuardOutcome(performance.now());
@@ -804,7 +814,7 @@ function renderScene(){
   $("log").replaceChildren();
   for(const entry of state.log){const li=document.createElement("li");li.textContent=tr(entry);$("log").append(li);}
   const pockets=document.createElement("li");
-  pockets.textContent=local("In tasca: ","Inventory: ")+(state.pockets.map(tr).join(", ")||local("solo il badge e un programma d’esame.","just your badge and an exam syllabus."));
+  pockets.textContent=local("In tasca: ","Inventory: ")+(state.pockets.map(item=>item==="Sigarette"?local("Sigarette","Cigarettes")+" ("+cigarettesLeft()+"/10)":tr(item)).join(", ")||local("solo il badge e un programma d’esame.","just your badge and an exam syllabus."));
   $("log").append(pockets);
   const profile=document.createElement("li");profile.textContent=Object.entries(traits).map(([id,label])=>tr(label)+" "+state.traits[id]).join(" · ");$("log").append(profile);
 }

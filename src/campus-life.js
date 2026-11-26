@@ -89,6 +89,8 @@ function addVialeArcade(map){
     }
   }
   for(const [area,uid,name,x,y,w,color,native] of [
+    [street,"ingresso-tabaccheria","Tabaccheria · Viale Romania",21,17,2,"#426787","tabaccheria"],
+    [integrated?garden:null,"giardino-tabaccheria","Tabaccheria · Viale Romania",67,99,2,"#426787","tabaccheria"],
     [street,"ingresso-sala-giochi","Sala scommesse · Viale Romania",24,17,2,"#a45153","cavalli"],
     [integrated?garden:null,"giardino-sala-giochi","Sala scommesse · Viale Romania",63,102,3,"#a45153","cavalli"],
     [integrated?garden:null,"giardino-rosticceria","Rosticceria · Viale Romania",64,96,2,"#8b527e","rosticceria"]
@@ -137,7 +139,7 @@ function collectCampusCoin(){
   const coin=vialeCoins.find(([,zone,x,y])=>state.zone===zone&&state.x===x&&state.y===y);
   if(!coin||wallet().picked.includes(coin[0]))return;
   wallet().picked.push(coin[0]);awardCoins(1);record("Hai raccolto una moneta del campus.");
-  chime([74,81],.07);save();
+  sound("coin","map");save();
 }
 function paintCampusCoins(context,zone,view,now){
   if(!state||testMode)return;
@@ -160,7 +162,7 @@ function shopScene(){
     return [[(owned?"Indossa ":"Compra · "+item.cost+" monete · ")+item.name,()=>{
       if(!purse.owned.includes(item.id)){
         if(purse.coins<item.cost)return;
-        purse.coins-=item.cost;purse.owned.push(item.id);chime([67,76],.09);
+        purse.coins-=item.cost;purse.owned.push(item.id);sound("buy","map");
       }
       Object.assign(state.avatar,item.outfit);
       record("Luiss Shop · "+item.name);refreshWallet();
@@ -235,4 +237,30 @@ function paintGuardOutcome(now){
   }
   rect(c,"#a2203b",158,105,16+31*t,5);
   rect(c,"#711831",154,110,20+22*t,3);
+}
+
+function tobaccoShopScene(){
+  const purse=wallet();
+  const hasProduct=item=>item==="Sigarette"?cigarettesLeft()>0:has(item);
+  const products=[["Sigarette",local("Sigarette","Cigarettes"),2],["IQOS","IQOS",5]];
+  return scene(local("Tabaccheria · Viale Romania","Tobacconist · Viale Romania"),
+    local("Al bancone · Sigarette 2 monete · IQOS 5 monete. Saldo: ","At the counter · Cigarettes 2 coins · IQOS 5 coins. Balance: ")+purse.coins,
+    ...products.filter(([item,,cost])=>!testMode&&!hasProduct(item)&&purse.coins>=cost).map(([item,label,cost])=>[
+      local("Compra ","Buy ")+label+" · "+cost,()=>{
+        if(hasProduct(item)||purse.coins<cost)return;
+        const previousCount=state.cigarettes,hadItem=has(item);
+        purse.coins-=cost;carry(item);
+        if(item==="Sigarette")state.cigarettes=10;
+        if(!save()){
+          purse.coins+=cost;state.cigarettes=previousCount;
+          if(!hadItem)state.pockets.splice(state.pockets.indexOf(item),1);
+          return;
+        }
+        record("Tabaccheria · "+item);refreshWallet();sound("buy","map");
+        const animation=$("tobaccoHandoff");
+        animation.classList.remove("tobacco-handoff");
+        void animation.offsetWidth;
+        animation.classList.add("tobacco-handoff");
+      }
+    ]));
 }

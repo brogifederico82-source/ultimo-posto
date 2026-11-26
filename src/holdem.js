@@ -50,12 +50,13 @@ function startHoldem(){
 }
 function holdemPay(seat,amount){
   const chips=Math.min(seat.stack,amount);
+  if(chips)sound("chips");
   seat.stack-=chips;
   seat.bet+=chips;
   seat.paid+=chips;
 }
 function dealHoldem(g){
-  g.hand++;
+  g.hand++;sound("deal");
   g.deck=shuffleCards(holdemSuits.flatMap(suit=>Array.from({length:13},(_,index)=>({suit,rank:index+2}))));
   g.dealer=nextHoldemSeat(g,g.dealer,seat=>seat.stack>0);
   g.board=[];g.street=0;g.price=2;g.raiseSize=2;g.complete=false;g.showdown=false;g.log=[];g.note="";
