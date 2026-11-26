@@ -447,6 +447,12 @@ function nativeScene(id){
         ["Distinguo ciò che sappiamo da ciò che deduciamo",()=>{state.seminarArgument="prove";}],
         ["Confronto le interpretazioni prima di concludere",()=>{state.seminarArgument="interpretazioni";}],
         ...(state.seminarArgument?[["Presenta il caso al seminario",()=>{checkpoint("Seminario Parenzo");change(state.seminarArgument==="prove"?"razionalita":"empatia",4);}]]:[]));
+    case "pola-foto":
+      if(state.completedEvents.includes("pola-foto"))return scene("Foto di laurea","«È venuta bene. Sullo sfondo il buffet è ancora intero. Nessuno ci crederà.»");
+      return scene("Foto di laurea","La fotografa ti fa cenno verso le luci del cortile. «Facciamola prima che arrivi qualcuno a chiederti la tesi.»",
+        ["Scatta la foto",()=>{
+          state.completedEvents.push("pola-foto");record("Pola · Foto di laurea sotto le luci del cortile.");sound("inspect","map");
+        }]);
     case "pola-festa":
       if(has("Festa a Pola"))return scene("Pola · Festa di laurea","Le luci sono accese. Dal cortile qualcuno ti chiede se dopo la festa gli mandi gli appunti.");
       if(!state.graduationSpeech)return scene("Pola · Ultime parole prima della festa","Il cortile si fa silenzioso. Tocca a te raccontare in una frase cosa porti via da questi anni.",

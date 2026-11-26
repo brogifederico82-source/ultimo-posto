@@ -3,6 +3,7 @@ const layers={
   terreno:"Terreno",edifici:"Edifici",arredi:"Arredamento",persone:"Personaggi",decori:"Decorazioni"
 };
 const catalog={
+  "Villa Alberoni":[["polaVilla","Villino di Villa Alberoni","edifici","#a78464",21,6,true],["polaNinfeo","Tinello Alberoni","edifici","#b4a285",10,5,true],["polaBuffet","Buffet","arredi","#dad0b8",7,2,true],["polaLights","Filo di luci","decori","#ffe1a1",8,1]],
   "Campus LUISS":[["domeHall","Padiglione metallico","edifici","#52616a",7,4,true],["chapel","Aula Chiesa","edifici","#ad6c51",6,5,true],["faculty","Edificio in cotto","edifici","#ae6b50",8,4,true],["court","Campo sportivo","decori","#527d72",7,4]],
   "Viale Romania":[["shelter","Pensilina","edifici","#466e7a",4,2,true],["pillar","Pilastro con urna","edifici","#e9e4d3",1,3,true],["booth","Guardiola","edifici","#ddc4a0",3,3,true],["pine","Pino marittimo","decori","#526d49",3,3],["cypress","Cipresso","decori","#355246",1,2],["luiss","Scritta LUISS","decori","#325988",5,2],["zebra","Strisce pedonali","decori","#e4deca",1,3],["bus","Autobus ATAC 360","persone","#a84a45",5,1],["shuttle","Navetta LUISS","persone","#e4e5da",4,1,true],["car","Auto","persone","#b96054",2,1],["scooter","Motorino","persone","#e8bc45"]],
   "Architettura":[["wall","Muro","edifici","#887870",1,1,true],["door","Porta","edifici","#ac754d"],["window","Finestra","edifici","#78a5a5"],["stairs","Scale","edifici","#a09b88"],["roof","Edificio","edifici","#ab6654",4,3,true]],
@@ -29,6 +30,12 @@ function saveProfileKey(mode){
 const mapId=()=>globalThis.crypto?.randomUUID?.()??("obj-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2));
 const maxCampusZones=33;
 const stockCampus=installTeachingRooms(JSON.parse($("edOriginal").textContent));
+const polaZones=["pola","pola-cortile"];
+const sourcePola={ingresso:stockCampus.zones.ingresso,...Object.fromEntries(polaZones.map(id=>[id,stockCampus.zones[id]]))};
+const normalizedPola=normalizeCampus({version:1,zones:sourcePola}).zones;
+const originalPolaStock=Object.fromEntries(polaZones.map(id=>[id,[sourcePola[id],normalizedPola[id]].map(
+  zone=>new Map(zone.objects.map(o=>[o.uid,JSON.stringify(o)]))
+)]));
 const priorInteriors=normalizeCampus({version:1,zones:Object.fromEntries(
   ["ingresso","aula-chiesa","polivalente","loft"].map(id=>[id,stockCampus.zones[id]])
 )});
@@ -50,7 +57,7 @@ function updateGardenStudentNames(map){
     if(names&&student.name===names[0])student.name=names[1];
   }
 }
-const originalMap=normalizeCampus(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus))))));
+const originalMap=normalizeCampus(installPola(furnishCampusFountains(improveDome2Entrance(addVialeArcade(joinRomaniaEntrance(furnishCampusInteriors(stockCampus)))))));
 updateGardenStudentNames(originalMap);
 for(const [uid,x,y] of [
   ["giardiniera-nora",35,13],
@@ -207,6 +214,14 @@ function loadCampus(){
         }
       }
       if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);}
+      if(!embedded){
+        const prior=Object.fromEntries(polaZones.map(id=>[id,map.zones[id]?.width]));
+        installPola(map);
+        for(const id of polaZones){
+          if(prior[id]===map.zones[id]?.width)continue;
+          map.zones[id]=normalizeCampus({version:1,zones:{ingresso:map.zones.ingresso,[id]:map.zones[id]}}).zones[id];
+        }
+      }
       return map;
     }
   }catch{}
@@ -526,6 +541,9 @@ function drawObject(c,o,now=0,editing=false){
         break;
       case "lamp":box(shadow,7,5,2,10);box(color,5,2,6,5);box(white,6,3,4,2);break;
       case "bin":box(shadow,4,5,8,10);box(color,4,4,8,8);box(light,3,4,10,2);break;
+      case "polaVilla":case "polaNinfeo":case "polaBuffet":case "polaLights":
+        paintPolaLandmark(c,o,box,now);
+        break;
       case "fountain":{
         const ripple=Math.floor(now/180)%4;
         box("#293d3a65",0,6,16,8);box("#354b48",2,4,12,10);
