@@ -68,6 +68,7 @@ const insegnaEdifici=[
   [/^Radio Luiss/,{testo:"RADIO LUISS",colore:"#3a2542",onair:true}],
   [/^The Dome 1/,{testo:"THE DOME 1",colore:"#1f4a54"}],
   [/^The Dome 2/,{testo:"THE DOME 2",colore:"#1f4a54"}],
+  [/^The Dome(?! [12])/,{testo:"THE DOME",colore:"#1f4a54"}],
   [/^A200/,{testo:"A200",colore:"#40306a"}],
   [/^Corpo aule/,{testo:"AULE",colore:"#37495a"}],
   [/^Edificio principale · Facciata/,{testo:"LUISS · CAMPUS",colore:"#1f3c63"}],

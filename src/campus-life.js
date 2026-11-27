@@ -398,10 +398,10 @@ function updateCampusPlaces(map){
   update("wayfinding-west",{name:"LUISS Shop · A sinistra",text:"Il LUISS Shop è nell’edificio subito a sinistra. Per il campus, dopo il tornello tieni la destra e prosegui sul vialetto."});
   add("romania-shop-approach","paving","Passaggio del LUISS Shop",21,70,{w:5,h:4,color:"#b4a894"});
 
-  update("dome-building",{name:"The Dome 2"});
-  update("giardino-dome",{name:"The Dome 2 · Sala studio"});
-  update("dome-route",{name:"Indicazioni per The Dome 2",text:"The Dome 2 è il padiglione grande davanti a te. L’ingresso è sul lato del piazzale."});
-  map.zones.dome.name="The Dome 2 · Sala studio";
+  update("dome-building",{name:"The Dome"});
+  update("giardino-dome",{name:"The Dome · Sala studio"});
+  update("dome-route",{name:"Indicazioni per The Dome",text:"The Dome è il padiglione grande davanti a te. L’ingresso è sul lato del piazzale."});
+  map.zones.dome.name="The Dome · Sala studio";
   map.zones.dome2.name="Serra · Spazio polifunzionale";
   update("dome2-door",{name:"Entra nella Serra"});
   update("polivalente",{name:"Serra · Padiglione ovest"});

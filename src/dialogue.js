@@ -706,7 +706,7 @@ const campusLandmarks=[
   ["giardino-uscita","Viale Romania · Ingresso","Viale Romania · Entrance"],
   ["giardino-evento","A200 · Aula Chiesa","A200 · Aula Chiesa"],
   ["giardino-terra","Edificio principale","Main building"],
-  ["giardino-dome","The Dome 2","The Dome 2"],
+  ["giardino-dome","The Dome","The Dome"],
   ["dome2-door","Serra","Greenhouse"],
   ["polivalente-door","Aula Polivalente","Multipurpose hall"],
   ["giardino-caffe","Bar e terrazza giochi","Café and games terrace"],

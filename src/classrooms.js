@@ -100,7 +100,7 @@ function installTeachingRooms(map){
     garden.objects.push(
       object("romania-corte-chiesa","paving","Sagrato Aula Chiesa",36,63,{w:5,h:5,color:"#c1ad91"}),
       object("romania-corte-atrio","paving","Piazzale dell’edificio centrale",44,77,{w:10,h:5,color:"#ad9a84"}),
-      object("romania-corte-dome","paving","Piazzale The Dome 1",55,53,{w:8,h:4,color:"#b2a38b"}),
+      object("romania-corte-dome","paving","Piazzale The Dome",55,53,{w:8,h:4,color:"#b2a38b"}),
       object("romania-corte-panama","paving","Accesso sul lato Via Panama",70,46,{w:5,h:4,color:"#ad9a84"})
     );
     garden.objects.push(
