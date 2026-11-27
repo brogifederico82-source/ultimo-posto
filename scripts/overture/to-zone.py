@@ -41,28 +41,55 @@ ACQUA = carica("acqua")
 LARGHEZZA = {"trunk": 14, "primary": 12, "secondary": 10, "tertiary": 8, "residential": 6, "unclassified": 6, "living_street": 5}
 VERDE = {"park", "garden", "grass", "flowerbed", "meadow", "village_green", "playground", "dog_park", "recreation_ground", "allotments"}
 
-ZONE = {
-    "pola": {
-        "nome": "Viale Pola 12 · Villa Alberoni",
-        "centro": (12.51168, 41.91849),
-        "chiave": [  # (nome, lon, lat) edifici da evidenziare
-            ("Villa Alberoni · Sede storica LUISS", 12.51145, 41.91868),
-        ],
-        "porta": "Villa Alberoni",
-        "strada": "Viale Pola",
-        "pini": 0.35,
-    },
-    "parenzo": {
-        "nome": "Via Parenzo 11 · Giurisprudenza",
-        "centro": (12.51309, 41.92180),
-        "chiave": [
-            ("Facoltà di Giurisprudenza · Via Parenzo 11", 12.51309, 41.92180),
-        ],
-        "porta": "Facoltà di Giurisprudenza",
-        "strada": "Via Parenzo",
-        "pini": 0.1,
-    },
+PUNTI = {  # ancore reali (lon, lat) verificate nei luoghi Overture
+    "pola": ("Villa Alberoni · Sede storica LUISS", 12.51145, 41.91868),
+    "parenzo": ("Facoltà di Giurisprudenza · Via Parenzo 11", 12.51309, 41.92180),
+    "romania": ("LUISS · Viale Romania 32", 12.49332, 41.92503),
 }
+# griglia: la cella di Pola ha l'ancora alla tessera (40, 60); le celle si toccano senza sovrapposizioni
+_ax, _ay = pm(PUNTI["pola"][1], PUNTI["pola"][2])
+X0 = _ax - 40.5 * SCALA
+Y0 = _ay + 60.5 * SCALA
+
+
+def cella_di(lon, lat):
+    x, y = pm(lon, lat)
+    return int((x - X0) // (W * SCALA)), int((Y0 - y) // (H * SCALA))
+
+
+def centro_cella(c, r):
+    return (X0 + (c + 0.5) * W * SCALA, Y0 - (r + 0.5) * H * SCALA)
+
+
+def tessera_in_cella(c, r, lon, lat):
+    x, y = pm(lon, lat)
+    return int((x - (X0 + c * W * SCALA)) // SCALA), int(((Y0 - r * H * SCALA) - y) // SCALA)
+
+
+CPOLA = cella_di(PUNTI["pola"][1], PUNTI["pola"][2])
+CPAR = cella_di(PUNTI["parenzo"][1], PUNTI["parenzo"][2])
+CROM = cella_di(PUNTI["romania"][1], PUNTI["romania"][2])
+_cs = [CPOLA, CPAR, CROM]
+COL0, COL1 = min(c for c, r in _cs), max(c for c, r in _cs)
+RIG0, RIG1 = min(r for c, r in _cs), max(r for c, r in _cs)
+# una cella di margine attorno alle sedi, ma solo dove ci sono dati (il riquadro dei dati è lon 12.478-12.522, lat 41.912-41.948)
+MINX, MAXX = pm(12.478, 41.912)[0], pm(12.522, 41.948)[0]
+MINY, MAXY = pm(12.478, 41.912)[1], pm(12.522, 41.948)[1]
+CELLE = []
+for c in range(COL0 - 1, COL1 + 2):
+    for r in range(RIG0 - 1, RIG1 + 2):
+        cx, cy = centro_cella(c, r)
+        if cx - W * SCALA / 2 >= MINX and cx + W * SCALA / 2 <= MAXX and cy - H * SCALA / 2 >= MINY and cy + H * SCALA / 2 <= MAXY:
+            CELLE.append((c, r))
+
+
+def id_cella(c, r):
+    if (c, r) == CPOLA:
+        return "pola"
+    if (c, r) == CPAR:
+        return "parenzo"
+    return "pq-%d-%d" % (c - COL0 + 1, r - RIG0 + 1)
+
 
 TONI = ["#c99a63", "#b4684f", "#d9c49a", "#c9826e", "#b98b6a"]
 
@@ -98,7 +125,7 @@ def rettangolo_massimo(celle):
 
 def costruisci(id_zona, spec):
     rnd = random.Random(id_zona)
-    cx, cy = pm(*spec["centro"])
+    cx, cy = spec["centro_m"]
     # centri delle tessere (metri); riga 0 = nord
     xs = cx + (np.arange(W) + 0.5 - W / 2) * SCALA
     ys = cy + (H / 2 - (np.arange(H) + 0.5)) * SCALA
@@ -196,7 +223,7 @@ def costruisci(id_zona, spec):
 
     # edifici -> rettangoli
     chiavi = []
-    for nome, lo, la in spec["chiave"]:
+    for nome, lo, la in spec.get("chiave", []):
         px, py = pm(lo, la)
         best, bd = None, 1e9
         for idx, (f, g) in enumerate(lista):
@@ -265,7 +292,7 @@ def costruisci(id_zona, spec):
             if (vicino == "B").any() or (vicino == "r").any() or (vicino == "p").any():
                 continue
             if rnd.random() < (0.16 if mV[j, i] else (0.14 if regione[j, i] >= 150 else 0.07)):
-                tipo = "pine" if rnd.random() < spec["pini"] else "tree"
+                tipo = "pine" if rnd.random() < spec.get("pini", 0.2) else "tree"
                 if tipo == "pine" and (j + 3 >= H or i + 3 >= W):
                     continue
                 s = 3 if tipo == "pine" else 1
@@ -346,7 +373,20 @@ def costruisci(id_zona, spec):
                         best = (d, i, j)
         if best:
             arrivo = (best[1], best[2])
-    return dict(T=T, edifici=edifici, alberi=alberi, lampioni=lampioni, insegne=insegne, stagni=stagni,
+    # punto d'ingresso generico: marciapiede (o prato) più vicino al centro, libero da alberi
+    occupati_alberi = {(a[0], a[1]) for a in alberi}
+    ingresso, bd = None, 1e9
+    for j in range(H):
+        for i in range(W):
+            if T[j, i] in ("p", ".") and (i, j) not in occupati_alberi and not any(a[2] == "pine" and a[0] <= i < a[0] + 3 and a[1] <= j < a[1] + 3 for a in alberi):
+                near = (T[max(0, j - 1):j + 2, max(0, i - 1):i + 2] == "r").any()
+                d = (i - W / 2) ** 2 + (j - H / 2) ** 2 - (3000 if near else 0)
+                if d < bd:
+                    bd, ingresso = d, (i, j)
+    vicina = None
+    if nomi_strade:
+        vicina = min(nomi_strade.items(), key=lambda kv: unary_union(kv[1]).distance(Point(cx, cy)))[0]
+    return dict(ingresso=ingresso, strada_vicina=vicina, T=T, edifici=edifici, alberi=alberi, lampioni=lampioni, insegne=insegne, stagni=stagni,
                 porta=porta, ritorno=ritorno if porta else None, arrivo=arrivo, B=B, mV=mV)
 
 
@@ -369,20 +409,23 @@ def connesso(Z):
     return reach, len(seen), int((T != "B").sum())
 
 
-def esporta(risultati):
+def esporta(risultati, vicini):
     out = {}
     for idz, (spec, Z) in risultati.items():
         out[idz] = {
-            "nome": spec["nome"], "w": W, "h": H, "scala": SCALA, "centro": [spec["centro"][1], spec["centro"][0]],
+            "nome": spec["nome"], "w": W, "h": H, "scala": SCALA, "centro": [round(CLON + spec["centro_m"][0] / KLON, 6), round(CLAT + spec["centro_m"][1] / KLAT, 6)],
             "righe": ["".join(r) for r in Z["T"]],
             "edifici": Z["edifici"], "alberi": Z["alberi"], "lampioni": [list(p) for p in Z["lampioni"]],
             "insegne": Z["insegne"], "stagni": [list(p) for p in Z["stagni"]],
             "porta": [int(v) for v in Z["porta"]] if Z["porta"] else None, "ritorno": [int(v) for v in Z["ritorno"]] if Z["ritorno"] else None,
             "arrivo": [int(v) for v in Z["arrivo"]] if Z["arrivo"] else None,
+            "cancello": [int(v) for v in Z["cancello"]] if Z.get("cancello") else None,
+            "ingresso": [int(v) for v in Z["ingresso"]] if Z.get("ingresso") else None,
+            "vicini": vicini[idz],
         }
     js = ("// File generato da scripts/overture/to-zone.py (dati: Overture Maps, release 2026-11-18.0). Non modificare a mano.\n"
-          "// Righe: . prato, p spiazzo/marciapiede, r strada, a sentiero, B edificio.\n"
-          "function quartiereDati(){return " + json.dumps(out, ensure_ascii=False, separators=(",", ":")) + ";}\n")
+          "// Righe: . prato, p spiazzo/marciapiede, r strada, a sentiero, B edificio. Celle da %dx%d tessere, %.0f m per tessera, contigue.\n"
+          "function quartiereDati(){return " % (W, H, SCALA) + json.dumps(out, ensure_ascii=False, separators=(",", ":")) + ";}\n")
     with open(os.path.join(ROOT, "src", "quartiere-dati.js"), "w") as f:
         f.write(js)
     return len(js)
@@ -424,14 +467,44 @@ def anteprima(risultati, cartella):
         plt.close(fig)
 
 
+def libera_vicino(Z, t, raggio=8):
+    """Tessera percorribile (marciapiede o prato) più vicina a t."""
+    T = Z["T"]
+    for r in range(raggio):
+        for dj in range(-r, r + 1):
+            for di in range(-r, r + 1):
+                if max(abs(di), abs(dj)) != r:
+                    continue
+                i, j = t[0] + di, t[1] + dj
+                if 0 <= i < W and 0 <= j < H and T[j, i] in ("p", ".") and not any(a[0] == i and a[1] == j for a in Z["alberi"]):
+                    return (i, j)
+    return None
+
+
 if __name__ == "__main__":
     ris = {}
-    for idz, spec in ZONE.items():
+    vicini = {}
+    idx = {cr: id_cella(*cr) for cr in CELLE}
+    print("celle", len(CELLE), "colonne", COL0 - 1, "-", COL1 + 1, "righe", RIG0 - 1, "-", RIG1 + 1, "pola", CPOLA, "parenzo", CPAR, "romania", CROM)
+    for (c, r) in CELLE:
+        idz = idx[(c, r)]
+        cx, cy = centro_cella(c, r)
+        spec = {"centro_m": (cx, cy), "nome": "", "pini": 0.2}
+        if idz == "pola":
+            spec.update(nome="Viale Pola 12 · Villa Alberoni", chiave=[PUNTI["pola"]], pini=0.35)
+        elif idz == "parenzo":
+            spec.update(nome="Via Parenzo 11 · Giurisprudenza", chiave=[PUNTI["parenzo"]], pini=0.1)
         Z = costruisci(idz, spec)
+        if not spec["nome"]:
+            spec["nome"] = "Parioli · " + (Z["strada_vicina"] or "isolati")
+        if (c, r) == CROM:
+            t = tessera_in_cella(c, r, PUNTI["romania"][1], PUNTI["romania"][2])
+            Z["cancello"] = libera_vicino(Z, t)
+        vicini[idz] = {d: idx.get((c + dc, r + dr)) for d, (dc, dr) in {"n": (0, -1), "s": (0, 1), "e": (1, 0), "w": (-1, 0)}.items() if idx.get((c + dc, r + dr))}
         ris[idz] = (spec, Z)
-        c = connesso(Z)
-        print(idz, "edifici-rettangoli", len(Z["edifici"]), "alberi", len(Z["alberi"]), "lampioni", len(Z["lampioni"]),
-              "insegne", len(Z["insegne"]), "stagni", len(Z["stagni"]), "porta", Z["porta"], "arrivo", Z["arrivo"], "connessione", c)
-    print("byte scritti", esporta(ris))
+        cn = connesso(Z)
+        print(idz, spec["nome"], "| edifici", len(Z["edifici"]), "alberi", len(Z["alberi"]), "lampioni", len(Z["lampioni"]), "insegne", len(Z["insegne"]),
+              "porta", Z["porta"], "arrivo", Z["arrivo"], "cancello", Z.get("cancello"), "conn", cn)
+    print("byte scritti", esporta(ris, vicini))
     if len(sys.argv) > 1:
         anteprima(ris, sys.argv[1])

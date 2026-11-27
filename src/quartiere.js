@@ -28,12 +28,36 @@ function quartiereTerreno(righe,w,h){
   return out;
 }
 
-function installQuartiere(map){
-  const dati=quartiereDati();
-  for(const id of ["pola","parenzo"]){
-    const z=map.zones[id],d=dati[id];
-    if(!z||!d||(z.width===d.w&&z.height===d.h&&z.objects.some(o=>o.uid.startsWith("q-"))))continue;
-    const tieni=z.objects.filter(o=>!o.uid.startsWith("q-")&&(o.action||o.kind==="entrance"||o.kind==="door"));
+function quartiereCache(){return quartiereCache.d||(quartiereCache.d=quartiereDati());}
+
+// Gli oggetti generati (uid "q-...") non entrano in esportazioni, salvataggi e cronologia dell'editor: si rigenerano dai dati.
+function quartiereMarca(id,objects){
+  if(!quartiereCache()[id])return objects;
+  Object.defineProperty(objects,"toJSON",{value(){return this.filter(o=>!String(o.uid).startsWith("q-"));},enumerable:false,configurable:true});
+  return objects;
+}
+function quartiereMarcaMappa(map){for(const [id,z] of Object.entries(map.zones))quartiereMarca(id,z.objects);return map;}
+// Dopo aver letto una mappa (annulla/ripeti, importazione, mappa incorporata): rigenera le zone del quartiere rimaste vuote.
+function quartiereRigenera(map){
+  installQuartiere(map,true);
+  quartiereRifinisci(map);
+  return normalizeCampus(map);
+}
+
+function installQuartiere(map,soloGusci){
+  const dati=quartiereCache();
+  quartiereVicino.mappa=Object.fromEntries(Object.entries(dati).map(([id,d])=>[id,d.vicini||{}]));
+  for(const id of Object.keys(dati)){
+    const d=dati[id];
+    let z=map.zones[id];
+    const storia=id==="pola"||id==="parenzo";
+    if(z&&z.width===d.w&&z.height===d.h&&z.objects.some(o=>o.uid.startsWith("q-")))continue;
+    if(soloGusci&&(!z||z.width!==d.w||z.height!==d.h))continue;   // mappe personalizzate: si rigenerano solo le zone che sono già gusci vuoti
+    if(!z){
+      if(Object.keys(map.zones).length>=maxCampusZones)continue;
+      z=map.zones[id]={name:d.nome,width:d.w,height:d.h,ground:"grass",objects:[],plan:{show:false,x:0,y:0,opacity:45,scale:57}};
+    }
+    const tieni=storia?z.objects.filter(o=>!o.uid.startsWith("q-")&&(o.action||o.kind==="entrance"||o.kind==="door")):[];
     const solidi=[];                                   // rettangoli occupati: edifici e alberi
     const oggetti=[];
     const colori={p:"#a59a8d",r:"#6a6c6e",a:"#b8a281"};
@@ -54,6 +78,9 @@ function installQuartiere(map){
     d.lampioni.forEach(([x,y],n)=>oggetti.push({uid:"q-"+id+"-lampione-"+n,kind:"lamp",name:"Lampione",x,y,w:1,h:1,color:"#d2ac66",solid:false}));
     d.stagni.forEach(([x,y],n)=>{oggetti.push({uid:"q-"+id+"-fontana-"+n,kind:"fountain",name:"Fontana",x,y,w:2,h:2,color:"#699b9b",solid:true});solidi.push([x,y,2,2]);});
     d.insegne.forEach(([x,y,nome],n)=>oggetti.push({uid:"q-"+id+"-via-"+n,kind:"sign",name:nome,x,y,w:1,h:1,color:"#2a56a8",solid:false,action:"event",text:nome+"."}));
+    if(!storia&&d.ingresso)oggetti.push({uid:"q-"+id+"-centro",kind:"entrance",name:"Punto di ingresso",x:d.ingresso[0],y:d.ingresso[1],w:1,h:1,color:"#d1af6d",solid:false,target:"quartiere"});
+    if(d.cancello)oggetti.push({uid:"q-"+id+"-ingresso-luiss",kind:"door",name:"Ingresso LUISS · Viale Romania 32",x:d.cancello[0],y:d.cancello[1],w:1,h:1,color:"#ac754d",solid:false,
+      action:"portal",target:"giardino#romania-mobility"});
     // libero = tessera percorribile e non occupata
     const occupato=(x,y)=>x<0||y<0||x>=d.w||y>=d.h||d.righe[y][x]==="B"||solidi.some(([a,b,w,h])=>x>=a&&x<a+w&&y>=b&&y<b+h);
     const usati=new Set();
@@ -67,26 +94,44 @@ function installQuartiere(map){
       return [x,y];
     };
     const posa=(o,x,y)=>{const [a,b]=libera(x,y);o.x=a;o.y=b;o.w=1;o.h=1;return o;};
-    const porta=d.porta||[Math.floor(d.w/2),Math.floor(d.h/2)],arrivo=d.arrivo||porta,ritorno=d.ritorno||porta;
-    usati.add(porta.join(","));usati.add(arrivo.join(","));usati.add(ritorno.join(","));
-    const prima=new Map(z.objects.map(o=>[o.uid,o]));
-    const sposta=(uid,xy,fisso)=>{const o=prima.get(uid);if(!o)return;if(fisso){o.x=xy[0];o.y=xy[1];o.w=1;o.h=1;}else posa(o,xy[0],xy[1]);};
-    sposta(id+"-inside",porta,true);sposta(id+"-interior-return",ritorno,true);sposta(id+"-arrival",arrivo,true);
-    sposta(id+"-back",[arrivo[0]+1,arrivo[1]]);sposta(id+"-info",[arrivo[0]-1,arrivo[1]]);
-    for(const o of tieni){
-      if([id+"-inside",id+"-interior-return",id+"-arrival",id+"-back",id+"-info"].includes(o.uid))continue;
-      if(o.uid===id+"-villa")continue;                    // vecchia villa disegnata a mano: ora c'è l'edificio vero
-      posa(o,porta[0]+2,porta[1]+2);                      // gli altri oggetti narrativi si dispongono attorno alla porta
-    }
-    if(id==="pola"&&!tieni.some(o=>o.uid==="giardini-vivi-pola")){
-      // Noemi (campus-life.js la metteva nel giardino di Villa Alberoni): resta nel prato accanto alla villa
-      tieni.push(posa({uid:"giardini-vivi-pola",kind:"student",name:"Noemi · Giardino di Villa Alberoni",color:"#a2865c",solid:false,
-        action:"dialog",native:"",text:"",target:"",behavior:"idle",speed:1.05,route:[],rotation:0,variant:0,gate:"",missionTarget:"",auto:false},porta[0]-3,porta[1]-3));
+    if(storia){
+      const porta=d.porta||[Math.floor(d.w/2),Math.floor(d.h/2)],arrivo=d.arrivo||porta,ritorno=d.ritorno||porta;
+      usati.add(porta.join(","));usati.add(arrivo.join(","));usati.add(ritorno.join(","));
+      const prima=new Map(z.objects.map(o=>[o.uid,o]));
+      const sposta=(uid,xy,fisso)=>{const o=prima.get(uid);if(!o)return;if(fisso){o.x=xy[0];o.y=xy[1];o.w=1;o.h=1;}else posa(o,xy[0],xy[1]);};
+      sposta(id+"-inside",porta,true);sposta(id+"-interior-return",ritorno,true);sposta(id+"-arrival",arrivo,true);
+      sposta(id+"-back",[arrivo[0]+1,arrivo[1]]);sposta(id+"-info",[arrivo[0]-1,arrivo[1]]);
+      for(const o of tieni){
+        if([id+"-inside",id+"-interior-return",id+"-arrival",id+"-back",id+"-info"].includes(o.uid))continue;
+        if(o.uid===id+"-villa")continue;                    // vecchia villa disegnata a mano: ora c'è l'edificio vero
+        posa(o,porta[0]+2,porta[1]+2);                      // gli altri oggetti narrativi si dispongono attorno alla porta
+      }
+      if(id==="pola"&&!tieni.some(o=>o.uid==="giardini-vivi-pola")){
+        // Noemi (campus-life.js la metteva nel giardino di Villa Alberoni): resta nel prato accanto alla villa
+        tieni.push(posa({uid:"giardini-vivi-pola",kind:"student",name:"Noemi · Giardino di Villa Alberoni",color:"#a2865c",solid:false,
+          action:"dialog",native:"",text:"",target:"",behavior:"idle",speed:1.05,route:[],rotation:0,variant:0,gate:"",missionTarget:"",auto:false},porta[0]-3,porta[1]-3));
+      }
     }
     z.objects=[...oggetti,...tieni.filter(o=>o.uid!==id+"-villa")];
     z.width=d.w;z.height=d.h;z.ground="grass";z.name=d.nome;
   }
   return map;
+}
+
+// Camminare oltre il bordo di una zona porta nella zona contigua (le celle del quartiere si toccano esattamente).
+function quartiereVicino(id,dir){return quartiereVicino.mappa&&quartiereVicino.mappa[id]&&quartiereVicino.mappa[id][dir];}
+function quartiereBordo(x,y){
+  const z=room(state.zone);
+  if(x>=0&&y>=0&&x<z.width&&y<z.height)return false;
+  const dir=x<0?"w":x>=z.width?"e":y<0?"n":"s",id=quartiereVicino(state.zone,dir);
+  if(!id||!Object.hasOwn(campus.zones,id))return false;
+  const n=campus.zones[id];
+  const nx=x<0?n.width-1:x>=z.width?0:x,ny=y<0?n.height-1:y>=z.height?0:y;
+  if(blocked(id,nx,ny,mapClock))return false;
+  state.zone=id;state.x=nx;state.y=ny;state.chatTopic=null;state.freeMoment=null;activeScene=null;
+  walkStep=null;
+  syncBackgroundMusic();
+  return true;
 }
 
 // Dopo Lore, Idee e Segreti: sposta in una tessera libera gli oggetti che sono finiti dentro un edificio, un albero o fuori mappa.

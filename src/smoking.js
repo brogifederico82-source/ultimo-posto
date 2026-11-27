@@ -1,4 +1,5 @@
 const smokingOutdoors=new Set(["ingresso","giardino","parenzo","pola","pola-cortile"]);
+function smokingZona(z){return smokingOutdoors.has(z)||String(z).startsWith("pq-");}
 const smokingOption=$("smokingEnabled");
 try{smokingOption.checked=localStorage.getItem("ultimo-posto-smoking")!=="off";}catch{}
 let cigarette=null, smokingHold=null, smokingMessage="";
@@ -7,7 +8,7 @@ function cigarettesLeft(s=state){
     Number.isInteger(s.cigarettes)?Math.max(0,Math.min(10,s.cigarettes)):10:0;
 }
 function smokingAllowed(){
-  return screen==="game"&&state&&smokingOption.checked&&smokingOutdoors.has(state.zone)&&
+  return screen==="game"&&state&&smokingOption.checked&&smokingZona(state.zone)&&
     !state.prologue&&!activeScene&&!state.ending&&!minigame&&!$("campusSurprise").open&&!testMode;
 }
 function updateSmokingUI(){
@@ -89,7 +90,7 @@ function endSmokingAtBin(){
 function tickSmoking(now){
   if(!cigarette)return;
   if(!smokingAllowed()){
-    if(cigarette.phase==="ready"&&activeScene&&smokingOutdoors.has(state.zone)&&!minigame&&!state.ending){
+    if(cigarette.phase==="ready"&&activeScene&&smokingZona(state.zone)&&!minigame&&!state.ending){
       smokingHold=null;return;
     }
     stopSmoking();return;

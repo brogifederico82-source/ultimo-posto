@@ -847,7 +847,9 @@ function frame(now){
       queuedTap=null;
       state.look=move.control;
       const x=state.x+move.dx,y=state.y+move.dy;
-      if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
+      if(typeof quartiereBordo==="function"&&quartiereBordo(x,y)){
+        dirty=true;paintCampusOverview();
+      }else if(!stopAtRestrictedLine(x,y)&&!blocked(state.zone,x,y,mapClock)&&!blockedBeforeCampus(x,y)){
         walkStep={state,zone:state.zone,x:state.x,y:state.y,toX:x,toY:y,start:now};
         state.x=x;state.y=y;dirty=true;
         if(cigarette)updateSmokingUI();

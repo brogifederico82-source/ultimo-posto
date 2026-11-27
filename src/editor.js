@@ -40,7 +40,7 @@ function edit(fn,message){
 function historyStep(from,to){
   if(!from.length)return;
   to.push(JSON.stringify(campus));
-  campus=JSON.parse(from.pop());
+  campus=quartiereRigenera(JSON.parse(from.pop()));
   if(!Object.hasOwn(campus.zones,es.zone))es.zone=Object.keys(campus.zones)[0];
   es.selection.clear();es.area=null;es.pointer=null;
   persistEditor();refreshEditor();
@@ -581,7 +581,7 @@ $("edFile").onchange=async()=>{
   if(!file)return;
   try{
     if(file.size>24*1024*1024)throw Error("Il file supera 24 MB.");
-    const data=normalizeCampus(JSON.parse(await file.text()));
+    const data=quartiereRigenera(normalizeCampus(JSON.parse(await file.text())));
     edit(()=>{
       campus=data;es.zone=Object.hasOwn(campus.zones,es.zone)?es.zone:"ingresso";es.selection.clear();es.area=null;es.fit=true;
     },"Mappa importata");
