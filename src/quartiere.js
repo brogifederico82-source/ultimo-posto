@@ -41,7 +41,7 @@ function quartiereMarcaMappa(map){for(const [id,z] of Object.entries(map.zones))
 function quartiereRigenera(map){
   installQuartiere(map,true);
   quartiereRifinisci(map);
-  return normalizeCampus(map);
+  return typeof guidaInstalla==="function"?guidaInstalla(normalizeCampus(map)):normalizeCampus(map);
 }
 
 function installQuartiere(map,soloGusci){
