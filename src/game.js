@@ -478,7 +478,7 @@ function resetGame(){
   )))return;
   const zone=(mode==="free"&&campus.zones.giardino)||hasIntegratedEntrance()?"giardino":"ingresso";
   const [x,y]=reachEntry(zone,mode==="story"&&hasIntegratedEntrance()?"viale":"ingresso");
-  state={version:1,mode,campusGateOpen:mode==="free",name:badgeName(),matricola:draftMatricola,avatar:avatar(),traits:Object.fromEntries(Object.entries(sliders).map(([id,input])=>[id,Number(input.value)])),x,y,prologue:mode==="free"?0:1,streetVisited:true,campusExpanded:true,campusLayout:campusLayoutVersion,look:"down",zone,log:[],secrets:[],pockets:[],ending:null,wins:{},events:[],completedEvents:[],mission:"",missionTarget:""};
+  state={version:1,mode,campusGateOpen:mode==="free",name:badgeName(),matricola:draftMatricola,avatar:avatar(),traits:Object.fromEntries(Object.entries(sliders).map(([id,input])=>[id,Number(input.value)])),x,y,prologue:mode==="free"?0:1,streetVisited:true,campusExpanded:true,campusLayout:campusLayoutVersion,look:"down",zone,log:[],secrets:[],pockets:[],wallet:{coins:5,picked:[],owned:[]},ending:null,wins:{},events:[],completedEvents:[],mission:"",missionTarget:""};
   draftMatricola=newMatricola();
   activeScene=null;dirty=false;save();show("game");
 }
@@ -747,13 +747,14 @@ function vialeEncounterScene(npc){
   }]);
   const balance=local("Saldo: ","Balance: ")+purse.coins;
   if(purse.coins<cost)return scene(npc.name,offer+" "+balance+" · "+
-    local("Ti servono 5 monete.","You need 5 coins."),...choices);
+    local("Ti mancano ","You still need ")+(cost-purse.coins)+local(" monete."," coins."),...choices);
   const selected=vialeSelection?.npc===npc&&vialeSelection.profile===state?vialeSelection:null;
   const options=vialeOptions.map(([id,it,en])=>[local(it,en)+" · "+cost+local(" monete"," coins"),()=>{
     vialeSelection={npc,profile:state,id,label:local(it,en),start:performance.now()};
   }]);
-  if(!selected)return scene(npc.name,offer+" "+balance,...choices,...options);
-  return scene(npc.name,local("Hai scelto: ","You chose: ")+selected.label+" · "+balance,
+  if(!selected)return scene(npc.name,offer+" "+balance,...options,...choices);
+  return scene(npc.name,local("Hai scelto: ","You chose: ")+selected.label+" · "+
+    local("Saldo dopo la conferma: ","Balance after confirming: ")+(purse.coins-cost),
     [local("Schizzo · 5 monete","Splash · 5 coins"),()=>{
       if(vialeSelection!==selected||currentObject()!==npc||wallet().coins<cost)return;
       vialeSelection=null;
