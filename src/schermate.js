@@ -554,6 +554,7 @@ function opzioniCostruisci(){
     fs.dataset.fs="1";game.append(fs);refreshers.push(fs.sync);
   }
   if(typeof profiloRiga==="function")game.append(profiloRiga());
+  if(typeof creditiRiga==="function")game.append(creditiRiga());
   root.refresh=()=>{
     for(const f of refreshers)f();
     for(const b of root.querySelectorAll(".sch-seg button"))b.setAttribute("aria-pressed",String(locale===b.dataset.lang));
