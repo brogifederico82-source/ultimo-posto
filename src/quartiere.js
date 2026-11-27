@@ -112,7 +112,9 @@ function installQuartiere(map,soloGusci){
           action:"dialog",native:"",text:"",target:"",behavior:"idle",speed:1.05,route:[],rotation:0,variant:0,gate:"",missionTarget:"",auto:false},porta[0]-3,porta[1]-3));
       }
     }
-    z.objects=[...oggetti,...tieni.filter(o=>o.uid!==id+"-villa")];
+    // Strade vive: strisce pedonali, auto e motorini parcheggiati, passanti, panchine, cartelli dei luoghi (strade-vive.js)
+    const vivi=typeof stradeViveOggetti==="function"?stradeViveOggetti(id,d,[...tieni.map(o=>[o.x,o.y]),...oggetti.filter(o=>o.kind==="entrance"||o.kind==="door"||o.kind==="sign").map(o=>[o.x,o.y])]):[];
+    z.objects=[...oggetti,...vivi,...tieni.filter(o=>o.uid!==id+"-villa")];
     z.width=d.w;z.height=d.h;z.ground="grass";z.name=d.nome;
   }
   return map;

@@ -1210,7 +1210,7 @@ function renderScene(){
   $("radioTapeHint").hidden=!radioHint;
   $("radioTapeHint").textContent=radioHint;
   updateStoryWaypointHint();
-  $("zone").textContent=tr(room(state.zone).name);
+  $("zone").textContent=tr((typeof stradeViveLuogo==="function"&&stradeViveLuogo())||room(state.zone).name);
   updateCampusOverview();
   $("campusMap").replaceChildren();
   for(const [id,zone] of Object.entries(campus.zones)){

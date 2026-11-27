@@ -296,7 +296,7 @@ function sfxZoneKind(){
   if(z===villaZone)return "villa";
   if(z==="ingresso")return "viale";
   if(z==="giardino")return atViale(state)?"viale":"campus";
-  if(z==="parenzo"||z==="pola"||z.startsWith("pq-"))return "street";
+  if(z==="parenzo"||z==="pola"||z.startsWith("pq-"))return typeof stradeViveSuono==="function"?stradeViveSuono():"street";
   if(z==="pola-cortile")return "courtyard";
   if(["caffe","mensa","primo"].includes(z))return "busy";
   if(["aula-chiesa","dome","dome2","aula-toti","polivalente","parenzo-interno"].includes(z))return "hall";

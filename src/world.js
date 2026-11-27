@@ -714,7 +714,8 @@ function drawObject(c,o,now=0,editing=false){
             c.fillStyle=color;
             c.fillRect(.5+band*2,top,1.16,height);
           }
-        }else box(color,0,3,16,8);
+        }else if(o.uid.startsWith("q-")&&typeof stradeViveZebra==="function")stradeViveZebra(c,o,color);
+        else box(color,0,3,16,8);
         break;
       case "sign":
         if(o.uid==="viale-bus-360-stop"||o.uid==="bus-360-stop"){
