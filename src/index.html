@@ -309,11 +309,11 @@ La planimetria mantiene l’orientamento di Viale Romania. I percorsi interni, i
 <p class="hint">Attive di default. Puoi disattivarle qui. La voce segue l’impostazione audio del gioco.</p>
 </details>
 </main>
-<audio id="quietPlace" preload="none" src="data:audio/ogg;base64,<!-- BUILD_QUIET_PLACE -->"></audio>
-<audio id="stillness" preload="none" src="data:audio/ogg;base64,<!-- BUILD_STILLNESS -->"></audio>
-<audio id="reverie" preload="none" src="data:audio/ogg;base64,<!-- BUILD_REVERIE -->"></audio>
-<audio id="entranceMusic" preload="none" loop src="data:audio/mpeg;base64,<!-- BUILD_ENTRANCE_MUSIC -->"></audio>
-<audio id="campusMusic" preload="none" loop src="data:audio/mpeg;base64,<!-- BUILD_CAMPUS_MUSIC -->"></audio>
+<audio id="quietPlace" preload="none"></audio>
+<audio id="stillness" preload="none"></audio>
+<audio id="reverie" preload="none"></audio>
+<audio id="entranceMusic" preload="none" loop></audio>
+<audio id="campusMusic" preload="none" loop></audio>
 <script id="edOriginal" type="application/json"><!-- BUILD_CAMPUS --></script>
 <script id="edEmbedded" type="application/json"></script>
 <img id="edPlanImage" hidden alt="Planimetria originale di Viale Romania" src="data:image/webp;base64,<!-- BUILD_PLAN -->">
@@ -394,5 +394,21 @@ if (location.protocol === "https:" || location.hostname === "localhost") {
   } else status.textContent = "Questo browser non supporta il salvataggio offline dell’app.";
 
 }
+</script>
+<script type="text/plain" id="datiAudio-quietPlace" data-audio="quietPlace" data-mime="audio/ogg"><!-- BUILD_QUIET_PLACE --></script>
+<script type="text/plain" id="datiAudio-stillness" data-audio="stillness" data-mime="audio/ogg"><!-- BUILD_STILLNESS --></script>
+<script type="text/plain" id="datiAudio-reverie" data-audio="reverie" data-mime="audio/ogg"><!-- BUILD_REVERIE --></script>
+<script type="text/plain" id="datiAudio-entranceMusic" data-audio="entranceMusic" data-mime="audio/mpeg"><!-- BUILD_ENTRANCE_MUSIC --></script>
+<script type="text/plain" id="datiAudio-campusMusic" data-audio="campusMusic" data-mime="audio/mpeg"><!-- BUILD_CAMPUS_MUSIC --></script>
+<script>
+/* Le tracce audio (circa 23 MB in base64) stanno dopo il gioco: così il menu parte senza aspettare di scaricarle tutte. */
+(()=>{
+  for(const d of document.querySelectorAll("script[data-audio]")){
+    const a=document.getElementById(d.dataset.audio);
+    if(a)a.src="data:"+d.dataset.mime+";base64,"+d.textContent.trim();
+    d.textContent="";
+  }
+  try{if(typeof retryMusic==="function"&&musicFailed)retryMusic();}catch{}
+})();
 </script>
 </html>
