@@ -267,6 +267,7 @@ const nativeConversations={
   "silenzio":[["Come hai trovato questo posto?","«Sono salita finché ho smesso di sentire gente dire “mandami il file”.»"]]
 };
 function conversationFor(o){
+  if(typeof stradeViveConversazione==="function"){const passante=stradeViveConversazione(o);if(passante)return passante;}
   const conversation=Object.hasOwn(conversations,o.uid)?conversations[o.uid]:null;
   const translatedIntro=Object.hasOwn(campusEnglishIntros,o.uid)?campusEnglishIntros[o.uid]:null;
   const profile=conversation&&translatedIntro&&locale==="en"
@@ -837,6 +838,7 @@ function frame(now){
     tickVillaAda(now);
     tickIdee(now);
     tickSegreti(now);
+    if(typeof tickStradeVive==="function")tickStradeVive(now);
     nearbyTrafficSound(now);
     tickSmoking(now);
     if(!exploringCampus())queuedTap=null;
