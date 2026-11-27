@@ -168,6 +168,7 @@ function gsMenuItems(){
   items.push({id:"diario",label:gsLocal("Diario","Journal"),run:()=>gsOpenPanel("gsPanelDiario")});
   if(has("archivioApri"))items.push({id:"archivio",label:gsLocal("Archivio","Archive"),run:()=>{gsCloseAll(false);archivioApri();}});
   if(has("segretiApri"))items.push({id:"segreti",label:gsLocal("Segreti","Secrets"),run:()=>{gsCloseAll(false);segretiApri();}});
+  if(has("quartiereDentro")&&quartiereDentro())items.push({id:"campus",label:gsLocal("Torna al campus","Back to campus"),run:()=>{gsCloseAll(false);quartiereEsci();}});
   items.push({id:"mappa",label:gsLocal("Mappa","Map"),run:()=>gsOpenPanel("gsPanelMappa")});
   items.push({id:"opzioni",label:gsLocal("Opzioni","Options"),run:()=>gsOpenPanel("gsPanelOpzioni")});
   items.push({id:"salva",label:gsLocal("Salva","Save"),run:()=>{

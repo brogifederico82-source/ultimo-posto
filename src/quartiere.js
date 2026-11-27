@@ -160,3 +160,11 @@ function quartiereRifinisci(map){
   }
   return map;
 }
+
+// Uscita di sicurezza: dal menu di pausa si torna al campus da qualsiasi cella del quartiere (anche in auto).
+function quartiereDentro(){return typeof state==="object"&&Boolean(state)&&screen==="game"&&Object.hasOwn(quartiereCache(),state.zone);}
+function quartiereEsci(){
+  if(typeof guidaAttiva==="function"&&guidaAttiva())guidaScendi(true);
+  travel("giardino","romania-mobility");
+  save();renderScene();
+}

@@ -1202,7 +1202,7 @@ function paintPolaCeremony(now){
 function renderScene(){
   updateSmokingUI();
   const scene=getScene();
-  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard||state.ending?.boar)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?tr("Esplora il campus"):storyObjective()));
+  $("objective").textContent=(testMode?"Prova · ":"")+((state.ending?.traffic||state.ending?.guard||state.ending?.boar)?"Game Over":state.ending?tr("Missione compiuta"):state.mission||(isFree()?(typeof quartiereDentro==="function"&&quartiereDentro()?local("Parioli · Menu: Torna al campus","Parioli · Menu: Back to campus"):tr("Esplora il campus")):storyObjective()));
   const nextStep=isFree()?-1:storySteps.findIndex(([item])=>!has(item));
   const chapter=nextStep<0?"":nextStep<4?"Romania":nextStep===4?"Parenzo":"Pola";
   $("taskChapter").hidden=!chapter||Boolean(state.ending);
