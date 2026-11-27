@@ -1,5 +1,13 @@
 # Piano: mappa reale dei Parioli, Pola, Parenzo e guida con il car sharing
 
+## Stato (aggiornato)
+- **Fatto:** dati reali dell'area (Overture Maps) in `data/mappa/overture/`; generatore `scripts/overture/to-zone.py`; 40 celle contigue di 110×90 tessere (3 m per tessera) tra Viale Romania 32, Viale Pola 12 e Via Parenzo 11, con strade, marciapiedi, edifici e verde veri, nomi veri delle vie; passaggio tra celle camminando; Pola e Parenzo ricostruite sulla geometria reale mantenendo porte e storia; zone generate escluse da salvataggi ed esportazioni.
+- **In corso (agenti):** guida con il car sharing; nome della via nell'HUD, strisce pedonali, auto parcheggiate, pedoni e luoghi LUISS veri; confronto del campus di Viale Romania con i dati veri.
+- **Da fare:** traffico reale sul grafo stradale, correzione del campus di Viale Romania in base al confronto, verifica sul campo (foto), conferma delle licenze Overture/OSM, interni delle sedi in base a planimetrie e foto.
+- **Fonte dei dati:** il bucket pubblico di Overture Maps (`overturemaps-us-west-2`) era raggiungibile; OpenStreetMap, Overpass e i portali di Roma e Lazio no. La scansione si rifà con `scripts/overture/` (`scan2.py`, `scanall.py`, `geojson-metri.py`).
+
+Il testo qui sotto è il piano originale (le parti già fatte sono indicate sopra).
+
 Obiettivo: un quartiere esplorabile a piedi e in auto (stile GTA 1/2, vista dall'alto) con **strade, isolati ed edifici fedeli alla realtà**, e le tre sedi (Viale Romania 32, Viale Pola 12, Via Parenzo 11) ricostruite bene.
 Stato onesto: la mappa attuale è disegnata a mano e approssimata; Pola e Parenzo sono due stanze piccole. Questo piano sostituisce l'approssimazione con dati veri.
 
