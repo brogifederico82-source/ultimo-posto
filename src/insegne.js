@@ -43,7 +43,7 @@ const insegnaTipi=[
   [/menu|bacheca/i,"AVVISI","#7b5c32"]
 ];
 function insegnaCartello(c,o,box){
-  let tipo=insegnaTipi.find(t=>t[0].test(o.name||""));
+  let tipo=/^q-.*-via-\d+$/.test(o.uid||"")?[null,"VIA","#34567a"]:insegnaTipi.find(t=>t[0].test(o.name||""));
   const piano=(o.name||"").match(/Piano\s*(\d)/i);
   const txt=piano?"P"+piano[1]:tipo?.[1]??"?",col=tipo?.[2]??"#4b5a63";
   box("#222a2d",7.4,8,1.3,8);box("#222a2d",5.7,15,4.7,1);               // palo e base

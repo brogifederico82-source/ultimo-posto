@@ -120,10 +120,12 @@ for(const [uid,x,y] of [
 
 arrangeRomaniaSurfaces(originalMap.zones.giardino);
 traceRomaniaCampus(originalMap.zones.giardino);
+installQuartiere(originalMap);
 installVillaAda(originalMap);
 installLore(originalMap);
 installIdee(originalMap);
 installSegreti(originalMap);
+quartiereRifinisci(originalMap);
 updateCampusPlaces(originalMap);
 furnishCampusGardens(originalMap);
 const firstFloor=originalMap.zones.primo;
@@ -299,7 +301,7 @@ function loadCampus(){
       }
       if(!embedded){updateGardenStudentNames(map);addVialeArcade(map);improveDome2Entrance(map);furnishCampusFountains(map);addRadioVan(map);installPola(map);}
       if(!embedded)furnishCampusGardens(map);
-      return embedded?map:normalizeCampus(installSegreti(installLore(installIdee(installVillaAda(refineRomania(map))))));
+      return embedded?map:normalizeCampus(quartiereRifinisci(installSegreti(installLore(installIdee(installQuartiere(installVillaAda(refineRomania(map))))))));
     }
   }catch{}
   return freshMap();

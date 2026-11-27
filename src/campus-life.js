@@ -486,7 +486,7 @@ const campusPlanting={
 function furnishCampusGardens(map){
   for(const [id,{landmark,plants,people}] of Object.entries(campusPlanting)){
     const area=map.zones[id];
-    if(!area||!area.objects.some(o=>o.uid===landmark)||area.objects.some(o=>o.uid.startsWith("giardini-vivi-")))continue;
+    if(!area||!area.objects.some(o=>o.uid===landmark)||area.objects.some(o=>o.uid.startsWith("giardini-vivi-")||o.uid.startsWith("q-")))continue;
     const occupied=(x,y,w,h)=>area.objects.some(o=>
       (o.kind==="entrance"||assets[o.kind]?.[2]!=="terreno")&&
       o.x<x+w&&o.x+(o.w??1)>x&&o.y<y+h&&o.y+(o.h??1)>y);
