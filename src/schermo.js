@@ -331,7 +331,7 @@ addEventListener("keydown",event=>{
   if(minigame||gsEl("campusSurprise").open||schermoPausato())return;
   const field=event.target instanceof Element&&event.target.closest("input,select,textarea");
   if(field)return;
-  if(key==="escape"&&!activeScene){event.preventDefault();event.stopPropagation();schermoMenuApri();return;}
+  if(key==="escape"&&!activeScene){event.preventDefault();event.stopPropagation();if(typeof guidaEsc==="function"&&guidaEsc())return;schermoMenuApri();return;}
   if(key==="enter"&&!activeScene&&!event.repeat&&exploringCampus()){
     const tag=document.activeElement?.tagName;
     if(!["BUTTON","A","SUMMARY"].includes(tag)){event.preventDefault();schermoMenuApri();return;}

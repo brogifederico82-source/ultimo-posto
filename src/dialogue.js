@@ -580,22 +580,24 @@ $("stage").onclick=event=>{
 };
 function draw(now){
   const z=room(state.zone);
-  const [drawX,drawY]=walkPosition(now);
+  const G=typeof guidaVista==="function"?guidaVista(now):null;   // in guida: posizione, zoom e camera continui
+  const [drawX,drawY]=G?[G.x-.5,G.y-.5]:walkPosition(now);
   const x=Math.round(drawX*16),y=Math.round(drawY*16);
   const time=reducedMotion?0:now;
   const defaultZoom=(["aula-chiesa","dome","tutorato"].includes(state.zone)||Object.hasOwn(teachingRooms,state.zone))?1.25:1;
-  const zoom=Math.max(defaultZoom,20/z.width,12/z.height);
+  const zoom=G?G.zoom:Math.max(defaultZoom,20/z.width,12/z.height);
   const viewWidth=320/zoom,viewHeight=192/zoom;
-  const cameraX=Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
-  const cameraY=Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
+  const cameraX=G?G.camX:Math.round(clamp(x+8-viewWidth/2,0,Math.max(0,z.width*16-viewWidth)));
+  const cameraY=G?G.camY:Math.round(clamp(y+8-viewHeight/2,0,Math.max(0,z.height*16-viewHeight)));
   vividGrade(state.zone);
-  realismoGiocatore.x=drawX;realismoGiocatore.y=drawY;
+  realismoGiocatore.x=G?-999:drawX;realismoGiocatore.y=G?-999:drawY;
   const density=stage.canvas.width/320;
   stage.setTransform(density,0,0,density,0,0);
   rect(stage,"#182625",0,0,320,192);
   stage.save();stage.scale(zoom,zoom);stage.translate(-cameraX,-cameraY);
+  if(G)guidaVicini(stage,time,cameraX,cameraY,viewWidth,viewHeight);
   worldView(stage,state.zone,time,{x:cameraX,y:cameraY,w:viewWidth,h:viewHeight},layers,false,
-    {row:drawY+.86,draw:()=>{
+    G?G:{row:drawY+.86,draw:()=>{
       sprite(stage,state.avatar,x+8,y+14,walkStep&&now-walkStep.start<135?Math.floor(now/75)%3:0,state.look);
       paintSmoking(stage,x+8,y+14,now);
     }});
@@ -612,6 +614,7 @@ function draw(now){
   paintLore(stage,state.zone,time);
   ambienteMondo(stage,state.zone,cameraX,cameraY,viewWidth,viewHeight,now,state.x,state.y);
   if(typeof realismoLuceMondo==="function"&&!testMode)realismoLuceMondo(stage,z,state.zone,cameraX,cameraY,viewWidth,viewHeight,now);
+  if(G)guidaLuci(stage,now);
   stage.restore();
   paintTeachingSigns(stage,state.zone,cameraX,cameraY,zoom,320,192);
   const waypoint=nextCampusWaypoint();
@@ -621,7 +624,7 @@ function draw(now){
     const py=((waypoint.y-.5)*16-cameraY)*zoom;
     paintWaypointOnStage(stage,px,py,minimap);
   }
-  const nearest=nearby();
+  const nearest=G?null:nearby();
   stageInteraction=null;
   if(nearest&&!activeScene&&!state.ending&&!state.prologue){
     const label="E · "+tr(nearest.label);
@@ -839,6 +842,7 @@ function frame(now){
     tickIdee(now);
     tickSegreti(now);
     if(typeof tickStradeVive==="function")tickStradeVive(now);
+    if(typeof guidaTick==="function")guidaTick(now,delta);
     nearbyTrafficSound(now);
     tickSmoking(now);
     if(!exploringCampus())queuedTap=null;

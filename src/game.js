@@ -515,6 +515,7 @@ function campusTurnstile(uid){return uid==="viale-ingresso-varco"||uid==="panama
 function interact(){
   if(!exploringCampus())return;
   const spot=nearby();
+  if(typeof guidaInteragisci==="function"&&guidaInteragisci(spot))return;
   if(segretiInteragisci(spot))return;
   if(!spot){sound("error","interface");return;}
   ambienteInteragisci(spot);
