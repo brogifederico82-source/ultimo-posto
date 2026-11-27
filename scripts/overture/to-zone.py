@@ -552,7 +552,7 @@ def nomi_tessere(Z, spec):
             j += 1
         rle.append(seq[i] + str(j - i))
         i = j
-    return ordine, "".join(rle), dominante, quota, nome_parco
+    return ordine, "".join(rle), dominante, quota, nome_parco, out.reshape(H, W)
 
 
 def strisce_pedonali(Z, spec):
@@ -614,7 +614,7 @@ def componente(Z, occ, partenza):
     return seen
 
 
-def luoghi_luiss(spec, Z):
+def luoghi_luiss(spec, Z, nomi):
     """Cartelli informativi accanto agli edifici veri dei luoghi LUISS (solo nome e indirizzo, come nei dati)."""
     cx, cy = spec["centro_m"]
     x0m, y0m = cx - W / 2 * SCALA, cy + H / 2 * SCALA
@@ -629,6 +629,7 @@ def luoghi_luiss(spec, Z):
         if not (0 <= i < W and 0 <= j < H):
             continue
         nome, ind = LUOGHI_LUISS[p["id"]]
+        via = ind.split(",")[0].strip().lower()
         best = None
         for jj in range(2, H - 2):
             for ii in range(2, W - 2):
@@ -639,14 +640,16 @@ def luoghi_luiss(spec, Z):
                 if any(a[0] == ii and a[1] == jj for a in Z["alberi"] if a[2] == "tree"):
                     continue
                 d = (ii - i) ** 2 + (jj - j) ** 2
+                if str(nomi[jj, ii]).lower() != via:
+                    d += 900        # meglio un edificio sulla via dell'indirizzo, se c'è abbastanza vicino
                 if best is None or d < best[0]:
                     best = (d, ii, jj)
-        if best and best[0] <= 14 ** 2:
+        if best and (best[0] <= 25 ** 2 or 900 <= best[0] <= 900 + 14 ** 2):
             out.append([best[1], best[2], nome, ind])
     return out
 
 
-def vita(id_zona, spec, Z, nome_parco, quota_parco, partenza):
+def vita(id_zona, spec, Z, nome_parco, quota_parco, partenza, nomi):
     rnd = random.Random("vita-" + id_zona)
     T = Z["T"]
     # tessere occupate: edifici, alberi solidi, fontane
@@ -658,7 +661,7 @@ def vita(id_zona, spec, Z, nome_parco, quota_parco, partenza):
         occ[b:b + 2, a:a + 2] = True
     prot = [tuple(p) for p in (Z["porta"], Z["ritorno"], Z["arrivo"], Z.get("cancello"), Z.get("ingresso")) if p]
     prot += [(s[0], s[1]) for s in Z["insegne"]]
-    luoghi = luoghi_luiss(spec, Z)
+    luoghi = luoghi_luiss(spec, Z, nomi)
     prot += [(l[0], l[1]) for l in luoghi]
     zebre = strisce_pedonali(Z, spec)
 
@@ -927,7 +930,7 @@ if __name__ == "__main__":
         elif idz == "parenzo":
             spec.update(nome="Via Parenzo 11 · Giurisprudenza", chiave=[PUNTI["parenzo"]], pini=0.1)
         Z = costruisci(idz, spec)
-        ordine, rle, dominante, quota, nome_parco = nomi_tessere(Z, spec)
+        ordine, rle, dominante, quota, nome_parco, nomi_arr = nomi_tessere(Z, spec)
         Z["nomi"], Z["via"] = ordine, rle
         if not spec["nome"]:
             if quota > 0.45:
@@ -939,7 +942,7 @@ if __name__ == "__main__":
                 spec["nome"] = max(conta.items(), key=lambda kv: kv[1])[0]
             else:
                 spec["nome"] = "Parioli · " + (dominante or Z["strada_vicina"] or "isolati")
-        ex = vita(idz, spec, Z, nome_parco, quota, Z.get("ingresso"))
+        ex = vita(idz, spec, Z, nome_parco, quota, Z.get("ingresso"), nomi_arr)
         Z.update(ex)
         tag = []
         if any(("luiss" in str(f["properties"].get("nome")).lower()) for f in SUOLO if f["properties"]["classe"] == "university" and geom(f).intersects(box(spec["centro_m"][0] - W * SCALA / 2, spec["centro_m"][1] - H * SCALA / 2, spec["centro_m"][0] + W * SCALA / 2, spec["centro_m"][1] + H * SCALA / 2))):
